@@ -1,0 +1,7 @@
+<h1><?php echo escape($title); ?></h1>
+
+<?php echo loadViewScript('book', '_menu', array('topics' => $topics)); ?>
+
+<?php if ($page !== null) : ?>
+    <?php echo $content; ?>
+<?php endif; ?>

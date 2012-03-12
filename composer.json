@@ -1,0 +1,23 @@
+{
+    "name": "kaloa/renderer",
+    "type": "library",
+    "description": "A collection of different output renderers",
+    "keywords": ["output", "renderer"],
+    "homepage": "http://www.kaloa.org/",
+    "version": "0.0.1",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marc Ermshaus",
+            "email": "marc@ermshaus.org"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "Kaloa": "src"
+        }
+    }
+}

@@ -1,0 +1,93 @@
+<?php
+
+use \org\example\Contact as H;
+
+?><!DOCTYPE html>
+
+<html>
+
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Contact page</title>
+  </head>
+
+  <body>
+
+    <h1>Let's get into contact</h1>
+
+    <?php if ($tpl['formIsSent']) : ?>
+
+      <?php if (empty($tpl['errors'])) : ?>
+        
+        <p>Thanks! We will contact you soon.</p>
+
+      <?php else : ?>
+
+        <?php foreach ($tpl['errors'] as $error) : ?>
+
+          <p class="error"><?php echo H\escape($error); ?></p>
+
+        <?php endforeach; ?>
+
+      <?php endif; ?>
+
+    <?php endif; ?>
+
+    <form method="post" action="">
+
+      <fieldset>
+
+        <legend>Please provide your details</legend>
+
+        <p>E-Mail*: <input name="email" type="email" value="<?php
+                              echo (isset($_POST['email']))
+                                   ? H\escape($_POST['email'])
+                                   : '';
+                              ?>" />
+        </p>
+
+        <p>Title*:
+          <select name="title">
+            <option value="0">Please choose...</option>
+            <?php foreach ($tpl['titles'] as $index => $title) : ?>
+              <option value="<?php echo $index; ?>"
+                <?php if (isset($_POST['title'])
+                        && $_POST['title'] === (string) $index) : ?>
+                            selected="selected"
+                <?php endif; ?>><?php echo H\escape($title); ?></option>
+            <?php endforeach; ?>
+          </select>
+        </p>
+                
+        <p>Name*: <input name="name" type="text" value="<?php
+                            echo (isset($_POST['name']))
+                                 ? H\escape($_POST['name'])
+                                 : '';
+                            ?>" />
+        </p>
+
+        <p>Phone: <input name="phone" type="text" value="<?php
+                            echo (isset($_POST['phone']))
+                                 ? H\escape($_POST['phone'])
+                                 : '';
+                            ?>" />
+        </p>
+
+        <p><input name="callback" type="checkbox"
+                  <?php echo (isset($_POST['callback']) && $_POST['callback'])
+                             ? 'checked="checked"'
+                             : ''; ?> /> Would you like a callback?
+        </p>
+
+        <p><input type="hidden" name="action" value="submit" />
+            <input type="submit" value="Submit" /></p>
+
+        <p>* Please fill in these fields.</p>
+
+      </fieldset>
+
+    </form>
+
+  </body>
+
+</html>

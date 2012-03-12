@@ -1,0 +1,85 @@
+<h1>ORM</h1>
+
+
+
+<toc />
+
+<youtube id="p1W1XJ96y9k" />
+
+<h2>Test for internal links</h2>
+
+<p><a href="http://www.ermshaus.org/">This link is not internal</a></p>
+<p><a href="something.txt">This link is internal</a></p>
+
+
+
+<h2>Weitere Tests</h2>
+
+<p>Integer id lectus lacus, sed mattis erat. Integer a tellus at eros vehicula sodales at id velit. Fusce tristique ullamcorper mauris vel lacinia. Etiam sagittis felis non dui blandit vitae dignissim lorem mattis. Sed posuere suscipit diam, id sagittis velit tristique non. Nullam rhoncus purus ut elit interdum lacinia. Nullam aliquet varius massa at porta. Etiam at magna massa, sed ornare sapien. Quisque in dolor ut magna aliquet placerat. Vivamus nec rutrum lacus. Sed aliquet varius elit id commodo. Suspendisse fringilla hendrerit porttitor. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aliquam lobortis auctor odio, in pharetra justo rhoncus quis. Donec facilisis quam non dui rutrum id porttitor tellus eleifend. Aliquam nisl mauris, lacinia at pharetra non, convallis quis quam. Pellentesque ut dolor risus. Donec a mi at lectus elementum sodales. In imperdiet molestie feugiat.</p>
+
+<blockquote cite="A. Nonymous">To be or not to be.</blockquote>
+
+<p>Sed aliquet varius elit id commodo. Suspendisse fringilla hendrerit porttitor. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aliquam lobortis auctor odio, in pharetra justo rhoncus quis. Donec facilisis quam non dui rutrum id porttitor tellus eleifend. Aliquam nisl mauris, lacinia at pharetra non, convallis quis quam. Pellentesque ut dolor risus. Donec a mi at lectus elementum sodales. In imperdiet molestie feugiat.</p>
+
+<dl>
+    <dt>Praesent lacinia</dt>
+        <dd>Sem nec ultrices dignissim, lacus purus luctus risus, ut bibendum ante sem vitae eros. Ut commodo sollicitudin lorem, at rhoncus urna viverra et.</dd>
+    <dt>Suspendisse lorem odio</dt>
+        <dd>
+            <p>Fringilla pharetra sollicitudin vulputate, scelerisque adipiscing est. Sed dapibus purus vel sem porta tincidunt. Cras a nunc sapien.</p>
+            <p>Nunc ullamcorper, est ac pretium dapibus, turpis justo blandit neque, nec pulvinar velit risus at justo. Quisque sit amet lorem non nibh iaculis dignissim. Vestibulum vitae nulla quam. Nunc et erat ipsum. Nullam nec justo leo. Fusce ut felis purus, nec imperdiet velit.</p>
+        </dd>
+</dl>
+
+<p>Aenean iaculis turpis condimentum risus sodales in feugiat nunc ultricies. Nulla dignissim, massa ac tincidunt porta, nibh lorem vehicula urna, vitae malesuada est arcu vitae felis. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Donec lobortis velit lectus, a gravida sapien. Cras orci ligula, tincidunt molestie condimentum sit amet, lobortis id enim. Maecenas tincidunt ullamcorper nisl, eu porta diam convallis ut.</p>
+
+<ol>
+    <li>Cras velit enim</li>
+    <li>Porttitor nec porta in</li>
+    <li>Eleifend vitae enim</li>
+    <li>Quisque vehicula semper augue</li>
+    <li>Nec tempor dui dapibus id</li>
+</ol>
+
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean fermentum suscipit nibh, id vehicula elit tincidunt sit amet. Aliquam gravida accumsan ultrices. Praesent mattis ullamcorper sem nec molestie. Donec malesuada feugiat sapien vel imperdiet. Cras ultrices molestie ligula, ac consequat dui dignissim vitae. Aenean et volutpat felis. Pellentesque non nisl sit amet diam placerat tristique ut a tortor. Nam leo dui, accumsan non malesuada vel, tincidunt ut eros. Vivamus blandit mollis lorem, vitae hendrerit mi aliquet id. Suspendisse accumsan massa et neque venenatis id tincidunt nulla facilisis. Etiam a turpis vitae lorem condimentum faucibus.</p>
+
+<listing language="php" caption="Paginator-Klasse"><![CDATA[
+class Paginator
+{
+    /** @var int */
+    protected $entriesPerPage;
+
+    /** @var int */
+    protected $paginatorEntriesPerSide;
+
+    /**
+     *
+     * @param int $entriesPerPage
+     * @param int $maxPaginatorEntries
+     */
+    public function __construct($entriesPerPage = 10, $maxPaginatorEntries = 7)
+    {
+        $entriesPerPage      = (int) $entriesPerPage;
+        $maxPaginatorEntries = (int) $maxPaginatorEntries;
+
+        if (!($maxPaginatorEntries & 1)) {
+            throw new Exception(
+                    'maxPaginatorEntries needs to be an odd number');
+        }
+
+        $this->entriesPerPage          = $entriesPerPage;
+        $this->paginatorEntriesPerSide = (int) ($maxPaginatorEntries - 1) / 2;
+    }
+}
+]]>
+</listing>
+
+<p>Sed at mi eu nisi <code>feugiat dictum</code> quis et elit. Proin lorem sapien, lobortis ut fringilla eget, bibendum in augue. Ut justo sem, volutpat id sollicitudin sit amet, luctus a lacus. <code>Phasellus tempor urna non tortor euismod eget scelerisque leo dictum. Cras a mi eget mauris viverra tempor at sollicitudin erat. Nunc eget sem leo, pellentesque porttitor libero</code>. Aliquam erat volutpat. Sed sed erat urna, quis rutrum odio. Aliquam quis diam eget ipsum aliquet sodales id at lorem. In ut turpis est, et placerat turpis. Vivamus in dapibus metus. Ut ut ipsum sapien, ut hendrerit magna. Nullam sed dolor mi.</p>
+
+<listing caption="Version von PHPUnit ausgeben">
+<![CDATA[
+$ phpunit --version
+PHPUnit 3.5.10 by Sebastian Bergmann.
+ÄÖÜß
+]]>
+</listing>

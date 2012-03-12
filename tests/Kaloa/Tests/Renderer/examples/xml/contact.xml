@@ -1,0 +1,222 @@
+<h1>php.de Mitmachquiz:<br />
+Einfaches Kontaktformular</h1>
+
+<p>Marc Ermshaus (mermshaus)<br />
+&lt;http://www.ermshaus.org/&gt;</p>
+
+<p>Revision 2<br />
+9. November 2010</p>
+
+
+
+<p>Der Inhalt dieses Dokuments sowie der zugehörige LaTeX-Quellcode dürfen im Rahmen der CC-BY-SA-Lizenz<footnote>Die genauen Lizenzbedingungen können unter http://creativecommons.org/licenses/by-sa/3.0/ eingesehen werden.</footnote> verwendet werden.</p>
+
+
+
+<toc />
+
+
+
+<h2>Änderungsübersicht</h2>
+
+<dl>
+    <dt>2010-10-18 Revision 1</dt>
+    <dd>Erstveröffentlichung.</dd>
+    <dt>2010-11-09 Revision 2</dt>
+    <dd>Lizenzinformationen und Änderungsübersicht hinzugefügt.</dd>
+</dl>
+
+
+
+<h2>Aufgabenstellung</h2>
+
+<p>Die Originalversion der von Forenmitglied Wolla formulierten Aufgabenstellung ist mitsamt einer anschließenden Diskussion im Internet einsehbar.<footnote>http://www.php.de/off-topic-diskussionen/71839-mitmachquiz-einfaches-kontaktformular.html</footnote> Zur einfacheren Übersicht wird sie an dieser Stelle weitgehend originalgetreu reproduziert.</p>
+
+<blockquote>
+    <p>Zu erstellen ist ein Kontaktformular, welches die folgenden Felder transportiert:</p>
+
+    <ul>
+        <li>E-Mail (Input)</li>
+        <li>Anrede („Bitte auswählen“, „Herr“, „Frau“, „Firma“) (Selectbox)</li>
+        <li>Name (Input)</li>
+        <li>Telefon (Input)</li>
+        <li>Rückruf erwünscht? (Checkbox)</li>
+    </ul>
+
+    <p>Die Felder „E-Mail“, „Anrede“ und „Name“ sind Pflichtfelder. Wird eins oder mehrere dieser Felder nicht ausgefüllt, dann soll eine Fehlermeldung ausgegeben werden und das Formular mit den gegebenenfalls schon vorhandenen Daten ausgefüllt neu ausgegeben werden.</p>
+    
+    <p>Ist alles richtig eingegeben, so soll eine E-Mail an example@example.org mit den vorhandenen Daten geschickt werden. Falls um Rückruf gebeten wird, so soll das auch in der E-Mail stehen.</p>
+    
+    <p>Nach Senden der Mail soll eine „Danke“-Seite ausgegeben werden.</p>
+    
+    <p>Bitte keine Frameworks benutzen, damit dieses Beispiel von Neueinsteigern nachvollzogen und verstanden werden kann.</p>
+</blockquote>
+
+
+
+
+<h2>Planung</h2>
+
+<h3>Allgemeines</h3>
+
+<p>In einem ersten Schritt gilt es, eine Designentscheidung über den Grad der Komplexität der zu implementierenden Lösung zu treffen, da dieser die Rahmenbedingungen für das weitere Vorgehen bestimmt. Um Spracheinsteigern ein einfaches Verständnis zu ermöglichen, wird in der Aufgabenstellung darum gebeten, keine Frameworks zu verwenden. Dieser Vorgabe folgend erscheint es sinnvoll, nach Möglichkeit von Abstraktionstechniken, die auf einen größeren Projektumfang ausgerichtet sind, abzusehen. Die zu erarbeitende Lösung wird deshalb beispielsweise keine spezielle Formular-Klasse mit integrierten, etwa im <em>Decorator</em>-Pattern angeordneten Filtern und Validatoren nutzen, sondern auf direkt in HTML formulierten Auszeichnungscode und Validierung durch PHP-Standardfunktionen setzen. Ohne qualitativ auf die Vor- und Nachteile der verschiedenen Ansätze eingehen zu wollen, sei an dieser Stelle angemerkt, dass in den großen PHP-Frameworks für nahezu jeden wiederkehrend auftretenden Anwendungsfall ein zumeist in einer Objekthierarchie abstrahierter Lösungsvorschlag vorhanden ist.</p>
+
+<h3>Frontend</h3>
+
+<p>Das Frontend, also die im Client darzustellenden HTML-Ausgaben, werden aus einer einzigen Templatedatei generiert, die sowohl das Formular enthält als auch die Logik zur Ausgabe etwaiger Fehlermeldungen sowie die Versandbestätigung bei erfolgreichem Übertragen der Daten. Das mehrfache Verschicken der Daten (etwa durch Auslösen der „Aktualisieren“-Funktion im Client) wird dabei durch das Anlegen einer Session und das Setzen entsprechender Prüfwerte verhindert. Um den Einsatz des EVA-Prinzips<footnote>Mehr oder weniger leicht verständliche Artikel (das Thema hat Untiefen) zum EVA-Prinzip können unter http://www.phpforum.de/forum/showthread.php?t=221678 und unter http://www.php.de/wiki-php/index.php/EVA-Prinzip_%28Standardverfahren%29 eingesehen werden. Ein Versuch einer Faustregel: Im Eingabeteil wird sichergestellt, dass alle zur Verabeitung notwendigen Daten (zum Beispiel GET- oder POST-Werte) korrekt formatiert vorliegen. Der Verarbeitungsteil führt die durch die Eingaben definierte Programmlogik aus und generiert eine Menge an Rückgabedaten für die nachfolgende Ausgabe. Zur Ausgabe gehört schließlich diejenige Funktionalität, die die Rückgabedaten für die Darstellung in einem bestimmten Ausgabemedium umformt. Beispielsweise erfordert die Aufbereitung von Daten als HTML-Code oder als PDF-Dokument eine unterschiedliche Vorgehensweise beim Escaping von Sonderzeichen. Die Anwendung von Befehlen wie <code>htmlspecialchars</code> zählt deshalb zum Ausgabeteil und ist nicht der Logikprogrammierung im Verarbeitungsteil zuzurechnen.</footnote>, also der Dreiteilung des Programmablaufs in Eingabe, Verarbeitung und Ausgabe, zu verdeutlichen, wird der Frontend-Code als eigenständige <code>*.phtml</code>-Datei (PHP-HTML-Template) ausgelagert.</p>
+
+<p>Der Auszeichnungscode selbst soll den HTML5-Syntaxregeln folgen und nach Möglichkeit die durch neue HTML-Elemente entstandene Möglichkeit der clientseitigen Vorvalidierung von Eingaben nutzen.<footnote>Eine Übersicht dazu bietet Mark Pilgrims „Dive Into HTML5“ (http://diveintohtml5.org/forms.html).</footnote> Dass HTML-Tags wie <code><![CDATA[<input type="email">]]></code> von Clients noch kaum unterstützt werden, ist unproblematisch, da Clients angehalten sind, in diesem Fall unbekannte Werte des <code>type</code>-Attributs als <code>type="text"</code> zu interpretieren. Beim Design von HTML5 wurde allgemein großer Wert auf Abwärtskompatibilität gelegt, sodass auch ältere Clients eine in HTML5 formulierte Seite in vielen Fällen sinnvoll darstellen können.</p>
+
+<h3>Backend</h3>
+
+<p>Das Backend enthält die notwendige Logikprogrammierung, also den maßgeblichen Anteil des PHP-Anwendungscodes. Wie für viele Anwendungsfälle bietet sich für die Bearbeitung der vorliegenden Aufgabe der Einsatz einer Action-basierten MVC-Grundarchitektur<footnote>Siehe dazu etwa http://www.phpforum.de/forum/showthread.php?t=220277. Ein wichtiger Grundsatz beim Einsatz von MVC lautet: „Fat models, skinny controllers.“</footnote> (Model, View, Controller) an. Da Objektorientierung nicht der Fokus der Aufgabenstellung ist, soll nur das Model als Klasse implementiert werden und eine Kombination aus Router<footnote>Der Router ist derjenige Teil eine Anwendung, der anhand der gegebenen Eingaben (zum Beispiel URL, GET/POST-Daten) den für die Verarbeitung zuständigen Controller auswählt und innerhalb dieses Controllers die passende Action aufruft.</footnote> und Controller „flach“ als Anwendungscode im globalen Namensraum abgelegt werden. Der Controller soll auf die beiden Actions <em>index</em> und <em>submit</em> reagieren, wobei erstere den normalen Aufruf der Seite markiert, bei dem das Formular zum Ausfüllen angeboten wird, und letztere den durch Klicken des Submit-Buttons ausgelösten Auswertungsvorgang. Die <em>submit</em>-Action kann dabei einerseits im erfolgreichen Absenden der E-Mail mitsamt Bestätigungsmeldung resultieren oder andererseits in der Ausgabe einer Fehlermeldung und der erneuten Darstellung des Eingabeformulars. Das für die Ausgabe vorgesehene View-Template ist in beiden Fällen die unter „Frontend“ beschriebene PHP/HTML-Datei.</p>
+
+<p>Für den Versand der E-Mail wird die externe PHPMailer-Bibliothek<footnote>http://phpmailer.worxware.com/</footnote> eingebunden, da E-Mail-Versand ein komplexes und fehleranfälliges Anwendungsgebiet ist, bei dem eine so große Zahl an Unwägbarkeiten und Sonderfällen zu beachten ist, dass der  einfache Aufruf der <code>mail</code>-Funktion selten ausreichend ist.</p>
+
+<p>Der Backend-Code soll PHP 5.3 und Namespaces nutzen und systematisch im Dateisystem angeordnet werden, um auf Namespaces basierendes Autoloading verwenden zu können. Autoloading mag bei geringer Klassenanzahl übertrieben erscheinen, aber es ist zu empfehlen, es dennoch als standardisierte Vorgehensweise einzusetzen. Abbildung 1 zeigt eine Übersicht der vorgesehenen Verzeichnisse und Dateien.</p>
+
+<listing caption="Verzeichnis und Dateiübersicht"><![CDATA[
++-/
+  +-library/
+  | +-org/
+  | | +-example/
+  | |   +-Contact/
+  | |     +-ContactModel.php
+  | |     +-inc.helpers.php
+  | +-phpmailer/
+  |   +-[...]
+  +-scripts
+  | +-contact.phtml
+  +-index.php
+]]></listing>
+
+
+
+
+<h2>Durchführung</h2>
+
+
+
+<h3>Vorbereitungen: Mailerklasse PHPMailer installieren</h3>
+
+<p>In einem ersten Schritt gilt es, die notwendige Verzeichnisstruktur anzulegen und externe Abhängigkeiten für das Projekt verfügbar zu machen. In diesem Fall muss lediglich das PHPMailer-Paket eingebunden werden. Der vorgestellte Code nutzt die Version 5.1, die bei sourceforge.net als Archiv heruntergeladen werden kann.<footnote>http://sourceforge.net/projects/phpmailer/files/phpmailer%20for%20php5_6/</footnote> Die folgende Beschreibung geht davon aus, dass das Verzeichnis <code>PHPMailer_v5.1</code> mit den PHPMailer-Klassen unter <code>library/phpmailer</code> aufzufinden ist.</p>
+
+
+
+<h3>Model-/Logik-Programmierung (<code>library/org/example/Contact/ContactModel.php</code>)</h3>
+
+<p>Dieser und die nachfolgenden Abschnitte enthalten eine mit zusätzlichen Kommentaren versehene Version des vollständigen Quellcodes. Eine eventuell aktualisierte Fassung ist zudem als Mercurial-Repository und als gepackte Archiv-Datei online abrufbar.<footnote>Der URL des Repositories lautet https://bitbucket.org/mermshaus/contactform. Der Download als Archiv befindet sich unter \enquote{get source} rechts oben im Interface der Seite. Das PHPMailer-Paket ist nicht enthalten.</footnote></p>
+
+<p>Das Schreiben des Quellcodes für das Beispiel beginnt beim Model, also demjenigen Bestandteil eines MVC-Designs, der die eigentliche Funktionalität implementiert.</p>
+
+<p>Im Header der Datei wird der Namespace<footnote>Allgemeine Informationen zur Nutzung von Namespaces in PHP bietet beispielsweise das Handbuch unter http://php.net/manual/en/language.namespaces.php</footnote> festgelegt, unter dem die zu erstellenden Klassen und Funktionen abgelegt werden. Die Model-Klasse bekommt den Namen <code>ContactModel</code>.</p>
+
+<listing file="ContactModel.php" length="11" language="php" />
+
+<p>Es folgen einige Member-Variablen, die notwendige Konfigurationseinstellungen enthalten. In einer größeren Anwendung sollten diese Angaben zentral ins Dateisystem ausgelagert und etwa über spezielle Config-Objekte geladen und dem Model bereitgestellt werden.</p>
+
+<p>Hier sei zudem erwähnt, dass die Kommentierung des Quellcodes der „DocBlock“-Syntax folgt. Dabei handelt es sich um eine syntaktisch standardisierte Kommentierweise, die durch externe Tools<footnote>Dazu zählt zum Beispiel der phpDocumentor (http://phpdoc.org/).</footnote> automatisch zu einer Dokumentation umgeformt werden kann und die von vielen Entwicklungsumgebungen dazu verwendet wird, während der Programmierung diverse Hilfestellungen anzubieten.</p>
+
+<listing file="ContactModel.php" length="28" language="php" />
+
+<p>Diese Methode gibt die in der Konfiguration festgelegten möglichen Anreden zurück, um sie in einer View verwenden zu können.</p>
+
+<listing file="ContactModel.php" length="10" language="php" />
+
+<p>Diese Methode soll eine aus POST-Daten generierte E-Mail verschicken. Im ersten Schritt wird sichergestellt, dass alle erwarteten Felder gesetzt und vom richtigen Typ sind. Dazu wird explizites Typecasting genutzt, da alle Inhalte des <code>$_POST</code>-Arrays entweder vom Typ <code>string</code> oder <code>array</code> sind. Sollte ein Feld in <code>$_POST</code> nicht gesetzt sein, wird das entsprechende Feld in der Anwendung auf einen Standardwert gesetzt, der je nach Datentyp verschieden ist und „leer“ bedeutet.</p>
+
+<listing file="ContactModel.php" length="25" language="php" />
+
+<p>Darauf folgt die Validierung der Eingaben. Diese ist in spezieller Form für die Felder <em>email</em> und <em>title</em> notwendig. Schlägt sie fehl, wird das entsprechende Feld auf leer gesetzt.</p>
+
+<listing file="ContactModel.php" length="7" language="php" />
+
+<p>Alle Pflichtfelder werden nun darauf überprüft, ob sie nicht leer sind. Gegebenenfalls werden Fehlermeldungen hinzugefügt. Liegen nach dem Vorgang keine Fehler vor, kann die E-Mail verschickt werden.</p>
+
+<listing file="ContactModel.php" length="22" language="php" />
+
+<p>Zu Beginn der Absende-Funktion wird geprüft, ob die in der Konfiguration festgeschriebene Zeit seit dem letzten Versand einer E-Mail vergangen ist. Dazu wird eine Session-Variable abgefragt, in der der Zeitpunkt des letzten Versands festgehalten wird. Diese Lösung sollte ein versehentliches mehrfaches Abschicken des Formulars verhindern. Sie ist jedoch etwas rudimentär. An dieser Stelle ist das Beispiel verbesserungswürdig.</p>
+
+<listing file="ContactModel.php" length="23" language="php" />
+
+<p>Zuletzt wird die E-Mail zusammengebaut und über einen SMTP-Server abgeschickt. Eine genauere Beschreibung der verwendeten Methoden findet sich in den Hilfen zum PHPMailer.<footnote>Siehe http://phpmailer.worxware.com/index.php?pg=tutorial und darin verlinkte Seiten.</footnote> Außerdem werden nach erfolgreichem Absenden der Mail die Daten in <code>$_POST</code> gelöscht, damit sie nicht weiterhin im Formular auftauchen (siehe \ref{view}).</p>
+
+<listing file="ContactModel.php" length="41" language="php" />
+
+<h3>Hilfsfunktionen (<code>library/org/example/Contact/inc.helpers.php</code>)</h3>
+
+<p>In der Datei <code>includes/inc.helpers.php</code> sind allgemeine Funktionen abgelegt, die von der Anwendung benötigt werden, die in PHP aber nicht standardmäßig enthalten sind. In diesem Fall trifft das auf eine Funktion zur Behandlung von Magic Quotes zu (<code>sanitizeMagicQuotes</code>)<footnote>Die ursprüngliche Fassung dieser Funktion ist dem Wiki von phpforum.de entnommen (http://www.phpforum.de/forum/showthread.php?t=217421). Der entsprechende Artikel enthält zudem eine ausführliche Darstellung zum Thema Magic Quotes.</footnote> sowie auf eine einfacher zu handhabende Escape-Funktion (<code>escape</code>) für die vor Cross-Site Scripting (XSS) geschütze Ausgabe von Text im HTML-Code.</p>
+
+<p>Die Datei beginnt mit der Angabe des genutzten Namespaces. Der Namespace dieses Beispiels lautet durchgängig <code>org\example\Contact</code>.</p>
+
+<listing file="inc.helpers.php" length="4" language="php" />
+
+<p>Die Funktion zur Behandlung von Magic Quotes ist dazu gedacht, einmal zu Beginn des Programmablaufs ausgeführt zu werden.</p>
+
+<listing file="inc.helpers.php" length="28" language="php" />
+
+<p>Die Escape-Funktion nutzt den Zeichensatz UTF-8. Sollte die Anwendung auf einen anderen Zeichensatz umgestellt werden, könnte dieser für das Escaping von Ausgaben im HTML-Code zentral an dieser Stelle verändert werden. Bei Bedarf könnte auch <code>htmlspecialchars</code> durch <code>htmlentities</code> ersetzt werden, falls zum Beispiel ein Zeichensatz der ISO-8859-Familie gewählt werden soll. Jede Ausgabe der Anwendung, die potentiell anfällig für XSS-Attacken ist, wird durch diese Funktion geschickt.</p>
+
+<listing file="inc.helpers.php" length="10" language="php" />
+
+
+
+<h3>PHP-HTML-Template für Ausgabe (<code>scripts/contact.phtml</code>)</h3>
+
+<p>Das für die Ausgabe der Daten zuständige Script nutzt den HTML5-Dokumenttyp, der vollständig abwärtskompatibel ist. Zudem wird die <code>escape</code>-Helferfunktion aus <code>inc.helpers.php</code> verwendet, weshalb der zugehörige Namespace in durch Alias abgekürzter Version eingebunden wird.</p>
+
+<p>Neben der Helferfunktion greift das View-Script lediglich auf Inhalte der Variable <code>$tpl</code> (für „Template“) zu.</p>
+
+<listing file="contact.phtml" length="17" language="php" />
+
+<p>In PHP/HTML-View-Scripts wird üblicherweise die alternative Syntax für Kontrollstrukturen<footnote>Siehe http://php.net/manual/en/control-structures.alternative-syntax.php.</footnote> eingesetzt, da der Mischcode aus PHP und HTML häufig so unübersichtlich ist, dass eine einfache Zuordnung von Paaren von geschweiften Klammern unmöglich wird.</p>
+
+<p>Dieser Abschnitt übernimmt die Ausgabe etwaiger Erfolgs- oder Fehlermeldungen.</p>
+
+<listing file="contact.phtml" length="18" language="php" />
+
+<p>Sollten POST-Daten vorhanden sein, werden sie beim Laden der Seite in die zugehörigen Felder eingetragen. So wird verhindert, dass bei einem Eingabefehler oder einer vergessenen Eingabe alle Daten verloren sind.</p>
+
+<listing file="contact.phtml" length="13" language="php" />
+
+<p>Die Werte der einzelnen Elemente der Auswahlliste entsprechen je Option dem in der Model-Konfiguration festgelegten Array-Index. Dadurch ist die Synchronisation dieser Daten zwischen View und Model gewährleistet. Die Option mit dem Index „0“ bleibt dabei reserviert für  den neutralen „Bitte auswählen…“-Eintrag.</p>
+
+<listing file="contact.phtml" length="13" language="php" />
+
+<p>Die weiteren Felder sind in etwa analog zum E-Mail-Feld definiert.</p>
+
+<listing file="contact.phtml" length="19" language="php" />
+
+<p>Beim Absenden des Formulars soll die <em>submit</em>-Action ausgelöst werden. Diese Information wird als verstecktes Feld mitgeschickt.</p>
+
+<listing file="contact.phtml" length="12" language="php" />
+
+
+
+<h3>Controller-Programmierung (<code>index.php</code>)</h3>
+
+<p>Die Index-Datei enthält die allgemeine Initialisierung und den Router/Controller-Teil. Sie beginnt mit Standardaufgaben wie dem Setzen des Error-Reporting-Levels<footnote>Der Wert „-1“ bedeutet „alle Bits gesetzt“. Es werden also alle Fehler angezeigt.</footnote> und des Ausgabe-Charsets.</p>
+
+<listing file="index.php" length="12" language="php" />
+
+<p>Als nächstes werden etwaige Probleme mit Magic Quotes behoben (siehe \ref{hilfsfunktionen}) und ein Autoloader registriert, der Dateien anhand von Namespaces und Klassennamen laden kann.</p>
+
+<listing file="index.php" length="8" language="php" />
+
+<p>Dann wird die gewünschte auszuführende Action bestimmt und mit einer Whitelist abgeglichen. Unbekannte Actions werden als <em>index</em>-Actions angesehen.</p>
+
+<listing file="index.php" length="9" language="php" />
+
+<p>Die <em>index</em>-Action initialisiert das Model, setzt die vom Model zum Schutz vor mehrfachem Absenden benötigte Session-Variable und füllt die Variable <code>$tpl</code> mit Daten, die dem View-Script zur Verfügung stehen sollen. Zuletzt wird das View-Script, das die HTML-Ausgabe generiert, ausgeführt.</p>
+
+<listing file="index.php" length="19" language="php" />
+
+<p>Die <em>index</em>-Action funktioniert nach dem gleichen Prinzip. In ihr wird die Model-Methode aufgerufen, die das Formular zu verschicken versucht. Etwaige Fehler werden über die <code>$tpl</code>-Variable an die Ausgabe weitergegeben.</p>
+
+<listing file="index.php" length="15" language="php" />
+
+<h2>Schluss</h2>
+
+<p>Vielleicht kann diese kurze Darstellung einige erste Hinweise auf <em>„best practices“</em> der Anwendungsprogrammierung mit PHP bieten. Mit dem vorgestellten Quellcode wird dabei keinerlei Anspruch erhoben, eine optimale oder auch nur eine gute Lösung beschrieben zu haben. Verschiedene Aspekte wurden in stark wechselnder Ausführlichkeit angesprochen und implementiert, was durchaus zu falschen Schlüssen führen könnte. Auch inhaltlich ist sicher vieles an diesem Beispiel diskutabel.</p>
+
+<p>Abschließend kann daher nur dazu geraten werden, einen Blick auf umfangreichere Frameworks oder Projekte zu werfen, die entsprechende Entwurfsmuster (MVC) nutzen.</p>

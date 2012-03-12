@@ -1,0 +1,55 @@
+<h1>Kaloa Renderer</h1>
+
+<k:toc />
+
+<h2>Überblick</h2>
+
+<p>Kaloa_Renderer ist ein Paket zur Generierung von XML-Ausgaben auf Basis verschiedener Eingabeformate.</p>
+
+<p>Derzeit unterstützte Eingabeformate:</p>
+
+<ul>
+    <li>Inigo <em>(deprecated)</em></li>
+    <li>XML</li>
+    <li>XML (legacy) <em>(deprecated)</em></li>
+</ul>
+
+<h2>Inigo</h2>
+
+<h2>XML</h2>
+
+<h3>Packages</h3>
+
+<h4>Footnotes</h4>
+
+<dl>
+    <dt><code>footnote [@name] { $text }</code></dt>
+    <dd>Erzeugt eine Fußnote.</dd>
+</dl>
+
+<h4>Listings</h4>
+
+<dl>
+    <dt><code>listing [@caption, @language] { $content }</code></dt>
+    <dd>Erzeugt einen Code-Block.</dd>
+</dl>
+
+<h4>PrefixRelativeUris</h4>
+
+<p>Fügt lokalen Links a@href und img@src den baseResourcePath hinzu.</p>
+
+<h4>Toc</h4>
+
+<dl>
+    <dt><code>toc { null }</code></dt>
+    <dd>Generiert ein Inhaltsverzeichnis.</dd>
+</dl>
+
+<h4>YouTube</h4>
+
+<dl>
+    <dt><code>youtube @id { null }</code></dt>
+    <dd>Bindet ein YouTube-Video ein.</dd>
+</dl>
+
+<h2>XML (legacy)</h2>

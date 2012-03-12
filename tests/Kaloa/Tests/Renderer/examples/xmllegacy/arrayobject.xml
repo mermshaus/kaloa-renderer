@@ -1,0 +1,246 @@
+<p>Regarding the frequency of questions about the topic, one thing many programmers seem to have difficulties with is a technique called "control break". Basically, this is a way of displaying data grouped into visually separated hierarchical sections. Examples might be a list of employees grouped by the starting letter of their family names or a list of blog posts grouped first by year and second by month. Every time the index key of one of the sections changes, a visual mark, like a new heading, should be printed. Those changes are defined as control breaks.</p>
+
+<p>Although it's not really a big deal to write a simple algorithm to achieve the desired effect, I thought it might be desirable to have a generic solution to the problem. So I created a helper class containing static methods that would transform an array of entries (homogeneous arrays of key/value pairs) into a grouped array using the unique values of one of the entries' fields as grouping key. That worked quite well <!--might put the source online later--> but I am not a big fan of calling static class methods if feasible alternatives exist. A more object-centric approach in which the grouping code could be run as an instance method seemed to me to be the superior solution. Following this thought, I wrote an extended version of <var>ArrayObject</var> from the <abbr title="Standard PHP Library">SPL</abbr> which I'd like to introduce in this post.</p>
+
+<h3>Basic grouping (<var>groupBy</var>)</h3>
+
+<p>The class I came up with is named <var>Kaloa_Spl_ArrayObject</var> (<a href="Kaloa_Spl_ArrayObject.php.txt">you can view or download it here</a>). It's designed to be an unobtrusive addition to <var>ArrayObject</var>. In the current version, the constructor from the parent class is overriden but everything else is left intact. In order to show how it works, I'll define some data that might roughly resemble a list of articles from a blogging application.</p>
+
+<code lang="php"><![CDATA[
+$items = array(
+    array('year' => 2009, 'month' =>  9, 'title' => 'Hello World!'),
+    array('year' => 2009, 'month' =>  9, 'title' => 'At the museum'),
+    array('year' => 2009, 'month' =>  9, 'title' => 'Godspeed'),
+    array('year' => 2009, 'month' =>  9, 'title' => '2010 Olympics'),
+    array('year' => 2010, 'month' =>  1, 'title' => 'Tornado season'),
+    array('year' => 2010, 'month' =>  1, 'title' => 'Bailout'),
+    array('year' => 2010, 'month' =>  2, 'title' => 'Cheers, Ladies!'),
+    array('year' => 2010, 'month' =>  2, 'title' => 'Neglected'),
+    array('year' => 2009, 'month' => 11, 'title' => 'Ethics probe'),
+    array('year' => 2010, 'month' =>  3, 'title' => 'Commitment to security'),
+    array('year' => 2010, 'month' =>  3, 'title' => 'Election'),
+    array('year' => 2009, 'month' => 10, 'title' => 'Same-sex couples'),
+    array('year' => 2009, 'month' => 10, 'title' => 'Junkyard'),
+);
+]]></code>
+
+<p>The most interesting new method of <var>Kaloa_Spl_ArrayObject</var>, the grouping method, is <var>groupBy</var>. It takes a callback function as argument which is called once for every entry in the original array. The method might be used to group the example data by year and month.</p>
+
+<code lang="php"><![CDATA[
+$obj = new Kaloa_Spl_ArrayObject($items);
+
+$obj->groupBy(
+    create_function(
+        '$item',
+        'return array($item["year"], $item["month"]);'
+    )
+);
+]]></code>
+
+<p>The return value of the callback function is the key of the group to which the corresponding entry will be assigned. If an array is returned, it will be treated as a multi-dimensional key which translates to a multi-level grouping.</p>
+
+<p>Displaying the content of <var>$obj</var> using <var>var_dump</var> or <var>print_r</var> will result in an array structured like this:</p>
+
+<code lang="text"><![CDATA[
+Kaloa_Spl_ArrayObject Object(
+    [2009] => Kaloa_Spl_ArrayObject Object(
+        [9]  => Kaloa_Spl_ArrayObject Object(...),
+        [11] => Kaloa_Spl_ArrayObject Object(...),
+        [10] => Kaloa_Spl_ArrayObject Object(...)
+    ),
+    [2010] => Kaloa_Spl_ArrayObject Object(
+        [1] => Kaloa_Spl_ArrayObject Object(...),
+        [2] => Kaloa_Spl_ArrayObject Object(...),
+        [3] => Kaloa_Spl_ArrayObject Object(...)
+    )
+)
+]]></code>
+
+<p>The third dimension contains a numbered array with all of the original entries that are part of the corresponding group. For instance, the content of <var>$obj[2009][9]</var> would be an array with the four entries from September 2009:</p>
+
+<code lang="text"><![CDATA[
+0 => Kaloa_Spl_ArrayObject(
+    'year' => 2009,
+    'month' => 9,
+    'title' => 'Hello World!'
+),
+1 => Kaloa_Spl_ArrayObject(
+    'year' => 2009,
+    'month' => 9,
+    'title' => 'At the museum'
+),
+2 => Kaloa_Spl_ArrayObject(
+    'year' => 2009,
+    'month' => 9,
+    'title' => 'Godspeed'
+),
+3 => Kaloa_Spl_ArrayObject(
+    'year' => 2009,
+    'month' => 9,
+    'title' => '2010 Olympics'
+)
+]]></code>
+
+<p>As <var>Kaloa_Spl_ArrayObject</var> subclasses <var>ArrayObject</var>, it's already possible to print the data in the desired fashion using nested <var>foreach</var>-loops.</p>
+
+<code lang="php"><![CDATA[
+foreach ($obj as $year => $yearContent) {
+    echo '<h1>' . $year . "</h1>\n";
+    foreach ($yearContent as $month => $monthContent) {
+        echo '  <h2>' . $month . "</h2>\n";
+        echo "    <ul>\n";
+        foreach ($monthContent as $entry => $entryContent) {
+            echo '      <li>' . $entryContent['title'] . "</li>\n";
+        }
+        echo "    </ul>\n";
+    }
+}
+]]></code>
+
+<p>The resulting <abbr>HTML</abbr> code:</p>
+
+<code lang="html"><![CDATA[
+<h1>2009</h1>
+  <h2>9</h2>
+    <ul>
+      <li>Hello World!</li>
+      <li>At the museum</li>
+      <li>Godspeed</li>
+      <li>2010 Olympics</li>
+    </ul>
+  <h2>11</h2>
+    <ul>
+      <li>Ethics probe</li>
+    </ul>
+  <h2>10</h2>
+    <ul>
+      <li>Same-sex couples</li>
+      <li>Junkyard</li>
+    </ul>
+<h1>2010</h1>
+  <h2>1</h2>
+    <ul>
+      <li>Tornado season</li>
+      <li>Bailout</li>
+    </ul>
+  <h2>2</h2>
+    <ul>
+      <li>Cheers, Ladies!</li>
+      <li>Neglected</li>
+    </ul>
+  <h2>3</h2>
+    <ul>
+      <li>Commitment to security</li>
+      <li>Election</li>
+    </ul>
+]]></code>
+
+<h3>Advanced grouping</h3>
+
+<p>In some cases, it might be useful to modify entries before they are added to the resulting data structure. This can be achieved by simply editing or removing fields from the argument passed to the callback function. All arguments, including scalar values, are passed by reference.</p>
+
+<p>This grouping function will remove the fields "year" and "month" from all entries of the resulting array and will change the content of the "title" field to all uppercase letters.</p>
+
+<code lang="php"><![CDATA[
+$obj->groupBy(
+    create_function(
+        '$item',
+        '$ret = array($item["year"], $item["month"]);
+         unset($item["year"]);
+         unset($item["month"]);
+         $item["title"] = strtoupper($item["title"]);
+         return $ret;'
+    )
+);
+]]></code>
+
+<p>An example using scalar values that will be grouped by the first letter and changed to uppercase:</p>
+
+<code lang="php"><![CDATA[
+$items = array('Carl', 'Susan', 'Cindy', 'Peter', 'Steve', 'Patricia', 'Sam');
+
+$obj = new Kaloa_Spl_ArrayObject($items);
+
+$obj->groupBy(
+    create_function(
+        '$item',
+        '$item = strtoupper($item);
+         return substr($item, 0, 1);'
+    )
+);
+
+var_dump($obj);
+]]></code>
+
+<p>Output:</p>
+
+<code lang="text"><![CDATA[
+object(Kaloa_Spl_ArrayObject)#1 (3) {
+  ["C"]=>
+  object(Kaloa_Spl_ArrayObject)#4 (2) {
+    [0]=>
+    string(4) "CARL"
+    [1]=>
+    string(5) "CINDY"
+  }
+  ["S"]=>
+  object(Kaloa_Spl_ArrayObject)#5 (3) {
+    [0]=>
+    string(5) "SUSAN"
+    [1]=>
+    string(5) "STEVE"
+    [2]=>
+    string(3) "SAM"
+  }
+  ["P"]=>
+  object(Kaloa_Spl_ArrayObject)#6 (2) {
+    [0]=>
+    string(5) "PETER"
+    [1]=>
+    string(8) "PATRICIA"
+  }
+}
+]]></code>
+
+<h3>Sorting (<var>usort</var>, <var>usortm</var>, <var>uasortm</var>, <var>uksortm</var>)</h3>
+
+<p>By now, it might have become apparent that the <var>groupBy</var> method doesn't sort the resulting array in any way. Therefore, I made a second major addition to <var>ArrayObject</var> by adding more sophisticated sorting functionality that is able to realign one or more dimensions of the array. All three multi-dimensional sorting methods are based on the different flavours of <abbr>PHP</abbr>'s built-in <var>usort</var> function. They each take sorting criteria specified by an anonymous function or an array of anonymous functions as arguments.</p>
+
+<p>Here is an example to illustrate the usage. It works with the data defined in the "Basic grouping" section.</p>
+
+<code lang="php"><![CDATA[
+$obj->groupBy(
+    create_function(    // Group by year and month
+        '$item',
+        'return array($item["year"], $item["month"]);'
+    )
+)->uksortm(
+    array(
+        create_function(    // Order first dimension descending
+            '$a, $b',
+            'return $a < $b;'
+        ),
+        create_function(    // Order second dimension ascending
+            '$a, $b',
+            'return $a > $b;'
+        )
+    )
+)->usortm(
+    array(
+        null,    // Skip first and second dimensions, only realign third
+        null,    //  (descending by length of an entry's title)
+        create_function(
+            '$a, $b',
+            'return strlen($a["title"]) < strlen($b["title"]);'
+        )
+    )
+);
+]]></code>
+
+<p>This notation uses <a href="http://mattiasgeniar.be/2009/01/23/method-chaining-in-php-fluent-interface/">method chaining</a> in order to hint at the fact that I implemented a fluent interface for all new methods (with the exception of the <var>usort</var> method which I threw in because it was the only one missing). This might be split into three parts starting with <var>$obj-&gt;</var>, of course.</p>
+
+<p>Besides the <var>groupBy</var> call, there are calls to both <var>uksortm</var> and <var>usortm</var> because the first two dimensions (years and months) have to be sorted by key whereas the third one (the entries) should be sorted by value. (By the way: <var>usortm</var> might be exchanged for <var>uasortm</var> here as well-formed keys are not an issue when iterating the array using <var>foreach</var>.) The differences between all of the <var>usort</var>-like functions <a href="http://www.php.net/manual/en/array.sorting.php">are explained in the <abbr>PHP</abbr> documentation</a>.</p>
+
+<p>Each of the <var>u*sortm</var> ("m" standing for "multi-dimensional") methods recursively applies the passed functions to the corresponding dimension of the array. From an array of three functions, the first one would be used to sort the years (first dimension), the second one to sort the months (second dimension) and the third one to sort the entries (third dimension). If no function is needed for a specific dimension, <var>null</var> can be passed and the dimension is skipped.</p>
+
+<p>Further documentation about the class may be found in the inline DocBlock comments <a href="Kaloa_Spl_ArrayObject.php.txt">of the source file</a>. If you try it out and have questions or any remarks or bug reports, <a href="mailto:marc@ermshaus.org">please contact me</a>.</p>

@@ -1,0 +1,19 @@
+<ul>
+<?php foreach ($topics as $title => $content) : ?>
+
+    <li><a href="<?php echo url('book', 'view', array('section' => $title)); ?>"
+           ><?php echo escape($title); ?></a>
+
+        <ul>
+        <?php foreach ($content as $pageTitle => $unused) : ?>
+
+            <li><a href="<?php echo url('book', 'view',
+                    array('section' => $title, 'page' => $pageTitle)); ?>"
+                    ><?php echo escape($pageTitle); ?></a></li>
+
+        <?php endforeach; ?>
+        </ul>
+    </li>
+
+<?php endforeach; ?>
+</ul>

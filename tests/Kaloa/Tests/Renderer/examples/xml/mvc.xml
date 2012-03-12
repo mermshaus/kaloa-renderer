@@ -1,0 +1,525 @@
+<h1>Ein Ansatz zum Aufbau einer Webseite nach dem MVC-Prinzip</h1>
+
+<p>Version: 2011-02-19-mermshaus</p>
+
+<toc />
+
+
+
+<h2>Einführung</h2>
+
+<p>Dieser Text erklärt, wie eine Webseite mit einfachen Mitteln auf eine an das <em>MVC-Design</em> angelehnte Weise programmiert werden kann.</p>
+
+<p>MVC steht für „Model, View, Controller“ und beschreibt eine Aufteilung der Bestandteile einer Anwendung in einen Teil, der die eigentliche Programmlogik implementiert (<em>Model</em>), einen Teil, der die Ausgaben generiert (<em>View</em>), und einen Teil, der zu jeder Anfrage (<em>Request</em>) die passende auszuführende Logik auswählt und deren Rückgaben an einen passenden Ausgabe-Teil weitergibt (<em>Controller</em>).</p>
+
+<p>Diese einzelnen Bestandteile sind üblicherweise objektorientiert als Klassen realisiert. Darauf wird in diesem Beispiel bewusst verzichtet. Der Fokus liegt auf der Abhandlung eines Requests von der Auswahl eines Controllers bis zur Ausgabe über ein View-Script.</p>
+
+
+
+<h2>Controller und Actions</h2>
+
+<p>Das MVC-Design basiert darauf, jeden Request über eine <em>Action</em> eines Controllers abzuarbeiten. Üblicherweise ist der Controller dabei eine Klasse, die Actions sind Methoden dieser Klasse. In diesem Beispiel ist ein Controller eine simple PHP-Datei mit der Bezeichung <var>&lt;Controller-Name&gt;.php</var>. Die Actions sind Funktionen innerhalb dieser Datei und werden nach dem Schema <var>&lt;Controller-Name&gt;_&lt;Action-Name&gt;Action</var> benannt.</p>
+
+<p>Der Aufruf der Startseite einer Webseite wird häufig als Aufruf der <var>index</var>-Action des <var>index</var>-Controllers (in Zukunft als <var>index.index</var> geschrieben) umgesetzt. In diesem Fall also als Funktion <var>index_indexAction</var> in der Controller-Datei <var>index.php</var>.</p>
+
+<p>Um die Übersicht zu erleichtern, werden alle Controller-Dateien in einem Unterverzeichnis <var>controllers</var> abgelegt.</p>
+
+<p>Der eigentlichen Index-Datei <var>index.php</var> im Root-Verzeichnis der Webseite fällt die Aufgabe zu, anhand der Request-Parameter (zum Beispiel <var>GET</var>-Werte) den passenden Controller zu finden, einzubinden und dort die passende Action-Funktion aufzurufen.</p>
+
+<listing language="php" caption="Auswahl und Aufruf einer Controller-Action in der Index-Datei"><![CDATA[
+$controller = (isset($_GET['controller']))
+            ? trim((string) $_GET['controller'])
+            : 'index';
+
+$action = (isset($_GET['action']))
+        ? trim((string) $_GET['action'])
+        : 'index';
+
+$controllerPath = realpath('./controllers/' . $controller . '.php');
+
+if (strpos($controllerPath, realpath('./controllers')) !== 0) {
+    throw new Exception('Invalid controller specified "' . $controller . '"');
+}
+
+require_once $controllerPath;
+
+$actionFunctionName = $controller . '_' . $action . 'Action';
+
+if (!function_exists($actionFunctionName)) {
+    throw new Exception('Invalid controller action specified "'
+            . $controller . '.' . $action . '"');
+}
+
+$appData['pageTitle'] = 'Meine Seite';
+
+$tplVars = $actionFunctionName($appData);
+]]></listing>
+
+<p>Dieses Beispiel erwartet die Angaben für Controller und Action in den <var>GET</var>-Parametern <var>$_GET['controller']</var> und <var>$_GET['action']</var>. Wird einer der beiden Parameter nicht gesetzt, wird der Wert <var>index</var> angenommen. Dies stellt sicher, dass der parameterlose Aufruf des Root-Verzeichnisses (zum Beispiel <var>http://example.org/</var>) an <var>index.index</var> weitergeleitet wird.</p>
+
+<p>Wird ein falscher Controller oder eine falsche Action angegeben, wirft die Anwendung eine Fehlermeldung.</p>
+
+<p>Jeder Action werden zudem im Parameter <var>$appData</var> eine Reihe „globaler“ Werte übergeben. Diese könnten beispielsweise die Daten des derzeit eingeloggten Nutzers enthalten oder wie in diesem Fall ein Feld <var>pageTitle</var>, das in der Action überschrieben werden kann und das später bei der Ausgabe in das <var>&lt;title&gt;</var>-Element der Seite geschrieben wird.</p>
+
+
+
+<h2>View-Scripts</h2>
+
+<p>Als Rückgabe der Action-Funktionen wird ein assoziatives Array von Werten erwartet, die dem zur Action gehörenden <em>View-Script</em> übergeben werden.</p>
+
+<p>Das View-Script generiert die tatsächlichen Ausgaben, die die aufgerufene Action erzeugt. Jeder Action ist dabei standardmäßig genau ein View-Script zugeordnet. Es trägt den Namen <var>&lt;Action-Name&gt;.phtml</var> und liegt im Unterverzeichnis <var>views/&lt;Controller-Name&gt;</var>.</p>
+
+<p>Eine Anwendung mit einem <var>index</var>-Controller und einer dort definierten <var>index</var>-Action benötigt also bis hierher folgende Verzeichnisstruktur:</p>
+
+<listing caption="Verzeichnisübersicht für index-Controller mit index-Action"><![CDATA[
+.
++--controllers
+|  `--index.php
++--views
+|  `--index
+|     `--index.phtml
+`--index.php
+]]></listing>
+
+<p>Die <var>index</var>-Action des <var>index</var>-Controllers könnte so aussehen:</p>
+
+<listing language="php" caption="Beispiel für eine simple index.index-Action"><![CDATA[
+function index_indexAction(&$appData)
+{
+    $appData['pageTitle'] = 'Startseite';
+
+    $vars = array();
+    $vars['name'] = 'Mark van Bommel';
+
+    return $vars;
+}
+]]></listing>
+
+<p>In dieser Action wird der Seitentitel neu gesetzt und außerdem wird ein Array mit dem Inhalt <var>name => Mark van Bommel</var> zurückgegeben, das im View-Script verwendet werden soll.</p>
+
+<p>Das entsprechende View-Script <var>index.phtml</var>:</p>
+
+<listing language="php" caption="View-Script index.phtml"><![CDATA[
+<h1>Willkommen auf meiner Homepage</h1>
+
+<p>Der Inhalt von 'Name' lautet: <?php echo escape($name); ?>.</p>
+]]></listing>
+
+<p>Hier tauchen einige neue Elemente auf, die im nächsten Abschnitt besprochen werden.</p>
+
+
+
+<h2>Ausgabe an den Browser</h2>
+
+<p>Die <var>index.php</var> im Root-Verzeichnis hat bisher die passende Action eines Controllers aufgerufen. Nun wird sie erweitert, um die Rückgabe dieser Action an das View-Script zu senden und die Rückgabe des View-Scripts selbst in einen HTML-Rahmen, das <em>Layout</em>, einzufügen und schließlich alle Ausgaben an den Browser zu senden.</p>
+
+<listing language="php" name="Vollständige index.php"><![CDATA[
+<?php
+
+function url($controller, $action, array $params = array())
+{
+    $tmp = array();
+
+    if ($controller !== 'index' || $action !== 'index') {
+        $tmp['controller'] = $controller;
+        $tmp['action']     = $action;
+    }
+
+    $params = array_merge($tmp, $params);
+
+    $queryPart = '';
+
+    if (count($params) > 0) {
+        $queryPart = '?' . http_build_query($params, '', '&amp;');
+    }
+
+    $url = './' . $queryPart;
+
+    return $url;
+}
+
+function escape($string, $quoteStyle = ENT_QUOTES, $charset = 'UTF-8')
+{   
+    return htmlspecialchars($string, $quoteStyle, $charset);
+}
+
+function loadViewScript($controller, $action, array $vars = array())
+{
+    $scriptPath = './views/' . $controller . '/' . $action . '.phtml';
+
+    extract($vars);
+    ob_start();
+    include $scriptPath;
+    return ob_get_clean();
+}
+
+$controller = (isset($_GET['controller']))
+            ? trim((string) $_GET['controller'])
+            : 'index';
+
+$action = (isset($_GET['action']))
+        ? trim((string) $_GET['action'])
+        : 'index';
+
+$controllerPath = realpath('./controllers/' . $controller . '.php');
+
+if (strpos($controllerPath, realpath('./controllers')) !== 0) {
+    throw new Exception('Invalid controller specified "' . $controller . '"');
+}
+
+require_once $controllerPath;
+
+$actionFunctionName = $controller . '_' . $action . 'Action';
+
+if (!function_exists($actionFunctionName)) {
+    throw new Exception('Invalid controller action specified "'
+            . $controller . '.' . $action . '"');
+}
+
+$appData['pageTitle'] = 'Meine Seite';
+
+$tplVars = $actionFunctionName($appData);
+
+if ($tplVars === null) {
+    $tplVars = array();
+}
+
+?><!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8" />
+        <title><?php echo escape($appData['pageTitle']); ?></title>
+    </head>
+
+    <body>
+        <ul>
+            <li><a href="<?php echo url('index', 'index'); ?>">Home</a></li>
+            <li><a href="<?php echo url('index', 'about'); ?>">About</a></li>
+            <li><a href="<?php echo url('book', 'index'); ?>">Themen</a></li>
+        </ul>
+
+        <?php echo loadViewScript($controller, $action, $tplVars); ?>
+    </body>
+
+</html>
+]]></listing>
+
+<p>Hinzugekommen sind unter anderem diese drei Funktionen:</p>
+
+<dl>
+
+<dt><code>escape</code></dt>
+<dd>Die <code>escape</code>-Funktion sichert Ausgaben gegen Injection-Versuche und sonstige Ausgabefehler ab. Nahezu jede Ausgabe, die nicht aus HTML-Code besteht, sollte durch diese Funktion geschickt werden.</dd>
+
+<dt><code>url</code></dt>
+<dd>Die <code>url</code>-Funktion generiert aus den Angaben <var>$controller</var>, <var>$action</var> und <var>$params</var> einen Link zur angegebenen Action des angegebenen Controllers, an den die Werte aus dem assoziativen Array <var>$params</var> als <var>GET</var>-Parameter angehängt werden. Jeder seiteninterne Link sollte mithilfe dieser Funktion erzeugt werden.</dd>
+
+<dt><code>loadViewScript</code></dt>
+<dd>Die <code>loadViewScript</code>-Funktion ruft das View-Script der angegebenen Action des angegebenen Controllers auf. Dabei wird der Inhalt des assoziativen Arrays <var>$vars</var> per <code>extract</code>-Funktion im Namensraum des View-Scripts bekannt gemacht. Der <var>$vars</var>-Parameter ist die Schnittstelle zwischen der Rückgabe einer Action und dem View-Script.</dd>
+
+</dl>
+
+<p>Am Ende der <var>index.php</var>-Datei wird der HTML-Rahmen festgelegt, in dem die Rückgabe des View-Scripts ausgegeben wird. Hier ist außerdem ein Seitenmenü definiert, das neben der <var>index.index</var>-Action die beiden Actions <var>index.about</var> und <var>book.index</var> verlinkt, die noch nicht erstellt wurden.</p>
+
+<p>Das Erstellen der <var>about</var>-Action des <var>index</var>-Controllers und eines beliebigen zugehörigen View-Scripts <var>about.phtml</var> dürfte an dieser Stelle keine Probleme mehr bereiten. Mit der Action <var>book.index</var> befasst sich der nächste Abschnitt.</p>
+
+
+
+<h2>Ein zweiter Controller: <var>book</var></h2>
+
+<p>Der <var>book</var>-Controller stellt Daten dar, die grob hierarchisch organisiert sind. Das heißt hier, es wird verschiedene Abschnitte (<em>Sections</em>) geben, die jeweils eine Anzahl an Seiten (<em>Pages</em>) enthalten. Eine weitere Schachtelung in Unterabschnitte ist nicht vorgesehen. Jede einzelne Seite entspricht einer HTML-Datei, die beim Aufruf der jeweiligen Seite geladen und über das View-Script der zugehörigen Action angezeigt werden soll.</p>
+
+<p>Die vorhandenen Abschnitte, Seiten und die zugehörigen HTML-Dateien sind wie folgt definiert:</p>
+
+<listing language="php" caption="Definition der Inhalte für den book-Controller"><![CDATA[
+function book_getTopicList()
+{
+    $topicsRootPath = './data/topics';
+
+    $topics = array();
+
+    $topics['Informatik'] = array(
+        'Sortierverfahren' => $topicsRootPath
+                . '/informatik/sortierverfahren.phtml',
+        'Kontrollstrukturen' => $topicsRootPath
+                . '/informatik/kontrollstrukturen.phtml',
+    );
+
+    return $topics;
+}
+]]></listing>
+
+<p>Diese Funktion gehört eigentlich zu einem Model und sollte nicht im Controller definiert werden, aber um das Beispiel einfach zu halten, steht sie in diesem Fall mit in der Controller-Datei <var>controllers/book.php</var> und trägt auch das entsprechende Präfix.</p>
+
+<p>Die tatsächlich darzustellenden Inhalte der einzelnen Seiten liegen (willkürlich) im Unterverzeichnis <var>data/topics</var>. Die gesamte Verzeichnisstruktur der Beispielanwendung sieht nach diesem Schritt so aus:</p>
+
+<listing caption="Verzeichnisübersicht nach Anlegen des data-Verzeichnisses"><![CDATA[
+.
++--controllers
+|  +--book.php
+|  `--index.php
++--data
+|  `--topics
+|     `--informatik
+|        +--konstrollstrukturen.phtml
+|        `--sortierverfahren.phtml
++--views
+|  `--index
+|     +--about.phtml
+|     `--index.phtml
+`--index.php
+]]></listing>
+
+<p>Als Actions für den <var>book</var>-Controller sind <var>book.index</var> und <var>book.view</var> vorgesehen. <var>book.index</var> soll eine Übersicht über die vorhandenen Sections und Pages ausgeben, <var>book.view</var> soll ebenfalls diese Übersicht darstellen und zusätzlich den jeweiligen Inhalt anzeigen.</p>
+
+<listing language="php" caption="Gesamter Code von controllers/book.php"><![CDATA[
+function book_getTopicList()
+{
+    $topicsRootPath = './data/topics';
+
+    $topics = array();
+
+    $topics['Informatik'] = array(
+        'Sortierverfahren' => $topicsRootPath
+                . '/informatik/sortierverfahren.phtml',
+        'Kontrollstrukturen' => $topicsRootPath
+                . '/informatik/kontrollstrukturen.phtml',
+    );
+
+    return $topics;
+}
+
+function book_indexAction(&$appData)
+{
+    $vars['topics'] = book_getTopicList();
+
+    return $vars;
+}
+
+function book_viewAction(&$appData)
+{
+    $topics = book_getTopicList();
+
+    $vars['topics'] = $topics;
+    
+    $vars['page'] = (isset($_GET['page']))
+                  ? $_GET['page']
+                  : null;
+
+    $appData['pageTitle'] = $_GET['section'];
+
+    if ($vars['page'] !== null) {
+        $vars['content'] = file_get_contents(
+                $topics[$_GET['section']][$_GET['page']]);
+        $appData['pageTitle'] = $vars['page'];
+    }
+
+    $vars['title'] = ($vars['page'] !== null)
+                   ? $vars['page']
+                   : $_GET['section'];
+
+    return $vars;
+}
+]]></listing>
+
+<p>Im Feld <var>topics</var> wird die gesamte Inhaltsstruktur mitsamt aller Sections und Pages zurückgeliefert, die im View-Script dazu verwendet werden soll, die Übersicht zu generieren.</p>
+
+<p>In der <var>view</var>-Action wird je nachdem, ob die Werte <var>$_GET['section']</var> und <var>$_GET['page']</var> gesetzt sind, der entsprechende Inhalt geladen und der Seitentitel angepasst. Diese Action ist nicht gegen alle Eventualitäten von gesetzten oder nicht gesetzten <var>GET</var>-Parametern abgesichert, aber für den Moment soll es so genügen.</p>
+
+
+
+<h2>View-Scripts für den <var>book</var>-Controller</h2>
+
+<p>Da im View-Script beider Actions dasselbe Übersichtsmenü über alle Inhalte dargestellt werden soll, bietet es sich an, den dazu notwendigen Code zentral auszulagern, um ein redundates Speichern zu vermeiden. Dazu dient ein spezielles View-Script <var>views/book/_menu.phtml</var>, das aus den eigentlichen View-Scripts der beiden Actions heraus aufgerufen wird. Um anzuzeigen, dass es sich bei diesem View-Script um eine Hilfsdatei handelt und nicht um das View-Script einer Action, beginnt der Name mit einem Unterstrich.</p>
+
+
+<listing language="php" caption="View-Script views/book/_menu.phtml"><![CDATA[
+<ul>
+<?php foreach ($topics as $title => $content) : ?>
+
+    <li><a href="<?php echo url('book', 'view', array('section' => $title)); ?>"
+           ><?php echo escape($title); ?></a>
+
+        <ul>
+        <?php foreach ($content as $pageTitle => $unused) : ?>
+
+            <li><a href="<?php echo url('book', 'view',
+                    array('section' => $title, 'page' => $pageTitle)); ?>"
+                    ><?php echo escape($pageTitle); ?></a></li>
+
+        <?php endforeach; ?>
+        </ul>
+    </li>
+
+<?php endforeach; ?>
+</ul>
+]]></listing>
+
+<p>Dieses View-Script erwartet die Eingabe-Variable <var>$topics</var> und generiert eine Ausgabe mit Links zu <var>book.view</var>, an die je nach Art (Link zu Section oder Page) weitere Parameter angehängt werden.</p>
+
+<p>Das View-Script für <var>book.index</var> zeigt, wie dieses Helfer-Script eingebunden werden kann.</p>
+
+<listing language="php" caption="View-Script für book.index"><![CDATA[
+<h1>Themenübersicht</h1>
+
+<?php echo loadViewScript('book', '_menu', array('topics' => $topics)); ?>
+]]></listing>
+
+<p>Das View-Script für <var>book.view</var> bindet ebenfalls das Menü ein und gibt den Inhalt einer nachgefragten Page aus oder eine derzeit leere Seite, falls keine Page nachgefragt wurde, sondern lediglich eine Section. Dieses View-Script sollte noch weiter ausgebaut werden, um auch im zweiten Fall einen sinnvolleren Inhalt darzustellen.</p>
+
+<listing language="php" caption="View-Script für book.view"><![CDATA[
+<h1><?php echo escape($title); ?></h1>
+
+<?php echo loadViewScript('book', '_menu', array('topics' => $topics)); ?>
+
+<?php if ($page !== null) : ?>
+    <?php echo $content; ?>
+<?php endif; ?>
+]]></listing>
+
+
+
+<h2>Schluss</h2>
+
+<p>Damit endet der wesentliche Teil der kleinen Einführung in einige Aspekte des MVC-Konzepts. Die fertige Beispielanwendung sieht nicht besonders hübsch aus, dürfte aber verdeutlicht haben, wie sich eine Webseite auf Basis eines abstrakten Konzepts von Controllern und darin enthaltenen Actions schematisch umsetzen lässt. Durch das Hinzufügen weiterer Controller und Actions kann das Beispiel flexibel um Funktionalität erweitert werden, ohne bestehenden Code großartig anpassen zu müssen.</p>
+
+<p>Dasselbe Konzept ist in stark erweitertem Umfang die Grundlage nahezu jedes bestehenden Frameworks im Bereich der Web-Entwicklung.</p>
+
+
+
+<h2>Erweiterung: URL-Rewriting hinzufügen</h2>
+
+<p><em>Dieser Abschnitt ist auf die Server-Software Apache mit aktiviertem mod_rewrite-Modul ausgelegt. Auf einem Webserver, der andere Technologien nutzt, werden die folgenden Code-Beispiele voraussichtlich nicht funktionieren.</em></p>
+
+<p>Die bestehenden URIs der Beispielanwendung sehen teilweise sehr unhandlich aus. Hier etwa der Direktlink auf die „Kontrollstrukturen“-Page der „Informatik“-Section:</p>
+
+<listing><![CDATA[
+/?controller=book&action=view&section=Informatik&page=Kontrollstrukturen
+]]></listing>
+
+<p>Wesentlich schöner wäre da beispielsweise diese Variante, die ohne <var>GET</var>-Parameter auskommt:</p>
+
+<listing><![CDATA[
+/book/view/section/Informatik/page/Kontrollstrukturen
+]]></listing>
+
+<p>Dieser verbesserte URI lässt sich in folgendes Schema zerlegen:</p>
+
+<listing><![CDATA[
+/<Controller-Name>/<Action-Name>/<param1>/<value1>/<param2>/<value2>
+]]></listing>
+
+<h3>Request-URI in GET-Parameter umwandeln</h3>
+
+<p>Da die Anwendung als Eingaben die Angabe von Controller und Action sowie optional diverse weitere <var>GET</var>-Parameter erwartet, muss ein angepasster URI zu Beginn der Ausführung in das erwartete Format zerlegt werden. Das bedeutet <var>$_GET</var> muss mit Controller, Action und den übergebenen Key-Value-Paaren gefüllt werden.</p>
+
+<listing language="php" caption="Funktion requestUriToGetArray"><![CDATA[
+function requestUriToGetArray()
+{
+    $basePath     = pathinfo($_SERVER['SCRIPT_NAME'], PATHINFO_DIRNAME);
+    $requestPath  = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $relativePath = substr($requestPath, strlen($basePath));
+
+    $pathParts = explode('/', trim($relativePath, '/'));
+
+    $count = count($pathParts);
+
+    if ($count > 1) {
+        $_GET['controller'] = $pathParts[0];
+        $_GET['action']     = $pathParts[1];
+
+        for ($i = 2; $i < $count; $i += 2) {
+            $key   = $pathParts[$i];
+            $value = (isset($pathParts[$i + 1]))
+                   ? $pathParts[$i + 1]
+                   : '';
+            $_GET[$key] = $value;
+        }
+    }
+}
+]]></listing>
+
+<p>Diese Funktion formt einen Eingabe-URI wie
+<code>/book/view/section/Informatik/page/Kontrollstrukturen</code>
+in folgendes <var>$_GET</var>-Array um:</p>
+
+<listing><![CDATA[
+Array
+(
+    [controller] => book
+    [action] => view
+    [section] => Informatik
+    [page] => Kontrollstrukturen
+)
+]]></listing>
+
+<p>Das entspricht genau der Eingabe, von der die Anwendung auch zuvor ausgegangen ist.</p>
+
+<p>Die Funktion muss der Indexdatei <var>index.php</var> hinzugefügt und vor der Zuweisung von Werten an <var>$controller</var> und <var>$action</var>, also ganz zu Beginn des Scripts, einmal ausgeführt werden.</p>
+
+
+
+<h3>Links im neuen Format generieren</h3>
+
+<p>Als nächstes muss das Format, in dem die internen Verlinkungen erzeugt werden, ebenfalls an das neue Schema angepasst werden. Da das Erstellen aller Links über die <code>url</code>-Funktion geschieht, kann auch dies zentral an einer Stelle erledigt werden, indem die <code>url</code>-Funktion durch eine neue Variante ersetzt wird.</p>
+
+<listing language="php" caption="Veränderte Version der url-Funktion"><![CDATA[
+function url($controller, $action, array $params = array())
+{
+    $basePath = rtrim(pathinfo($_SERVER['SCRIPT_NAME'], PATHINFO_DIRNAME), '/');
+
+    if ($controller === 'index' && $action === 'index'
+            && count($params) === 0
+    ){
+        // Auf Hinzufügen des Controllers und der Action verzichten, wenn es
+        // sich um index.index handelt und keine weiteren Parameter angegeben
+        // wurden
+        return $basePath . '/';
+    }
+
+    $url = $basePath . '/' . $controller . '/' . $action;
+
+    foreach ($params as $key => $value) {
+        $url .= '/' . urlencode($key) . '/' . urlencode($value);
+    }
+
+    return $url;
+}
+]]></listing>
+
+<p>Wie bereits in der <code>requestUriToGetArray</code>-Funktion wird auch hier eine Variable <var>$basePath</var> berücksichtigt, die immer dann eine Rolle spielt, wenn die Index-Datei der Webseite nicht im Root-Verzeichnis der zugehörigen Domain (http://example.org/), sondern in einem Unterverzeichnis dieser liegt (http://example.org/myweb/). Diese Pfadanteile müssen dynamisch hinzugefügt oder entfernt werden.</p>
+
+
+
+<h3>Rewriting via .htaccess und mod_rewrite</h3>
+
+<p>Als letzte Komponente wird das serverseitige Rewriting angelegt. Dazu genügt es, die folgende <var>.htaccess</var>-Datei im Root-Verzeichnis der Webseite zu erstellen.</p>
+
+<listing caption=".htaccess-Datei mit Rewrite-Regeln"><![CDATA[
+RewriteEngine On
+
+# Wenn eine Ressource existiert, liefere sie aus
+
+RewriteCond %{REQUEST_FILENAME} -s [OR]
+RewriteCond %{REQUEST_FILENAME} -l [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^.*$ - [NC,L]
+
+# Sonst leite den Request zur Indexseite weiter
+
+RewriteRule ^.*$ index.php [NC,L]
+]]></listing>
+
+<p>Die Verlinkung innerhalb der Seite sollte nun nach dem neuen URL-Schema ordnungsgemäß funktionieren.</p>
+
+
+
+<h2>Lizenz</h2>
+
+<p>Dieser Text darf unter der CC-BY-SA-Lizenz frei verwendet werden. Der enthaltene Quellcode steht unter keiner Lizenz, darf also völlig frei verwendet werden. Der Original-Autor ist Marc Ermshaus.</p>
+
+<p>Ein Vorschlag zur Versionierung von Änderungen wäre, die Versionsangabe zu Beginn des Texts zu verändern und das Namenskürzel am Ende durch ein eigenes zu ersetzen. Ein eigener Abschnitt mit einem kurzen Kommentar zu jeder neuen Version wäre ebenfalls schön. Beides steht aber potentiellen weiteren Autoren völlig frei.</p>
+
+<p>Copyright 2011 Marc Ermshaus &lt;<a href="http://www.ermshaus.org/">http://www.ermshaus.org/</a>&gt;</p>
