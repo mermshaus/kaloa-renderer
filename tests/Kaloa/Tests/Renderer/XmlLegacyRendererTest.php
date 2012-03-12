@@ -6,18 +6,14 @@ use PHPUnit_Framework_TestCase;
 use Kaloa\Renderer\Config;
 use Kaloa\Renderer\Factory;
 
-class XmlRendererTest extends PHPUnit_Framework_TestCase
+class XmlLegacyRendererTest extends PHPUnit_Framework_TestCase
 {
     public function testIntegrity()
     {
         // Environment
-        $contentToRender = file_get_contents(__DIR__ . '/examples/xml/mvc.xml');
-        $resourceBasePath = __DIR__ . '/examples/xml/mvc';
-        $filter = 'xml';
-
-        #$contentToRender = file_get_contents('./examples/xml/kaloa_renderer.xml');
-        #$resourceBasePath = './examples/xml/kaloa_renderer';
-        #$filter = 'xml';
+        $contentToRender = file_get_contents(__DIR__ . '/examples/xmllegacy/arrayobject.xml');
+        $resourceBasePath = __DIR__ . '/examples/xmllegacy';
+        $filter = 'xmllegacy';
 
         $config = new Config();
         $config->setResourceBasePath($resourceBasePath);

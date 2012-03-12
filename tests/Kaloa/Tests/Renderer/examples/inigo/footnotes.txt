@@ -1,0 +1,11 @@
+Test[fn] Toast[fn]
+
+[fnt]Hello world![fn]
+
+How are things?[/fnt]
+
+This is not about love.
+
+[fnt]Tasty![/fnt]
+
+[fnt]foo[/fnt]

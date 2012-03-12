@@ -4,23 +4,23 @@ namespace Kaloa\Renderer;
 
 use Kaloa\Renderer\AbstractRenderer;
 
-use Inigo_Parser;
-use Inigo_Handler_Simple;
-use Inigo_Handler_Url;
-use Inigo_Handler_Img;
-use Inigo_Handler_Amazon;
-use Inigo_Handler_Abbr;
-use Inigo_Handler_HTML;
-use Inigo_Handler_Code;
-use Inigo_Handler_Footnotes;
-use Inigo_Handler_YouTube;
+use Kaloa\Renderer\Inigo\Parser;
+use Kaloa\Renderer\Inigo\Handler\SimpleHandler;
+use Kaloa\Renderer\Inigo\Handler\UrlHandler;
+use Kaloa\Renderer\Inigo\Handler\ImgHandler;
+use Kaloa\Renderer\Inigo\Handler\AmazonHandler;
+use Kaloa\Renderer\Inigo\Handler\AbbrHandler;
+use Kaloa\Renderer\Inigo\Handler\HTMLHandler;
+use Kaloa\Renderer\Inigo\Handler\CodeHandler;
+use Kaloa\Renderer\Inigo\Handler\FootnotesHandler;
+use Kaloa\Renderer\Inigo\Handler\YouTubeHandler;
 
 /**
  *
  */
 class Inigo extends AbstractRenderer
 {
-    /** @var Inigo_Parser */
+    /** @var Parser */
     protected $inigoParser = null;
 
     protected function init()
@@ -30,10 +30,7 @@ class Inigo extends AbstractRenderer
 
     protected function initInigoParser()
     {
-        #KaloaToolkit_MBString::language('uni');
-        #KaloaToolkit_MBString::internalEncoding('UTF-8');
-
-        $this->inigoParser = new Inigo_Parser();
+        $this->inigoParser = new Parser();
         $inigo = $this->inigoParser;
 
         // TODO Change this path to some useful implementation
@@ -43,51 +40,51 @@ class Inigo extends AbstractRenderer
         //
 
         /* Example for multiple tags being displayed in the same way */
-        $inigo->addHandler(new Inigo_Handler_Simple('b|strong', Inigo_Parser::TAG_INLINE, '<strong>', '</strong>'))
-              ->addHandler(new Inigo_Handler_Simple('i|em', Inigo_Parser::TAG_INLINE, '<em>', '</em>'))
+        $inigo->addHandler(new SimpleHandler('b|strong', Parser::TAG_INLINE, '<strong>', '</strong>'))
+              ->addHandler(new SimpleHandler('i|em', Parser::TAG_INLINE, '<em>', '</em>'))
 
         /*
-         * Used to display other tags. Tags with type Inigo_Parser::TAG_PRE will not be parsed
+         * Used to display other tags. Tags with type Parser::TAG_PRE will not be parsed
          * This tag belongs also to two types
          */
-              ->addHandler(new Inigo_Handler_Simple('off', Inigo_Parser::TAG_INLINE | Inigo_Parser::TAG_PRE, '', ''))
+              ->addHandler(new SimpleHandler('off', Parser::TAG_INLINE | Parser::TAG_PRE, '', ''))
 
-              ->addHandler(new Inigo_Handler_Simple('u', Inigo_Parser::TAG_INLINE, '<span class="underline">', '</span>'))
-              ->addHandler(new Inigo_Handler_Simple('var', Inigo_Parser::TAG_INLINE | Inigo_Parser::TAG_PRE, '<var>', '</var>'))
-              ->addHandler(new Inigo_Handler_Simple('strike', Inigo_Parser::TAG_INLINE, '<span class="strike">', '</span>'))
-              ->addHandler(new Inigo_Handler_Simple('quote', Inigo_Parser::TAG_OUTLINE | Inigo_Parser::TAG_FORCE_PARAGRAPHS, '<blockquote>', "</blockquote>\n\n"))
+              ->addHandler(new SimpleHandler('u', Parser::TAG_INLINE, '<span class="underline">', '</span>'))
+              ->addHandler(new SimpleHandler('var', Parser::TAG_INLINE | Parser::TAG_PRE, '<var>', '</var>'))
+              ->addHandler(new SimpleHandler('strike', Parser::TAG_INLINE, '<span class="strike">', '</span>'))
+              ->addHandler(new SimpleHandler('quote', Parser::TAG_OUTLINE | Parser::TAG_FORCE_PARAGRAPHS, '<blockquote>', "</blockquote>\n\n"))
 
               /* Most replacements are rather simple */
-              ->addHandler(new Inigo_Handler_Simple("h1", Inigo_Parser::TAG_OUTLINE, "<h1>", "</h1>\n\n"))
-              ->addHandler(new Inigo_Handler_Simple("h2", Inigo_Parser::TAG_OUTLINE, "<h2>", "</h2>\n\n"))
-              ->addHandler(new Inigo_Handler_Simple("h3", Inigo_Parser::TAG_OUTLINE, "<h3>", "</h3>\n\n"))
-              ->addHandler(new Inigo_Handler_Simple("h4", Inigo_Parser::TAG_OUTLINE, "<h4>", "</h4>\n\n"))
-              ->addHandler(new Inigo_Handler_Simple("h5", Inigo_Parser::TAG_OUTLINE, "<h5>", "</h5>\n\n"))
-              ->addHandler(new Inigo_Handler_Simple("h6", Inigo_Parser::TAG_OUTLINE, "<h6>", "</h6>\n\n"))
-              ->addHandler(new Inigo_Handler_Simple("dl", Inigo_Parser::TAG_OUTLINE, "<dl>", "\n\n</dl>\n\n"))
-              ->addHandler(new Inigo_Handler_Simple("dt", Inigo_Parser::TAG_OUTLINE, "\n\n<dt>", "</dt>"))
-              ->addHandler(new Inigo_Handler_Simple("dd", Inigo_Parser::TAG_OUTLINE, "\n<dd>", "</dd>"))
-              ->addHandler(new Inigo_Handler_Simple("ul", Inigo_Parser::TAG_OUTLINE, "<ul>", "\n</ul>\n\n"))
-              ->addHandler(new Inigo_Handler_Simple("ol", Inigo_Parser::TAG_OUTLINE, "<ol>", "\n</ol>\n\n"))
-              ->addHandler(new Inigo_Handler_Simple("li", Inigo_Parser::TAG_OUTLINE, "\n<li>", "</li>"))
-              ->addHandler(new Inigo_Handler_Simple("table", Inigo_Parser::TAG_OUTLINE, "<table cellspacing=\"0\">", "\n</table>\n\n"))
-              ->addHandler(new Inigo_Handler_Simple("tr", Inigo_Parser::TAG_OUTLINE, "\n<tr>", "\n</tr>"))
-              ->addHandler(new Inigo_Handler_Simple("td", Inigo_Parser::TAG_OUTLINE, "\n<td>", "</td>"))
-              ->addHandler(new Inigo_Handler_Simple("th", Inigo_Parser::TAG_OUTLINE, "\n<th>", "</th>"))
+              ->addHandler(new SimpleHandler("h1", Parser::TAG_OUTLINE, "<h1>", "</h1>\n\n"))
+              ->addHandler(new SimpleHandler("h2", Parser::TAG_OUTLINE, "<h2>", "</h2>\n\n"))
+              ->addHandler(new SimpleHandler("h3", Parser::TAG_OUTLINE, "<h3>", "</h3>\n\n"))
+              ->addHandler(new SimpleHandler("h4", Parser::TAG_OUTLINE, "<h4>", "</h4>\n\n"))
+              ->addHandler(new SimpleHandler("h5", Parser::TAG_OUTLINE, "<h5>", "</h5>\n\n"))
+              ->addHandler(new SimpleHandler("h6", Parser::TAG_OUTLINE, "<h6>", "</h6>\n\n"))
+              ->addHandler(new SimpleHandler("dl", Parser::TAG_OUTLINE, "<dl>", "\n\n</dl>\n\n"))
+              ->addHandler(new SimpleHandler("dt", Parser::TAG_OUTLINE, "\n\n<dt>", "</dt>"))
+              ->addHandler(new SimpleHandler("dd", Parser::TAG_OUTLINE, "\n<dd>", "</dd>"))
+              ->addHandler(new SimpleHandler("ul", Parser::TAG_OUTLINE, "<ul>", "\n</ul>\n\n"))
+              ->addHandler(new SimpleHandler("ol", Parser::TAG_OUTLINE, "<ol>", "\n</ol>\n\n"))
+              ->addHandler(new SimpleHandler("li", Parser::TAG_OUTLINE, "\n<li>", "</li>"))
+              ->addHandler(new SimpleHandler("table", Parser::TAG_OUTLINE, "<table cellspacing=\"0\">", "\n</table>\n\n"))
+              ->addHandler(new SimpleHandler("tr", Parser::TAG_OUTLINE, "\n<tr>", "\n</tr>"))
+              ->addHandler(new SimpleHandler("td", Parser::TAG_OUTLINE, "\n<td>", "</td>"))
+              ->addHandler(new SimpleHandler("th", Parser::TAG_OUTLINE, "\n<th>", "</th>"))
 
-              ->addHandler(new Inigo_Handler_Url())
-              ->addHandler(new Inigo_Handler_Img())
-              ->addHandler(new Inigo_Handler_Amazon())
-              ->addHandler(new Inigo_Handler_Abbr())
-              ->addHandler(new Inigo_Handler_HTML())
-              ->addHandler(new Inigo_Handler_Code())
-              ->addHandler(new Inigo_Handler_Footnotes())
-              ->addHandler(new Inigo_Handler_YouTube());
+              ->addHandler(new UrlHandler())
+              ->addHandler(new ImgHandler())
+              ->addHandler(new AmazonHandler())
+              ->addHandler(new AbbrHandler())
+              ->addHandler(new HTMLHandler())
+              ->addHandler(new CodeHandler())
+              ->addHandler(new FootnotesHandler())
+              ->addHandler(new YouTubeHandler());
     }
 
     /**
      *
-     * @param Blog_Model_Entry $entry
+     * @param string $input
      * @return string
      */
     public function render($input)
