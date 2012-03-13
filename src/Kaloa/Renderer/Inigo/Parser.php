@@ -13,7 +13,7 @@ namespace Kaloa\Renderer\Inigo;
 use Kaloa\Renderer\Inigo\Handler\ProtoHandler;
 use Kaloa\Renderer\Inigo\Tag;
 
-use Kaloa\Util\Stack;
+use SplStack;
 
 /**
  *
@@ -197,7 +197,7 @@ class Parser
      */
     private function fitsStack(Tag $tag)
     {
-        return ($tag->getName() === $this->m_stack->peek()->getName());
+        return ($tag->getName() === $this->m_stack->top()->getName());
     }
 
     /**
@@ -211,7 +211,7 @@ class Parser
         $last_pos = 0;
         $f_clear_content = false;
 
-        $this->m_stack = new Stack();
+        $this->m_stack = new SplStack();
 
         $tag_content = '';
         $pos = 0;
@@ -231,8 +231,8 @@ class Parser
              * closing tag to the active TAG_PRE tag
              */
             if ($executeTag
-                && $this->m_stack->size() > 0
-                && $this->m_stack->peek()->isOfType(self::TAG_PRE)
+                && $this->m_stack->count() > 0
+                && $this->m_stack->top()->isOfType(self::TAG_PRE)
             ) {
                 $executeTag = ($tag->isClosingTag() && $this->fitsStack($tag));
             }
@@ -337,8 +337,8 @@ class Parser
     {
         static $last_tag = null;
 
-        if ($this->m_stack->size() > 0
-            && $this->m_stack->peek()->isOfType(self::TAG_PRE)
+        if ($this->m_stack->count() > 0
+            && $this->m_stack->top()->isOfType(self::TAG_PRE)
         ) {
             /* Do not format text inside of TAG_PRE tags */
 
@@ -377,8 +377,8 @@ class Parser
 
         $s = str_replace('--', '&ndash;', $s);
 
-        if ($this->m_stack->size() > 0) {
-        $last_tag = $this->m_stack->peek();
+        if ($this->m_stack->count() > 0) {
+        $last_tag = $this->m_stack->top();
         } else {
         $last_tag = null;
         }
@@ -424,11 +424,11 @@ class Parser
             || (mb_strpos($cdata, "\n"))
 
             /* TODO Add FORCE_PARAGRAPHS parameter to tags (li?, blockquote, ...) */
-            || ($this->m_stack->size() > 0
-                    && $this->m_stack->peek()->isOfType(self::TAG_FORCE_PARAGRAPHS))
+            || ($this->m_stack->count() > 0
+                    && $this->m_stack->top()->isOfType(self::TAG_FORCE_PARAGRAPHS))
         ) {
-            if ($this->m_stack->size() > 0
-                && $this->m_stack->peek()->isOfType(self::TAG_PRE)
+            if ($this->m_stack->count() > 0
+                && $this->m_stack->top()->isOfType(self::TAG_PRE)
             ) {
                 /*
                  * We are inside of a TAG_PRE tag and do not want the CDATA to
