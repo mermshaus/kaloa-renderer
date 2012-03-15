@@ -6,6 +6,9 @@ This is an early release.
 
 Marc Ermshaus <marc@ermshaus.org>
 
+This package contains and/or expands on work of the following people:
+  - Michel Fortin <http://michelf.com/>
+  - John Gruber <http://daringfireball.net/>
 
 Unit tests (run from project root directory):
 
@@ -13,4 +16,4 @@ Unit tests (run from project root directory):
 
 Other tools:
 
-    $ phpmd ./library text codesize,design,naming
+    $ phpmd ./src text codesize,design,naming

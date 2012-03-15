@@ -48,6 +48,9 @@ class Factory
             case 'xmllegacy':
                 $renderer = new XmlLegacyRenderer($config);
                 break;
+            case 'markdown':
+                $renderer = new MarkdownRenderer($config);
+                break;
             default:
                 throw new Exception('Unknown renderer "' . $type . '"');
                 break;
