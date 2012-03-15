@@ -4,6 +4,7 @@ namespace Kaloa\Renderer\Markdown;
 
 use ArrayObject;
 
+use Kaloa\Renderer\Markdown\Encoder;
 use Kaloa\Renderer\Markdown\Hasher;
 use Kaloa\Renderer\Markdown\RegexManager;
 
@@ -11,6 +12,12 @@ use Kaloa\Renderer\Markdown\Filter\SetupFilter;
 use Kaloa\Renderer\Markdown\Filter\HashHtmlBlocksFilter;
 use Kaloa\Renderer\Markdown\Filter\ParseSpanFilter;
 use Kaloa\Renderer\Markdown\Filter\StripLinkDefinitionsFilter;
+use Kaloa\Renderer\Markdown\Filter\DoAnchorsFilter;
+use Kaloa\Renderer\Markdown\Filter\DoImagesFilter;
+use Kaloa\Renderer\Markdown\Filter\DoAutoLinksFilter;
+use Kaloa\Renderer\Markdown\Filter\DoEncodeAmpsAndAnglesFilter;
+use Kaloa\Renderer\Markdown\Filter\DoItalicsAndBoldFilter;
+use Kaloa\Renderer\Markdown\Filter\DoHardBreaksFilter;
 
 /**
  * Markdown Parser
@@ -111,10 +118,16 @@ class Parser
     protected $rem;
 
     /**
+     *
+     * @var Encoder
+     */
+    protected $encoder;
+
+    /**
      * Status flag to avoid invalid nesting.
      * @var bool
      */
-    protected $in_anchor = false;
+    public $in_anchor = false;
 
     /**
      * These are all the transformations that occur *within* block-level
@@ -128,17 +141,17 @@ class Parser
 
         # Process anchor and image tags. Images must come first,
         # because ![foo][f] looks like an anchor.
-        "doImages"            =>  10,
-        "doAnchors"           =>  20,
+        #"doImages"            =>  10,
+        #"doAnchors"           =>  20,
 
         # Make links out of things like `<http://example.com/>`
         # Must come after doAnchors, because you can use < and >
         # delimiters in inline links like [this](<url>).
-        "doAutoLinks"         =>  30,
-        "encodeAmpsAndAngles" =>  40,
+        #"doAutoLinks"         =>  30,
+        #"encodeAmpsAndAngles" =>  40,
 
-        "doItalicsAndBold"    =>  50,
-        "doHardBreaks"        =>  60,
+        #"doItalicsAndBold"    =>  50,
+        #"doHardBreaks"        =>  60,
         );
 
     /**
@@ -158,10 +171,13 @@ class Parser
     /**
      * Constructor function. Initialize appropriate member variables.
      */
-    public function __construct(Hasher $hasher, RegexManager $rem)
+    public function __construct(Hasher $hasher, RegexManager $rem, Encoder $encoder)
     {
-        $this->hasher = $hasher;
-        $this->rem    = $rem;
+        $this->hasher  = $hasher;
+        $this->rem     = $rem;
+
+        $encoder->setNoEntities($this->no_entities);
+        $this->encoder = $encoder;
 
         # Sort document, block, and span gamut in ascendent priority order.
         asort($this->block_gamut);
@@ -294,300 +310,32 @@ class Parser
      * @param type $text
      * @return type
      */
-    protected function runSpanGamut($text)
+    public function runSpanGamut($text)
     {
         $sf = new ParseSpanFilter($this->rem, $this->hasher, $this->no_markup);
-
         $text = $sf->run($text);
 
-        foreach (array_keys($this->span_gamut) as $method) {
-            $text = $this->$method($text);
-        }
+        $f = new DoImagesFilter($this->encoder, $this->rem, $this->hasher,
+                $this->urls, $this->titles, $this->empty_element_suffix);
+        $text = $f->run($text);
+
+        $f = new DoAnchorsFilter($this->encoder, $this->rem, $this->hasher,
+                $this->urls, $this->titles, $this);
+        $text = $f->run($text);
+
+        $f = new DoAutoLinksFilter($this->encoder, $this->hasher);
+        $text = $f->run($text);
+
+        $f = new DoEncodeAmpsAndAnglesFilter($this->encoder);
+        $text = $f->run($text);
+
+        $f = new DoItalicsAndBoldFilter($this->rem, $this->hasher, $this);
+        $text = $f->run($text);
+
+        $f = new DoHardBreaksFilter($this->hasher, $this->empty_element_suffix);
+        $text = $f->run($text);
 
         return $text;
-    }
-
-    /**
-     *
-     * @param type $text
-     * @return type
-     */
-    protected function doHardBreaks($text)
-    {
-        # Do hard breaks:
-        return preg_replace_callback('/ {2,}\n/',
-            array($this, '_doHardBreaks_callback'), $text);
-    }
-
-    /**
-     *
-     * @param type $matches
-     * @return type
-     */
-    protected function _doHardBreaks_callback(/*$matches*/)
-    {
-        return $this->hasher->hashPart("<br$this->empty_element_suffix\n");
-    }
-
-    /**
-     * Turn Markdown link shortcuts into XHTML <a> tags.
-     *
-     * @param type $text
-     * @return type
-     */
-    protected function doAnchors($text)
-    {
-        if ($this->in_anchor) return $text;
-        $this->in_anchor = true;
-
-        #
-        # First, handle reference-style links: [link text] [id]
-        #
-        $text = preg_replace_callback('{
-            (                    # wrap whole match in $1
-              \[
-                ('.$this->rem->getPattern('nested_brackets').')    # link text = $2
-              \]
-
-              [ ]?               # one optional space
-              (?:\n[ ]*)?        # one optional newline followed by spaces
-
-              \[
-                (.*?)            # id = $3
-              \]
-            )
-            }xs',
-            array(&$this, '_doAnchors_reference_callback'), $text);
-
-        #
-        # Next, inline-style links: [link text](url "optional title")
-        #
-        $text = preg_replace_callback('{
-            (                # wrap whole match in $1
-              \[
-                ('.$this->rem->getPattern('nested_brackets').')    # link text = $2
-              \]
-              \(            # literal paren
-                [ \n]*
-                (?:
-                    <(.+?)>    # href = $3
-                |
-                    ('.$this->rem->getPattern('nested_url_parenthesis').')    # href = $4
-                )
-                [ \n]*
-                (            # $5
-                  ([\'"])    # quote char = $6
-                  (.*?)      # Title = $7
-                  \6         # matching quote
-                  [ \n]*     # ignore any spaces/tabs between closing quote and )
-                )?           # title is optional
-              \)
-            )
-            }xs',
-            array(&$this, '_doAnchors_inline_callback'), $text);
-
-        #
-        # Last, handle reference-style shortcuts: [link text]
-        # These must come last in case you've also got [link text][1]
-        # or [link text](/foo)
-        #
-        $text = preg_replace_callback('{
-            (                    # wrap whole match in $1
-              \[
-                ([^\[\]]+)       # link text = $2; can\'t contain [ or ]
-              \]
-            )
-            }xs',
-            array(&$this, '_doAnchors_reference_callback'), $text);
-
-        $this->in_anchor = false;
-        return $text;
-    }
-
-    /**
-     *
-     * @param type $matches
-     * @return type
-     */
-    protected function _doAnchors_reference_callback($matches)
-    {
-        $whole_match =  $matches[1];
-        $link_text   =  $matches[2];
-        $link_id     =& $matches[3];
-
-        if ($link_id == "") {
-            # for shortcut links like [this][] or [this].
-            $link_id = $link_text;
-        }
-
-        # lower-case and turn embedded newlines into spaces
-        $link_id = strtolower($link_id);
-        $link_id = preg_replace('{[ ]?\n}', ' ', $link_id);
-
-        if (isset($this->urls[$link_id])) {
-            $url = $this->urls[$link_id];
-            $url = $this->encodeAttribute($url);
-
-            $result = "<a href=\"$url\"";
-            if ( isset( $this->titles[$link_id] ) ) {
-                $title = $this->titles[$link_id];
-                $title = $this->encodeAttribute($title);
-                $result .=  " title=\"$title\"";
-            }
-
-            $link_text = $this->runSpanGamut($link_text);
-            $result .= ">$link_text</a>";
-            $result = $this->hasher->hashPart($result);
-        }
-        else {
-            $result = $whole_match;
-        }
-        return $result;
-    }
-
-    /**
-     *
-     * @param type $matches
-     * @return type
-     */
-    protected function _doAnchors_inline_callback($matches)
-    {
-        #$whole_match    =  $matches[1];
-        $link_text        =  $this->runSpanGamut($matches[2]);
-        $url            =  $matches[3] == '' ? $matches[4] : $matches[3];
-        $title            =& $matches[7];
-
-        $url = $this->encodeAttribute($url);
-
-        $result = "<a href=\"$url\"";
-        if (isset($title)) {
-            $title = $this->encodeAttribute($title);
-            $result .=  " title=\"$title\"";
-        }
-
-        $link_text = $this->runSpanGamut($link_text);
-        $result .= ">$link_text</a>";
-
-        return $this->hasher->hashPart($result);
-    }
-
-    /**
-     * Turn Markdown image shortcuts into <img> tags.
-     *
-     * @param type $text
-     * @return type
-     */
-    protected function doImages($text)
-    {
-        #
-        # First, handle reference-style labeled images: ![alt text][id]
-        #
-        $text = preg_replace_callback('{
-            (                # wrap whole match in $1
-              !\[
-                ('.$this->rem->getPattern('nested_brackets').')        # alt text = $2
-              \]
-
-              [ ]?                # one optional space
-              (?:\n[ ]*)?        # one optional newline followed by spaces
-
-              \[
-                (.*?)        # id = $3
-              \]
-
-            )
-            }xs',
-            array(&$this, '_doImages_reference_callback'), $text);
-
-        #
-        # Next, handle inline images:  ![alt text](url "optional title")
-        # Don't forget: encode * and _
-        #
-        $text = preg_replace_callback('{
-            (                # wrap whole match in $1
-              !\[
-                ('.$this->rem->getPattern('nested_brackets').')        # alt text = $2
-              \]
-              \s?            # One optional whitespace character
-              \(            # literal paren
-                [ \n]*
-                (?:
-                    <(\S*)>    # src url = $3
-                |
-                    ('.$this->rem->getPattern('nested_url_parenthesis').')    # src url = $4
-                )
-                [ \n]*
-                (            # $5
-                  ([\'"])    # quote char = $6
-                  (.*?)        # title = $7
-                  \6        # matching quote
-                  [ \n]*
-                )?            # title is optional
-              \)
-            )
-            }xs',
-            array(&$this, '_doImages_inline_callback'), $text);
-
-        return $text;
-    }
-
-    /**
-     *
-     * @param type $matches
-     * @return type
-     */
-    protected function _doImages_reference_callback($matches)
-    {
-        $whole_match = $matches[1];
-        $alt_text    = $matches[2];
-        $link_id     = strtolower($matches[3]);
-
-        if ($link_id == "") {
-            $link_id = strtolower($alt_text); # for shortcut links like ![this][].
-        }
-
-        $alt_text = $this->encodeAttribute($alt_text);
-        if (isset($this->urls[$link_id])) {
-            $url = $this->encodeAttribute($this->urls[$link_id]);
-            $result = "<img src=\"$url\" alt=\"$alt_text\"";
-            if (isset($this->titles[$link_id])) {
-                $title = $this->titles[$link_id];
-                $title = $this->encodeAttribute($title);
-                $result .=  " title=\"$title\"";
-            }
-            $result .= $this->empty_element_suffix;
-            $result = $this->hasher->hashPart($result);
-        }
-        else {
-            # If there's no such link ID, leave intact:
-            $result = $whole_match;
-        }
-
-        return $result;
-    }
-
-    /**
-     *
-     * @param type $matches
-     * @return type
-     */
-    protected function _doImages_inline_callback($matches)
-    {
-        #$whole_match    = $matches[1];
-        $alt_text        = $matches[2];
-        $url            = $matches[3] == '' ? $matches[4] : $matches[3];
-        $title            =& $matches[7];
-
-        $alt_text = $this->encodeAttribute($alt_text);
-        $url = $this->encodeAttribute($url);
-        $result = "<img src=\"$url\" alt=\"$alt_text\"";
-        if (isset($title)) {
-            $title = $this->encodeAttribute($title);
-            $result .=  " title=\"$title\""; # $title already quoted
-        }
-        $result .= $this->empty_element_suffix;
-
-        return $this->hasher->hashPart($result);
     }
 
     /**
@@ -880,136 +628,6 @@ class Parser
      * @param type $text
      * @return type
      */
-    protected function doItalicsAndBold($text)
-    {
-        $token_stack = array('');
-        $text_stack = array('');
-        $em = '';
-        $strong = '';
-        $tree_char_em = false;
-
-        $xyztodo = $this->rem->getPattern('em_strong_prepared');
-
-        while (1) {
-            #
-            # Get prepared regular expression for seraching emphasis tokens
-            # in current context.
-            #
-            $token_re = $xyztodo["$em$strong"];
-
-            #
-            # Each loop iteration search for the next emphasis token.
-            # Each token is then passed to handleSpanToken.
-            #
-            $parts = preg_split($token_re, $text, 2, PREG_SPLIT_DELIM_CAPTURE);
-            $text_stack[0] .= $parts[0];
-            $token =& $parts[1];
-            $text =& $parts[2];
-
-            if (empty($token)) {
-                # Reached end of text span: empty stack without emitting.
-                # any more emphasis.
-                while ($token_stack[0]) {
-                    $text_stack[1] .= array_shift($token_stack);
-                    $text_stack[0] .= array_shift($text_stack);
-                }
-                break;
-            }
-
-            $token_len = strlen($token);
-            if ($tree_char_em) {
-                # Reached closing marker while inside a three-char emphasis.
-                if ($token_len == 3) {
-                    # Three-char closing marker, close em and strong.
-                    array_shift($token_stack);
-                    $span = array_shift($text_stack);
-                    $span = $this->runSpanGamut($span);
-                    $span = "<strong><em>$span</em></strong>";
-                    $text_stack[0] .= $this->hasher->hashPart($span);
-                    $em = '';
-                    $strong = '';
-                } else {
-                    # Other closing marker: close one em or strong and
-                    # change current token state to match the other
-                    $token_stack[0] = str_repeat($token{0}, 3-$token_len);
-                    $tag = $token_len == 2 ? "strong" : "em";
-                    $span = $text_stack[0];
-                    $span = $this->runSpanGamut($span);
-                    $span = "<$tag>$span</$tag>";
-                    $text_stack[0] = $this->hasher->hashPart($span);
-                    $$tag = ''; # $$tag stands for $em or $strong
-                }
-                $tree_char_em = false;
-            } else if ($token_len == 3) {
-                if ($em) {
-                    # Reached closing marker for both em and strong.
-                    # Closing strong marker:
-                    for ($i = 0; $i < 2; ++$i) {
-                        $shifted_token = array_shift($token_stack);
-                        $tag = strlen($shifted_token) == 2 ? "strong" : "em";
-                        $span = array_shift($text_stack);
-                        $span = $this->runSpanGamut($span);
-                        $span = "<$tag>$span</$tag>";
-                        $text_stack[0] .= $this->hasher->hashPart($span);
-                        $$tag = ''; # $$tag stands for $em or $strong
-                    }
-                } else {
-                    # Reached opening three-char emphasis marker. Push on token
-                    # stack; will be handled by the special condition above.
-                    $em = $token{0};
-                    $strong = "$em$em";
-                    array_unshift($token_stack, $token);
-                    array_unshift($text_stack, '');
-                    $tree_char_em = true;
-                }
-            } else if ($token_len == 2) {
-                if ($strong) {
-                    # Unwind any dangling emphasis marker:
-                    if (strlen($token_stack[0]) == 1) {
-                        $text_stack[1] .= array_shift($token_stack);
-                        $text_stack[0] .= array_shift($text_stack);
-                    }
-                    # Closing strong marker:
-                    array_shift($token_stack);
-                    $span = array_shift($text_stack);
-                    $span = $this->runSpanGamut($span);
-                    $span = "<strong>$span</strong>";
-                    $text_stack[0] .= $this->hasher->hashPart($span);
-                    $strong = '';
-                } else {
-                    array_unshift($token_stack, $token);
-                    array_unshift($text_stack, '');
-                    $strong = $token;
-                }
-            } else {
-                # Here $token_len == 1
-                if ($em) {
-                    if (strlen($token_stack[0]) == 1) {
-                        # Closing emphasis marker:
-                        array_shift($token_stack);
-                        $span = array_shift($text_stack);
-                        $span = $this->runSpanGamut($span);
-                        $span = "<em>$span</em>";
-                        $text_stack[0] .= $this->hasher->hashPart($span);
-                        $em = '';
-                    } else {
-                        $text_stack[0] .= $token;
-                    }
-                } else {
-                    array_unshift($token_stack, $token);
-                    array_unshift($text_stack, '');
-                    $em = $token;
-                }
-            }
-        }
-        return $text_stack[0];
-    }
-
-    /**
-     *
-     * @param type $text
-     * @return type
-     */
     protected function doBlockQuotes($text)
     {
         $text = preg_replace_callback('/
@@ -1129,144 +747,6 @@ class Parser
         }
 
         return implode("\n\n", $grafs);
-    }
-
-
-    /**
-     * Encode text for a double-quoted HTML attribute. This function
-     * is *not* suitable for attributes enclosed in single quotes.
-     *
-     * @param type $text
-     * @return type
-     */
-    protected function encodeAttribute($text)
-    {
-        $text = $this->encodeAmpsAndAngles($text);
-        $text = str_replace('"', '&quot;', $text);
-        return $text;
-    }
-
-    /**
-     * Smart processing for ampersands and angle brackets that need to
-     * be encoded. Valid character entities are left alone unless the
-     * no-entities mode is set.
-     */
-    protected function encodeAmpsAndAngles($text)
-    {
-        if ($this->no_entities) {
-            $text = str_replace('&', '&amp;', $text);
-        } else {
-            # Ampersand-encoding based entirely on Nat Irons's Amputator
-            # MT plugin: <http://bumppo.net/projects/amputator/>
-            $text = preg_replace('/&(?!#?[xX]?(?:[0-9a-fA-F]+|\w+);)/',
-                                '&amp;', $text);;
-        }
-        # Encode remaining <'s
-        $text = str_replace('<', '&lt;', $text);
-
-        return $text;
-    }
-
-    /**
-     *
-     * @param type $text
-     * @return type
-     */
-    protected function doAutoLinks($text)
-    {
-        $text = preg_replace_callback('{<((https?|ftp|dict):[^\'">\s]+)>}i',
-            array(&$this, '_doAutoLinks_url_callback'), $text);
-
-        # Email addresses: <address@domain.foo>
-        $text = preg_replace_callback('{
-            <
-            (?:mailto:)?
-            (
-                (?:
-                    [-!#$%&\'*+/=?^_`.{|}~\w\x80-\xFF]+
-                |
-                    ".*?"
-                )
-                \@
-                (?:
-                    [-a-z0-9\x80-\xFF]+(\.[-a-z0-9\x80-\xFF]+)*\.[a-z]+
-                |
-                    \[[\d.a-fA-F:]+\]    # IPv4 & IPv6
-                )
-            )
-            >
-            }xi',
-            array(&$this, '_doAutoLinks_email_callback'), $text);
-
-        return $text;
-    }
-
-    /**
-     *
-     * @param type $matches
-     * @return type
-     */
-    protected function _doAutoLinks_url_callback($matches)
-    {
-        $url = $this->encodeAttribute($matches[1]);
-        $link = "<a href=\"$url\">$url</a>";
-        return $this->hasher->hashPart($link);
-    }
-
-    /**
-     *
-     * @param type $matches
-     * @return type
-     */
-    protected function _doAutoLinks_email_callback($matches)
-    {
-        $address = $matches[1];
-        $link = $this->encodeEmailAddress($address);
-        return $this->hasher->hashPart($link);
-    }
-
-    /**
-     * Input: an email address, e.g. "foo@example.com"
-     *
-     * Output: the email address as a mailto link, with each character of the
-     * address encoded as either a decimal or hex entity, in the hopes of
-     * foiling most address harvesting spam bots. E.g.:
-     *
-     *    <p><a href="&#109;&#x61;&#105;&#x6c;&#116;&#x6f;&#58;&#x66;o&#111;
-     *        &#x40;&#101;&#x78;&#97;&#x6d;&#112;&#x6c;&#101;&#46;&#x63;&#111;
-     *        &#x6d;">&#x66;o&#111;&#x40;&#101;&#x78;&#97;&#x6d;&#112;&#x6c;
-     *        &#101;&#46;&#x63;&#111;&#x6d;</a></p>
-     *
-     * Based by a filter by Matthew Wickline, posted to BBEdit-Talk. With some
-     * optimizations by Milian Wolff.
-     *
-     * @param type $addr
-     * @return type
-     */
-    protected function encodeEmailAddress($addr)
-    {
-        $addr = "mailto:" . $addr;
-        $chars = preg_split('/(?<!^)(?!$)/', $addr);
-        $seed = (int)abs(crc32($addr) / strlen($addr)); # Deterministic seed.
-
-        foreach ($chars as $key => $char) {
-            $ord = ord($char);
-            # Ignore non-ascii chars.
-            if ($ord < 128) {
-                $r = ($seed * (1 + $key)) % 100; # Pseudo-random function.
-                # roughly 10% raw, 45% hex, 45% dec
-                # '@' *must* be encoded. I insist.
-                if ($r > 90 && $char != '@') /* do nothing */;
-                else if ($r < 45) $chars[$key] = '&#x'.dechex($ord).';';
-                else              $chars[$key] = '&#'.$ord.';';
-            }
-        }
-
-        $addr = implode('', $chars);
-        $text = implode('', array_slice($chars, 7)); # text without `mailto:`
-        $addr = "<a href=\"$addr\">$text</a>";
-
-        return $addr;
     }
 
     /**
