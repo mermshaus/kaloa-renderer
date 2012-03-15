@@ -7,7 +7,9 @@ use Kaloa\Renderer\Markdown\Encoder;
 use Kaloa\Renderer\Markdown\Hasher;
 
 /**
- *
+ * Make links out of things like `<http://example.com/>`. Must come after
+ * DoAnchors, because you can use < and > delimiters in inline links like
+ * [this](<url>).
  */
 class DoAutoLinksFilter extends AbstractFilter
 {

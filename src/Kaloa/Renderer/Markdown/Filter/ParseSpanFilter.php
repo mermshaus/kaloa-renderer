@@ -6,7 +6,7 @@ use Kaloa\Renderer\Markdown\Hasher;
 use Kaloa\Renderer\Markdown\RegexManager;
 
 /**
- *
+ * Process character escapes, code spans, and inline HTML in one shot.
  *
  * This is a PHP 5.3 port of the PHP Markdown class written by Michel Fortin.
  * PHP Markdown is based on the work of John Gruber.
@@ -22,11 +22,13 @@ class ParseSpanFilter extends AbstractFilter
      * @var RegexManager
      */
     protected $rem;
+
     /**
      *
      * @var Hasher
      */
     protected $hasher;
+
     /**
      *
      * @var bool

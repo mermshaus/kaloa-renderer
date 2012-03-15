@@ -8,16 +8,22 @@ use Kaloa\Renderer\Markdown\Encoder;
 use Kaloa\Renderer\Markdown\Hasher;
 use Kaloa\Renderer\Markdown\RegexManager;
 
-use Kaloa\Renderer\Markdown\Filter\SetupFilter;
-use Kaloa\Renderer\Markdown\Filter\HashHtmlBlocksFilter;
-use Kaloa\Renderer\Markdown\Filter\ParseSpanFilter;
-use Kaloa\Renderer\Markdown\Filter\StripLinkDefinitionsFilter;
 use Kaloa\Renderer\Markdown\Filter\DoAnchorsFilter;
-use Kaloa\Renderer\Markdown\Filter\DoImagesFilter;
 use Kaloa\Renderer\Markdown\Filter\DoAutoLinksFilter;
 use Kaloa\Renderer\Markdown\Filter\DoEncodeAmpsAndAnglesFilter;
-use Kaloa\Renderer\Markdown\Filter\DoItalicsAndBoldFilter;
 use Kaloa\Renderer\Markdown\Filter\DoHardBreaksFilter;
+use Kaloa\Renderer\Markdown\Filter\DoImagesFilter;
+use Kaloa\Renderer\Markdown\Filter\DoItalicsAndBoldFilter;
+use Kaloa\Renderer\Markdown\Filter\HashHtmlBlocksFilter;
+use Kaloa\Renderer\Markdown\Filter\ParseSpanFilter;
+use Kaloa\Renderer\Markdown\Filter\SetupFilter;
+use Kaloa\Renderer\Markdown\Filter\StripLinkDefinitionsFilter;
+
+use Kaloa\Renderer\Markdown\Filter\DoHeadersFilter;
+use Kaloa\Renderer\Markdown\Filter\DoHorizontalRulesFilter;
+use Kaloa\Renderer\Markdown\Filter\DoListsFilter;
+use Kaloa\Renderer\Markdown\Filter\DoCodeBlocksFilter;
+use Kaloa\Renderer\Markdown\Filter\DoBlockQuotesFilter;
 
 /**
  * Markdown Parser
@@ -68,7 +74,7 @@ use Kaloa\Renderer\Markdown\Filter\DoHardBreaksFilter;
  */
 class Parser
 {
-    const VERSION       = '1.0.1o';
+    const VERSION = '1.0.1o';
 
     /**
      * Change to ">" for HTML output.
@@ -94,8 +100,7 @@ class Parser
     public $predef_urls = array();
     public $predef_titles = array();
 
-    protected $list_level = 0;
-
+    public $list_level = 0;
 
     /**
      * Internal hashes used during transformation.
@@ -103,7 +108,6 @@ class Parser
      */
     protected $urls = array();
     protected $titles = array();
-
 
     /**
      * Hasher
@@ -130,46 +134,11 @@ class Parser
     public $in_anchor = false;
 
     /**
-     * These are all the transformations that occur *within* block-level
-     * tags like paragraphs, headers, and list items.
-     * @var type
-     */
-    protected $span_gamut = array(
-        # Process character escapes, code spans, and inline HTML
-        # in one shot.
-        #"parseSpan"           => -30,
-
-        # Process anchor and image tags. Images must come first,
-        # because ![foo][f] looks like an anchor.
-        #"doImages"            =>  10,
-        #"doAnchors"           =>  20,
-
-        # Make links out of things like `<http://example.com/>`
-        # Must come after doAnchors, because you can use < and >
-        # delimiters in inline links like [this](<url>).
-        #"doAutoLinks"         =>  30,
-        #"encodeAmpsAndAngles" =>  40,
-
-        #"doItalicsAndBold"    =>  50,
-        #"doHardBreaks"        =>  60,
-        );
-
-    /**
-     * These are all the transformations that form block-level tags like
-     * paragraphs, headers, and list items.
-     *
-     * @var type
-     */
-    protected $block_gamut = array(
-        "doHeaders"         => 10,
-        "doHorizontalRules" => 20,
-        "doLists"           => 40,
-        "doCodeBlocks"      => 50,
-        "doBlockQuotes"     => 60,
-        );
-
-    /**
      * Constructor function. Initialize appropriate member variables.
+     *
+     * @param Hasher       $hasher
+     * @param RegexManager $rem
+     * @param Encoder      $encoder
      */
     public function __construct(Hasher $hasher, RegexManager $rem, Encoder $encoder)
     {
@@ -178,10 +147,6 @@ class Parser
 
         $encoder->setNoEntities($this->no_entities);
         $this->encoder = $encoder;
-
-        # Sort document, block, and span gamut in ascendent priority order.
-        asort($this->block_gamut);
-        asort($this->span_gamut);
     }
 
     /**
@@ -212,8 +177,8 @@ class Parser
      * Main function. Performs some preprocessing on the input text and pass it
      * through the document gamut.
      *
-     * @param type $text
-     * @return type
+     * @param  string $text
+     * @return string
      */
     public function transform($text)
     {
@@ -245,8 +210,11 @@ class Parser
 
     /**
      * Run block gamut tranformations.
+     *
+     * These are all the transformations that form block-level tags like
+     * paragraphs, headers, and list items.
      */
-    protected function runBlockGamut($text)
+    public function runBlockGamut($text)
     {
         # We need to escape raw HTML in Markdown source before doing anything
         # else. This need to be done for each block, and not only at the
@@ -266,14 +234,25 @@ class Parser
      * useful when HTML blocks are known to be already hashed, like in the first
      * whole-document pass.
      *
-     * @param type $text
-     * @return type
+     * @param  string $text
+     * @return string
      */
     protected function runBasicBlockGamut($text)
     {
-        foreach (array_keys($this->block_gamut) as $method) {
-            $text = $this->$method($text);
-        }
+        $f = new DoHeadersFilter($this->hasher, $this);
+        $text = $f->run($text);
+
+        $f = new DoHorizontalRulesFilter($this->hasher, $this->empty_element_suffix);
+        $text = $f->run($text);
+
+        $f = new DoListsFilter($this->hasher, $this->tab_width, $this);
+        $text = $f->run($text);
+
+        $f = new DoCodeBlocksFilter($this->hasher, $this->tab_width, $this);
+        $text = $f->run($text);
+
+        $f = new DoBlockQuotesFilter($this->hasher, $this);
+        $text = $f->run($text);
 
         # Finally form paragraph and restore hashed blocks.
         $text = $this->formParagraphs($text);
@@ -282,33 +261,13 @@ class Parser
     }
 
     /**
-     *
-     * @param type $text
-     * @return type
-     */
-    protected function doHorizontalRules($text)
-    {
-        # Do Horizontal Rules:
-        return preg_replace(
-            '{
-                ^[ ]{0,3}      # Leading space
-                ([-*_])        # $1: First marker
-                (?>            # Repeated marker group
-                    [ ]{0,2}   # Zero, one, or two spaces.
-                    \1         # Marker character
-                ){2,}          # Group repeated at least twice
-                [ ]*           # Tailing spaces
-                $              # End of line.
-            }mx',
-            "\n".$this->hasher->hashBlock("<hr$this->empty_element_suffix")."\n",
-            $text);
-    }
-
-    /**
      * Run span gamut tranformations.
      *
-     * @param type $text
-     * @return type
+     * These are all the transformations that occur *within* block-level tags
+     * like paragraphs, headers, and list items.
+     *
+     * @param  string $text
+     * @return string
      */
     public function runSpanGamut($text)
     {
@@ -336,346 +295,6 @@ class Parser
         $text = $f->run($text);
 
         return $text;
-    }
-
-    /**
-     *
-     * @param type $text
-     * @return type
-     */
-    protected function doHeaders($text)
-    {
-        # Setext-style headers:
-        #      Header 1
-        #      ========
-        #
-        #      Header 2
-        #      --------
-        #
-        $text = preg_replace_callback('{ ^(.+?)[ ]*\n(=+|-+)[ ]*\n+ }mx',
-            array(&$this, '_doHeaders_callback_setext'), $text);
-
-        # atx-style headers:
-        #    # Header 1
-        #    ## Header 2
-        #    ## Header 2 with closing hashes ##
-        #    ...
-        #    ###### Header 6
-        #
-        $text = preg_replace_callback('{
-                ^(\#{1,6})    # $1 = string of #\'s
-                [ ]*
-                (.+?)        # $2 = Header text
-                [ ]*
-                \#*            # optional closing #\'s (not counted)
-                \n+
-            }xm',
-            array(&$this, '_doHeaders_callback_atx'), $text);
-
-        return $text;
-    }
-
-    /**
-     *
-     * @param type $matches
-     * @return type
-     */
-    protected function _doHeaders_callback_setext($matches)
-    {
-        # Terrible hack to check we haven't found an empty list item.
-        if ($matches[2] == '-' && preg_match('{^-(?: |$)}', $matches[1]))
-            return $matches[0];
-
-        $level = $matches[2]{0} == '=' ? 1 : 2;
-        $block = "<h$level>".$this->runSpanGamut($matches[1])."</h$level>";
-        return "\n" . $this->hasher->hashBlock($block) . "\n\n";
-    }
-
-    /**
-     *
-     * @param type $matches
-     * @return type
-     */
-    protected function _doHeaders_callback_atx($matches)
-    {
-        $level = strlen($matches[1]);
-        $block = "<h$level>".$this->runSpanGamut($matches[2])."</h$level>";
-        return "\n" . $this->hasher->hashBlock($block) . "\n\n";
-    }
-
-    /**
-     * Form HTML ordered (numbered) and unordered (bulleted) lists.
-     *
-     * @param type $text
-     * @return type
-     */
-    protected function doLists($text)
-    {
-        $less_than_tab = $this->tab_width - 1;
-
-        # Re-usable patterns to match list item bullets and number markers:
-        $marker_ul_re  = '[*+-]';
-        $marker_ol_re  = '\d+[\.]';
-        #$marker_any_re = "(?:$marker_ul_re|$marker_ol_re)";
-
-        $markers_relist = array(
-            $marker_ul_re => $marker_ol_re,
-            $marker_ol_re => $marker_ul_re,
-            );
-
-        foreach ($markers_relist as $marker_re => $other_marker_re) {
-            # Re-usable pattern to match any entirel ul or ol list:
-            $whole_list_re = '
-                (                                # $1 = whole list
-                  (                                # $2
-                    ([ ]{0,'.$less_than_tab.'})    # $3 = number of spaces
-                    ('.$marker_re.')            # $4 = first list item marker
-                    [ ]+
-                  )
-                  (?s:.+?)
-                  (                                # $5
-                      \z
-                    |
-                      \n{2,}
-                      (?=\S)
-                      (?!                        # Negative lookahead for another list item marker
-                        [ ]*
-                        '.$marker_re.'[ ]+
-                      )
-                    |
-                      (?=                        # Lookahead for another kind of list
-                        \n
-                        \3                        # Must have the same indentation
-                        '.$other_marker_re.'[ ]+
-                      )
-                  )
-                )
-            '; // mx
-
-            # We use a different prefix before nested lists than top-level lists.
-            # See extended comment in _ProcessListItems().
-
-            if ($this->list_level) {
-                $text = preg_replace_callback('{
-                        ^
-                        '.$whole_list_re.'
-                    }mx',
-                    array(&$this, '_doLists_callback'), $text);
-            }
-            else {
-                $text = preg_replace_callback('{
-                        (?:(?<=\n)\n|\A\n?) # Must eat the newline
-                        '.$whole_list_re.'
-                    }mx',
-                    array(&$this, '_doLists_callback'), $text);
-            }
-        }
-
-        return $text;
-    }
-
-    /**
-     *
-     * @param type $matches
-     * @return type
-     */
-    protected function _doLists_callback($matches)
-    {
-        # Re-usable patterns to match list item bullets and number markers:
-        $marker_ul_re  = '[*+-]';
-        $marker_ol_re  = '\d+[\.]';
-        $marker_any_re = "(?:$marker_ul_re|$marker_ol_re)";
-
-        $list = $matches[1];
-        $list_type = preg_match("/$marker_ul_re/", $matches[4]) ? "ul" : "ol";
-
-        $marker_any_re = ( $list_type == "ul" ? $marker_ul_re : $marker_ol_re );
-
-        $list .= "\n";
-        $result = $this->processListItems($list, $marker_any_re);
-
-        $result = $this->hasher->hashBlock("<$list_type>\n" . $result . "</$list_type>");
-        return "\n". $result ."\n\n";
-    }
-
-    /**
-     * Process the contents of a single ordered or unordered list, splitting it
-     * into individual list items.
-     *
-     *
-     * @param type $list_str
-     * @param type $marker_any_re
-     * @return type
-     */
-    protected function processListItems($list_str, $marker_any_re)
-    {
-        # The $this->list_level global keeps track of when we're inside a list.
-        # Each time we enter a list, we increment it; when we leave a list,
-        # we decrement. If it's zero, we're not in a list anymore.
-        #
-        # We do this because when we're not inside a list, we want to treat
-        # something like this:
-        #
-        #        I recommend upgrading to version
-        #        8. Oops, now this line is treated
-        #        as a sub-list.
-        #
-        # As a single paragraph, despite the fact that the second line starts
-        # with a digit-period-space sequence.
-        #
-        # Whereas when we're inside a list (or sub-list), that line will be
-        # treated as the start of a sub-list. What a kludge, huh? This is
-        # an aspect of Markdown's syntax that's hard to parse perfectly
-        # without resorting to mind-reading. Perhaps the solution is to
-        # change the syntax rules such that sub-lists must start with a
-        # starting cardinal number; e.g. "1." or "a.".
-
-        $this->list_level++;
-
-        # trim trailing blank lines:
-        $list_str = preg_replace("/\n{2,}\\z/", "\n", $list_str);
-
-        $list_str = preg_replace_callback('{
-            (\n)?                            # leading line = $1
-            (^[ ]*)                            # leading whitespace = $2
-            ('.$marker_any_re.'                # list marker and space = $3
-                (?:[ ]+|(?=\n))    # space only required if item is not empty
-            )
-            ((?s:.*?))                        # list item text   = $4
-            (?:(\n+(?=\n))|\n)                # tailing blank line = $5
-            (?= \n* (\z | \2 ('.$marker_any_re.') (?:[ ]+|(?=\n))))
-            }xm',
-            array(&$this, '_processListItems_callback'), $list_str);
-
-        $this->list_level--;
-        return $list_str;
-    }
-
-    /**
-     *
-     * @param type $matches
-     * @return type
-     */
-    protected function _processListItems_callback($matches)
-    {
-        $item = $matches[4];
-        $leading_line =& $matches[1];
-        $leading_space =& $matches[2];
-        $marker_space = $matches[3];
-        $tailing_blank_line =& $matches[5];
-
-        if ($leading_line || $tailing_blank_line ||
-            preg_match('/\n{2,}/', $item))
-        {
-            # Replace marker with the appropriate whitespace indentation
-            $item = $leading_space . str_repeat(' ', strlen($marker_space)) . $item;
-            $item = $this->runBlockGamut($this->outdent($item)."\n");
-        }
-        else {
-            # Recursion for sub-lists:
-            $item = $this->doLists($this->outdent($item));
-            $item = preg_replace('/\n+$/', '', $item);
-            $item = $this->runSpanGamut($item);
-        }
-
-        return "<li>" . $item . "</li>\n";
-    }
-
-    /**
-     * Process Markdown `<pre><code>` blocks.
-     *
-     * @param type $text
-     * @return type
-     */
-    protected function doCodeBlocks($text)
-    {
-        $text = preg_replace_callback('{
-                (?:\n\n|\A\n?)
-                (                # $1 = the code block -- one or more lines, starting with a space/tab
-                  (?>
-                    [ ]{'.$this->tab_width.'}  # Lines must start with a tab or a tab-width of spaces
-                    .*\n+
-                  )+
-                )
-                ((?=^[ ]{0,'.$this->tab_width.'}\S)|\Z)    # Lookahead for non-space at line-start, or end of doc
-            }xm',
-            array(&$this, '_doCodeBlocks_callback'), $text);
-
-        return $text;
-    }
-
-    /**
-     *
-     * @param type $matches
-     * @return type
-     */
-    protected function _doCodeBlocks_callback($matches)
-    {
-        $codeblock = $matches[1];
-
-        $codeblock = $this->outdent($codeblock);
-        $codeblock = htmlspecialchars($codeblock, ENT_NOQUOTES);
-
-        # trim leading newlines and trailing newlines
-        $codeblock = preg_replace('/\A\n+|\n+\z/', '', $codeblock);
-
-        $codeblock = "<pre><code>$codeblock\n</code></pre>";
-        return "\n\n".$this->hasher->hashBlock($codeblock)."\n\n";
-    }
-
-    /**
-     *
-     * @param type $text
-     * @return type
-     */
-    protected function doBlockQuotes($text)
-    {
-        $text = preg_replace_callback('/
-              (                                # Wrap whole match in $1
-                (?>
-                  ^[ ]*>[ ]?            # ">" at the start of a line
-                    .+\n                    # rest of the first line
-                  (.+\n)*                    # subsequent consecutive lines
-                  \n*                        # blanks
-                )+
-              )
-            /xm',
-            array(&$this, '_doBlockQuotes_callback'), $text);
-
-        return $text;
-    }
-
-    /**
-     *
-     * @param type $matches
-     * @return type
-     */
-    protected function _doBlockQuotes_callback($matches)
-    {
-        $bq = $matches[1];
-        # trim one level of quoting - trim whitespace-only lines
-        $bq = preg_replace('/^[ ]*>[ ]?|^[ ]+$/m', '', $bq);
-        $bq = $this->runBlockGamut($bq);        # recurse
-
-        $bq = preg_replace('/^/m', "  ", $bq);
-        # These leading spaces cause problem with <pre> content,
-        # so we need to fix that:
-        $bq = preg_replace_callback('{(\s*<pre>.+?</pre>)}sx',
-            array(&$this, '_doBlockQuotes_callback2'), $bq);
-
-        return "\n". $this->hasher->hashBlock("<blockquote>\n$bq\n</blockquote>")."\n\n";
-    }
-
-    /**
-     *
-     * @param type $matches
-     * @return type
-     */
-    protected function _doBlockQuotes_callback2($matches)
-    {
-        $pre = $matches[1];
-        $pre = preg_replace('/^  /m', '', $pre);
-        return $pre;
     }
 
     /**
@@ -755,7 +374,7 @@ class Parser
      * @param string $text
      * @return string
      */
-    protected function outdent($text)
+    public function outdent($text)
     {
         return preg_replace('/^(\t|[ ]{1,'.$this->tab_width.'})/m', '', $text);
     }

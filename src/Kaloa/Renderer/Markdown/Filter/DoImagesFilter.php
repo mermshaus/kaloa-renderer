@@ -9,7 +9,8 @@ use Kaloa\Renderer\Markdown\RegexManager;
 use ArrayObject;
 
 /**
- *
+ * Process image tags. Images must come first before anchors, because ![foo][f]
+ * looks like an anchor.
  */
 class DoImagesFilter extends AbstractFilter
 {
