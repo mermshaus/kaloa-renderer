@@ -93,13 +93,6 @@ class Parser
     public $predef_urls = array();
     public $predef_titles = array();
 
-    /**
-     * String length function for detab. `_initDetab` will create a function to
-     * handle UTF-8 if the default function does not exist.
-     */
-    protected $utf8_strlen = 'mb_strlen';
-
-
     protected $em_relist = array(
         ''  => '(?:(?<!\*)\*(?!\*)|(?<!_)_(?!_))(?=\S|$)(?![\.,:;]\s)',
         '*' => '(?<=\S|^)(?<!\*)\*(?!\*)',
@@ -169,7 +162,6 @@ class Parser
     protected $block_gamut = array(
         "doHeaders"         => 10,
         "doHorizontalRules" => 20,
-
         "doLists"           => 40,
         "doCodeBlocks"      => 50,
         "doBlockQuotes"     => 60,
@@ -189,7 +181,6 @@ class Parser
      */
     public function __construct()
     {
-        $this->_initDetab();
         $this->prepareItalicsAndBold();
 
         $this->nested_brackets_re =
@@ -218,7 +209,7 @@ class Parser
         $this->titles = $this->predef_titles;
         $this->html_hashes = array();
 
-        $in_anchor = false;
+        $this->in_anchor = false;
     }
 
     /**
@@ -266,7 +257,7 @@ class Parser
         $text = preg_replace('/^[ ]+$/m', '', $text);
 
         # Run document gamut methods.
-        foreach ($this->document_gamut as $method => $priority) {
+        foreach (array_keys($this->document_gamut) as $method) {
             $text = $this->$method($text);
         }
 
@@ -330,33 +321,34 @@ class Parser
 
     /**
      *
-     * @param type $text
+     * @param string $text
      * @return type
      */
     protected function hashHTMLBlocks($text)
     {
-        if ($this->no_markup)  return $text;
+        if ($this->no_markup) return $text;
 
         $less_than_tab = $this->tab_width - 1;
 
-        # Hashify HTML blocks:
-        # We only want to do this for block-level HTML tags, such as headers,
-        # lists, and tables. That's because we still want to wrap <p>s around
-        # "paragraphs" that are wrapped in non-block-level tags, such as anchors,
-        # phrase emphasis, and spans. The list of tags we're looking for is
-        # hard-coded:
-        #
-        # *  List "a" is made of tags which can be both inline or block-level.
-        #    These will be treated block-level when the start tag is alone on
-        #    its line, otherwise they're not matched here and will be taken as
-        #    inline later.
-        # *  List "b" is made of tags which are always block-level;
-        #
+        /**
+         * Hashify HTML blocks:
+         * We only want to do this for block-level HTML tags, such as headers,
+         * lists, and tables. That's because we still want to wrap <p>s around
+         * "paragraphs" that are wrapped in non-block-level tags, such as
+         * anchors, phrase emphasis, and spans. The list of tags we're looking
+         * for is hard-coded:
+         *
+         * -  List "a" is made of tags which can be both inline or block-level.
+         *    These will be treated block-level when the start tag is alone on
+         *    its line, otherwise they're not matched here and will be taken as
+         *    inline later.
+         * -  List "b" is made of tags which are always block-level;
+         */
         $block_tags_a_re = 'ins|del';
         $block_tags_b_re = 'p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|address|'.
                            'script|noscript|form|fieldset|iframe|math';
 
-        # Regular expression for the content of a block tag.
+        // Regular expression for the content of a block tag.
         $nested_tags_level = 4;
         $attr = '
             (?>                # optional tag attributes
@@ -382,8 +374,8 @@ class Parser
                     (?>
                       />
                     |
-                      >', $nested_tags_level).    # end of opening tag
-                      '.*?'.                    # last level nested tag content
+                      >', $nested_tags_level).  // end of opening tag
+                      '.*?'.                    // last level nested tag content
             str_repeat('
                       </\2\s*>    # closing nested tag
                     )
@@ -548,7 +540,7 @@ class Parser
      */
     protected function runBasicBlockGamut($text)
     {
-        foreach ($this->block_gamut as $method => $priority) {
+        foreach (array_keys($this->block_gamut) as $method) {
             $text = $this->$method($text);
         }
 
@@ -568,14 +560,14 @@ class Parser
         # Do Horizontal Rules:
         return preg_replace(
             '{
-                ^[ ]{0,3}    # Leading space
+                ^[ ]{0,3}      # Leading space
                 ([-*_])        # $1: First marker
                 (?>            # Repeated marker group
-                    [ ]{0,2}    # Zero, one, or two spaces.
-                    \1            # Marker character
-                ){2,}        # Group repeated at least twice
-                [ ]*        # Tailing spaces
-                $            # End of line.
+                    [ ]{0,2}   # Zero, one, or two spaces.
+                    \1         # Marker character
+                ){2,}          # Group repeated at least twice
+                [ ]*           # Tailing spaces
+                $              # End of line.
             }mx',
             "\n".$this->hashBlock("<hr$this->empty_element_suffix")."\n",
             $text);
@@ -589,7 +581,7 @@ class Parser
      */
     protected function runSpanGamut($text)
     {
-        foreach ($this->span_gamut as $method => $priority) {
+        foreach (array_keys($this->span_gamut) as $method) {
             $text = $this->$method($text);
         }
 
@@ -605,7 +597,7 @@ class Parser
     {
         # Do hard breaks:
         return preg_replace_callback('/ {2,}\n/',
-            array(&$this, '_doHardBreaks_callback'), $text);
+            array($this, '_doHardBreaks_callback'), $text);
     }
 
     /**
@@ -613,7 +605,7 @@ class Parser
      * @param type $matches
      * @return type
      */
-    protected function _doHardBreaks_callback($matches)
+    protected function _doHardBreaks_callback(/*$matches*/)
     {
         return $this->hashPart("<br$this->empty_element_suffix\n");
     }
@@ -638,11 +630,11 @@ class Parser
                 ('.$this->nested_brackets_re.')    # link text = $2
               \]
 
-              [ ]?                # one optional space
+              [ ]?               # one optional space
               (?:\n[ ]*)?        # one optional newline followed by spaces
 
               \[
-                (.*?)        # id = $3
+                (.*?)            # id = $3
               \]
             )
             }xs',
@@ -666,10 +658,10 @@ class Parser
                 [ \n]*
                 (            # $5
                   ([\'"])    # quote char = $6
-                  (.*?)        # Title = $7
-                  \6        # matching quote
-                  [ \n]*    # ignore any spaces/tabs between closing quote and )
-                )?            # title is optional
+                  (.*?)      # Title = $7
+                  \6         # matching quote
+                  [ \n]*     # ignore any spaces/tabs between closing quote and )
+                )?           # title is optional
               \)
             )
             }xs',
@@ -683,7 +675,7 @@ class Parser
         $text = preg_replace_callback('{
             (                    # wrap whole match in $1
               \[
-                ([^\[\]]+)        # link text = $2; can\'t contain [ or ]
+                ([^\[\]]+)       # link text = $2; can\'t contain [ or ]
               \]
             )
             }xs',
@@ -741,7 +733,7 @@ class Parser
      */
     protected function _doAnchors_inline_callback($matches)
     {
-        $whole_match    =  $matches[1];
+        #$whole_match    =  $matches[1];
         $link_text        =  $this->runSpanGamut($matches[2]);
         $url            =  $matches[3] == '' ? $matches[4] : $matches[3];
         $title            =& $matches[7];
@@ -862,7 +854,7 @@ class Parser
      */
     protected function _doImages_inline_callback($matches)
     {
-        $whole_match    = $matches[1];
+        #$whole_match    = $matches[1];
         $alt_text        = $matches[2];
         $url            = $matches[3] == '' ? $matches[4] : $matches[3];
         $title            =& $matches[7];
@@ -957,7 +949,7 @@ class Parser
         # Re-usable patterns to match list item bullets and number markers:
         $marker_ul_re  = '[*+-]';
         $marker_ol_re  = '\d+[\.]';
-        $marker_any_re = "(?:$marker_ul_re|$marker_ol_re)";
+        #$marker_any_re = "(?:$marker_ul_re|$marker_ol_re)";
 
         $markers_relist = array(
             $marker_ul_re => $marker_ol_re,
@@ -1658,6 +1650,8 @@ class Parser
      */
     protected function handleSpanToken($token, &$str)
     {
+        $matches = array();
+
         switch ($token{0}) {
             case "\\":
                 return $this->hashPart("&#". ord($token{1}). ";");
@@ -1713,7 +1707,6 @@ class Parser
     protected function _detab_callback($matches)
     {
         $line = $matches[0];
-        $strlen = $this->utf8_strlen; # strlen function for UTF-8.
 
         # Split in blocks.
         $blocks = explode("\t", $line);
@@ -1723,27 +1716,10 @@ class Parser
         foreach ($blocks as $block) {
             # Calculate amount of space, insert spaces, insert block.
             $amount = $this->tab_width -
-                $strlen($line, 'UTF-8') % $this->tab_width;
+                mb_strlen($line, 'UTF-8') % $this->tab_width;
             $line .= str_repeat(" ", $amount) . $block;
         }
         return $line;
-    }
-
-    /**
-     * Check for the availability of the function in the `utf8_strlen` property
-     * (initially `mb_strlen`). If the function is not available, create a
-     * function that will loosely count the number of UTF-8 characters with a
-     * regular expression.
-     *
-     * @return type
-     */
-    protected function _initDetab()
-    {
-        if (!function_exists($this->utf8_strlen)) {
-            $this->utf8_strlen = create_function('$text', 'return preg_match_all(
-                "/[\\\\x00-\\\\xBF]|[\\\\xC0-\\\\xFF][\\\\x80-\\\\xBF]*/",
-                $text, $m);');
-        }
     }
 
     /**
