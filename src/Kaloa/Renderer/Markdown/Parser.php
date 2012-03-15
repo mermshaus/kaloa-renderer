@@ -2,6 +2,16 @@
 
 namespace Kaloa\Renderer\Markdown;
 
+use ArrayObject;
+
+use Kaloa\Renderer\Markdown\Hasher;
+use Kaloa\Renderer\Markdown\RegexManager;
+
+use Kaloa\Renderer\Markdown\Filter\SetupFilter;
+use Kaloa\Renderer\Markdown\Filter\HashHtmlBlocksFilter;
+use Kaloa\Renderer\Markdown\Filter\ParseSpanFilter;
+use Kaloa\Renderer\Markdown\Filter\StripLinkDefinitionsFilter;
+
 /**
  * Markdown Parser
  *
@@ -54,22 +64,6 @@ class Parser
     const VERSION       = '1.0.1o';
 
     /**
-     * Regex to match balanced [brackets].
-     * Needed to insert a maximum bracked depth while converting to PHP.
-     */
-    public    $nested_brackets_depth = 6;
-    protected $nested_brackets_re;
-
-    public    $nested_url_parenthesis_depth = 4;
-    protected $nested_url_parenthesis_re;
-
-    /**
-     * Table of hash values for escaped characters:
-     */
-    public    $escape_chars = '\`*_{}[]()>#+-.!';
-    protected $escape_chars_re;
-
-    /**
      * Change to ">" for HTML output.
      * @var string
      */
@@ -79,7 +73,7 @@ class Parser
      * Define the width of a tab for code blocks.
      * @var int
      */
-    public $tab_width            = 4;
+    public $tab_width = 4;
 
     /**
      * Change to `true` to disallow markup or entities.
@@ -93,24 +87,6 @@ class Parser
     public $predef_urls = array();
     public $predef_titles = array();
 
-    protected $em_relist = array(
-        ''  => '(?:(?<!\*)\*(?!\*)|(?<!_)_(?!_))(?=\S|$)(?![\.,:;]\s)',
-        '*' => '(?<=\S|^)(?<!\*)\*(?!\*)',
-        '_' => '(?<=\S|^)(?<!_)_(?!_)',
-        );
-    protected $strong_relist = array(
-        ''   => '(?:(?<!\*)\*\*(?!\*)|(?<!_)__(?!_))(?=\S|$)(?![\.,:;]\s)',
-        '**' => '(?<=\S|^)(?<!\*)\*\*(?!\*)',
-        '__' => '(?<=\S|^)(?<!_)__(?!_)',
-        );
-    protected $em_strong_relist = array(
-        ''    => '(?:(?<!\*)\*\*\*(?!\*)|(?<!_)___(?!_))(?=\S|$)(?![\.,:;]\s)',
-        '***' => '(?<=\S|^)(?<!\*)\*\*\*(?!\*)',
-        '___' => '(?<=\S|^)(?<!_)___(?!_)',
-        );
-    protected $em_strong_prepared_relist;
-
-
     protected $list_level = 0;
 
 
@@ -120,7 +96,19 @@ class Parser
      */
     protected $urls = array();
     protected $titles = array();
-    protected $html_hashes = array();
+
+
+    /**
+     * Hasher
+     * @var Hasher
+     */
+    protected $hasher;
+
+    /**
+     * RegexManager
+     * @var RegexManager
+     */
+    protected $rem;
 
     /**
      * Status flag to avoid invalid nesting.
@@ -136,7 +124,7 @@ class Parser
     protected $span_gamut = array(
         # Process character escapes, code spans, and inline HTML
         # in one shot.
-        "parseSpan"           => -30,
+        #"parseSpan"           => -30,
 
         # Process anchor and image tags. Images must come first,
         # because ![foo][f] looks like an anchor.
@@ -168,33 +156,14 @@ class Parser
         );
 
     /**
-     * Strip link definitions, store in hashes.
-     * @var array
-     */
-    protected $document_gamut = array(
-        "stripLinkDefinitions" => 20,
-        "runBasicBlockGamut"   => 30,
-        );
-
-    /**
      * Constructor function. Initialize appropriate member variables.
      */
-    public function __construct()
+    public function __construct(Hasher $hasher, RegexManager $rem)
     {
-        $this->prepareItalicsAndBold();
-
-        $this->nested_brackets_re =
-            str_repeat('(?>[^\[\]]+|\[', $this->nested_brackets_depth).
-            str_repeat('\])*', $this->nested_brackets_depth);
-
-        $this->nested_url_parenthesis_re =
-            str_repeat('(?>[^()\s]+|\(', $this->nested_url_parenthesis_depth).
-            str_repeat('(?>\)))*', $this->nested_url_parenthesis_depth);
-
-        $this->escape_chars_re = '['.preg_quote($this->escape_chars).']';
+        $this->hasher = $hasher;
+        $this->rem    = $rem;
 
         # Sort document, block, and span gamut in ascendent priority order.
-        asort($this->document_gamut);
         asort($this->block_gamut);
         asort($this->span_gamut);
     }
@@ -205,9 +174,9 @@ class Parser
     protected function setup()
     {
         # Clear global hashes.
-        $this->urls = $this->predef_urls;
-        $this->titles = $this->predef_titles;
-        $this->html_hashes = array();
+        $this->urls = new ArrayObject($this->predef_urls);
+        $this->titles = new ArrayObject($this->predef_titles);
+        $this->hasher->clear();
 
         $this->in_anchor = false;
     }
@@ -220,12 +189,12 @@ class Parser
     {
         $this->urls = array();
         $this->titles = array();
-        $this->html_hashes = array();
+        $this->hasher->clear();
     }
 
     /**
-     * Main function. Performs some preprocessing on the input text
-     * and pass it through the document gamut.
+     * Main function. Performs some preprocessing on the input text and pass it
+     * through the document gamut.
      *
      * @param type $text
      * @return type
@@ -234,21 +203,11 @@ class Parser
     {
         $this->setup();
 
-        # Remove UTF-8 BOM and marker character in input, if present.
-        $text = preg_replace('{^\xEF\xBB\xBF|\x1A}', '', $text);
+        $sf   = new SetupFilter($this->tab_width);
+        $text = $sf->run($text);
 
-        # Standardize line endings:
-        #   DOS to Unix and Mac to Unix
-        $text = preg_replace('{\r\n?}', "\n", $text);
-
-        # Make sure $text ends with a couple of newlines:
-        $text .= "\n\n";
-
-        # Convert all tabs to spaces.
-        $text = $this->detab($text);
-
-        # Turn block-level HTML blocks into hash entries
-        $text = $this->hashHTMLBlocks($text);
+        $hf   = new HashHtmlBlocksFilter($this->hasher, $this->tab_width, $this->no_markup);
+        $text = $hf->run($text);
 
         # Strip any lines consisting only of spaces and tabs.
         # This makes subsequent regexen easier to write, because we can
@@ -256,263 +215,16 @@ class Parser
         # contorted like /[ ]*\n+/ .
         $text = preg_replace('/^[ ]+$/m', '', $text);
 
-        # Run document gamut methods.
-        foreach (array_keys($this->document_gamut) as $method) {
-            $text = $this->$method($text);
-        }
+
+
+        $f = new StripLinkDefinitionsFilter($this->urls, $this->titles, $this->tab_width);
+        $text = $f->run($text);
+
+        $text = $this->runBasicBlockGamut($text);
 
         $this->teardown();
 
         return $text . "\n";
-    }
-
-    /**
-     * Strips link definitions from text, stores the URLs and titles in
-     * hash references.
-     *
-     * @param type $text
-     * @return type
-     */
-    protected function stripLinkDefinitions($text)
-    {
-        $less_than_tab = $this->tab_width - 1;
-
-        # Link defs are in the form: ^[id]: url "optional title"
-        $text = preg_replace_callback('{
-                            ^[ ]{0,'.$less_than_tab.'}\[(.+)\][ ]?:    # id = $1
-                              [ ]*
-                              \n?                # maybe *one* newline
-                              [ ]*
-                            (?:
-                              <(.+?)>            # url = $2
-                            |
-                              (\S+?)            # url = $3
-                            )
-                              [ ]*
-                              \n?                # maybe one newline
-                              [ ]*
-                            (?:
-                                (?<=\s)            # lookbehind for whitespace
-                                ["(]
-                                (.*?)            # title = $4
-                                [")]
-                                [ ]*
-                            )?    # title is optional
-                            (?:\n+|\Z)
-            }xm',
-            array(&$this, '_stripLinkDefinitions_callback'),
-            $text);
-        return $text;
-    }
-
-    /**
-     *
-     * @param type $matches
-     * @return string
-     */
-    protected function _stripLinkDefinitions_callback($matches)
-    {
-        $link_id = strtolower($matches[1]);
-        $url = $matches[2] == '' ? $matches[3] : $matches[2];
-        $this->urls[$link_id] = $url;
-        $this->titles[$link_id] =& $matches[4];
-        return ''; # String that will replace the block
-    }
-
-    /**
-     *
-     * @param string $text
-     * @return type
-     */
-    protected function hashHTMLBlocks($text)
-    {
-        if ($this->no_markup) return $text;
-
-        $less_than_tab = $this->tab_width - 1;
-
-        /**
-         * Hashify HTML blocks:
-         * We only want to do this for block-level HTML tags, such as headers,
-         * lists, and tables. That's because we still want to wrap <p>s around
-         * "paragraphs" that are wrapped in non-block-level tags, such as
-         * anchors, phrase emphasis, and spans. The list of tags we're looking
-         * for is hard-coded:
-         *
-         * -  List "a" is made of tags which can be both inline or block-level.
-         *    These will be treated block-level when the start tag is alone on
-         *    its line, otherwise they're not matched here and will be taken as
-         *    inline later.
-         * -  List "b" is made of tags which are always block-level;
-         */
-        $block_tags_a_re = 'ins|del';
-        $block_tags_b_re = 'p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|address|'.
-                           'script|noscript|form|fieldset|iframe|math';
-
-        // Regular expression for the content of a block tag.
-        $nested_tags_level = 4;
-        $attr = '
-            (?>                # optional tag attributes
-              \s            # starts with whitespace
-              (?>
-                [^>"/]+        # text outside quotes
-              |
-                /+(?!>)        # slash not followed by ">"
-              |
-                "[^"]*"        # text inside double quotes (tolerate ">")
-              |
-                \'[^\']*\'    # text inside single quotes (tolerate ">")
-              )*
-            )?
-            ';
-        $content =
-            str_repeat('
-                (?>
-                  [^<]+            # content without tag
-                |
-                  <\2            # nested opening tag
-                    '.$attr.'    # attributes
-                    (?>
-                      />
-                    |
-                      >', $nested_tags_level).  // end of opening tag
-                      '.*?'.                    // last level nested tag content
-            str_repeat('
-                      </\2\s*>    # closing nested tag
-                    )
-                  |
-                    <(?!/\2\s*>    # other tags with a different name
-                  )
-                )*',
-                $nested_tags_level);
-        $content2 = str_replace('\2', '\3', $content);
-
-        # First, look for nested blocks, e.g.:
-        #     <div>
-        #         <div>
-        #         tags for inner block must be indented.
-        #         </div>
-        #     </div>
-        #
-        # The outermost tags must start at the left margin for this to match, and
-        # the inner nested divs must be indented.
-        # We need to do this before the next, more liberal match, because the next
-        # match will start at the first `<div>` and stop at the first `</div>`.
-        $text = preg_replace_callback('{(?>
-            (?>
-                (?<=\n\n)        # Starting after a blank line
-                |                # or
-                \A\n?            # the beginning of the doc
-            )
-            (                        # save in $1
-
-              # Match from `\n<tag>` to `</tag>\n`, handling nested tags
-              # in between.
-
-                        [ ]{0,'.$less_than_tab.'}
-                        <('.$block_tags_b_re.')# start tag = $2
-                        '.$attr.'>            # attributes followed by > and \n
-                        '.$content.'        # content, support nesting
-                        </\2>                # the matching end tag
-                        [ ]*                # trailing spaces/tabs
-                        (?=\n+|\Z)    # followed by a newline or end of document
-
-            | # Special version for tags of group a.
-
-                        [ ]{0,'.$less_than_tab.'}
-                        <('.$block_tags_a_re.')# start tag = $3
-                        '.$attr.'>[ ]*\n    # attributes followed by >
-                        '.$content2.'        # content, support nesting
-                        </\3>                # the matching end tag
-                        [ ]*                # trailing spaces/tabs
-                        (?=\n+|\Z)    # followed by a newline or end of document
-
-            | # Special case just for <hr />. It was easier to make a special
-              # case than to make the other regex more complicated.
-
-                        [ ]{0,'.$less_than_tab.'}
-                        <(hr)                # start tag = $2
-                        '.$attr.'            # attributes
-                        /?>                    # the matching end tag
-                        [ ]*
-                        (?=\n{2,}|\Z)        # followed by a blank line or end of document
-
-            | # Special case for standalone HTML comments:
-
-                    [ ]{0,'.$less_than_tab.'}
-                    (?s:
-                        <!-- .*? -->
-                    )
-                    [ ]*
-                    (?=\n{2,}|\Z)        # followed by a blank line or end of document
-
-            | # PHP and ASP-style processor instructions (<? and <%)
-
-                    [ ]{0,'.$less_than_tab.'}
-                    (?s:
-                        <([?%])            # $2
-                        .*?
-                        \2>
-                    )
-                    [ ]*
-                    (?=\n{2,}|\Z)        # followed by a blank line or end of document
-
-            )
-            )}Sxmi',
-            array(&$this, '_hashHTMLBlocks_callback'),
-            $text);
-
-        return $text;
-    }
-
-    /**
-     *
-     * @param type $matches
-     * @return type
-     */
-    protected function _hashHTMLBlocks_callback($matches)
-    {
-        $text = $matches[1];
-        $key  = $this->hashBlock($text);
-        return "\n\n$key\n\n";
-    }
-
-    /**
-     * Called whenever a tag must be hashed when a function insert an atomic
-     * element in the text stream. Passing $text to through this function gives
-     * a unique text-token which will be reverted back when calling unhash.
-     *
-     * The $boundary argument specify what character should be used to surround
-     * the token. By convension, "B" is used for block elements that needs not
-     * to be wrapped into paragraph tags at the end, ":" is used for elements
-     * that are word separators and "X" is used in the general case.
-     *
-     * @staticvar int $i
-     * @param type $text
-     * @param type $boundary
-     * @return string
-     */
-    protected function hashPart($text, $boundary = 'X')
-    {
-        # Swap back any tag hash found in $text so we do not have to `unhash`
-        # multiple times at the end.
-        $text = $this->unhash($text);
-
-        # Then hash the block.
-        static $i = 0;
-        $key = "$boundary\x1A" . ++$i . $boundary;
-        $this->html_hashes[$key] = $text;
-        return $key; # String that will replace the tag.
-    }
-
-    /**
-     * Shortcut function for hashPart with block-level boundaries.
-     *
-     * @param type $text
-     * @return type
-     */
-    protected function hashBlock($text)
-    {
-        return $this->hashPart($text, 'B');
     }
 
     /**
@@ -525,7 +237,10 @@ class Parser
         # begining in the Markdown function since hashed blocks can be part of
         # list items and could have been indented. Indented blocks would have
         # been seen as a code block in a previous pass of hashHTMLBlocks.
-        $text = $this->hashHTMLBlocks($text);
+        #$text = $this->hashHTMLBlocks($text);
+
+        $hf   = new HashHtmlBlocksFilter($this->hasher, $this->tab_width, $this->no_markup);
+        $text = $hf->run($text);
 
         return $this->runBasicBlockGamut($text);
     }
@@ -569,7 +284,7 @@ class Parser
                 [ ]*           # Tailing spaces
                 $              # End of line.
             }mx',
-            "\n".$this->hashBlock("<hr$this->empty_element_suffix")."\n",
+            "\n".$this->hasher->hashBlock("<hr$this->empty_element_suffix")."\n",
             $text);
     }
 
@@ -581,6 +296,10 @@ class Parser
      */
     protected function runSpanGamut($text)
     {
+        $sf = new ParseSpanFilter($this->rem, $this->hasher, $this->no_markup);
+
+        $text = $sf->run($text);
+
         foreach (array_keys($this->span_gamut) as $method) {
             $text = $this->$method($text);
         }
@@ -607,7 +326,7 @@ class Parser
      */
     protected function _doHardBreaks_callback(/*$matches*/)
     {
-        return $this->hashPart("<br$this->empty_element_suffix\n");
+        return $this->hasher->hashPart("<br$this->empty_element_suffix\n");
     }
 
     /**
@@ -627,7 +346,7 @@ class Parser
         $text = preg_replace_callback('{
             (                    # wrap whole match in $1
               \[
-                ('.$this->nested_brackets_re.')    # link text = $2
+                ('.$this->rem->getPattern('nested_brackets').')    # link text = $2
               \]
 
               [ ]?               # one optional space
@@ -646,14 +365,14 @@ class Parser
         $text = preg_replace_callback('{
             (                # wrap whole match in $1
               \[
-                ('.$this->nested_brackets_re.')    # link text = $2
+                ('.$this->rem->getPattern('nested_brackets').')    # link text = $2
               \]
               \(            # literal paren
                 [ \n]*
                 (?:
                     <(.+?)>    # href = $3
                 |
-                    ('.$this->nested_url_parenthesis_re.')    # href = $4
+                    ('.$this->rem->getPattern('nested_url_parenthesis').')    # href = $4
                 )
                 [ \n]*
                 (            # $5
@@ -718,7 +437,7 @@ class Parser
 
             $link_text = $this->runSpanGamut($link_text);
             $result .= ">$link_text</a>";
-            $result = $this->hashPart($result);
+            $result = $this->hasher->hashPart($result);
         }
         else {
             $result = $whole_match;
@@ -749,7 +468,7 @@ class Parser
         $link_text = $this->runSpanGamut($link_text);
         $result .= ">$link_text</a>";
 
-        return $this->hashPart($result);
+        return $this->hasher->hashPart($result);
     }
 
     /**
@@ -766,7 +485,7 @@ class Parser
         $text = preg_replace_callback('{
             (                # wrap whole match in $1
               !\[
-                ('.$this->nested_brackets_re.')        # alt text = $2
+                ('.$this->rem->getPattern('nested_brackets').')        # alt text = $2
               \]
 
               [ ]?                # one optional space
@@ -787,7 +506,7 @@ class Parser
         $text = preg_replace_callback('{
             (                # wrap whole match in $1
               !\[
-                ('.$this->nested_brackets_re.')        # alt text = $2
+                ('.$this->rem->getPattern('nested_brackets').')        # alt text = $2
               \]
               \s?            # One optional whitespace character
               \(            # literal paren
@@ -795,7 +514,7 @@ class Parser
                 (?:
                     <(\S*)>    # src url = $3
                 |
-                    ('.$this->nested_url_parenthesis_re.')    # src url = $4
+                    ('.$this->rem->getPattern('nested_url_parenthesis').')    # src url = $4
                 )
                 [ \n]*
                 (            # $5
@@ -837,7 +556,7 @@ class Parser
                 $result .=  " title=\"$title\"";
             }
             $result .= $this->empty_element_suffix;
-            $result = $this->hashPart($result);
+            $result = $this->hasher->hashPart($result);
         }
         else {
             # If there's no such link ID, leave intact:
@@ -868,7 +587,7 @@ class Parser
         }
         $result .= $this->empty_element_suffix;
 
-        return $this->hashPart($result);
+        return $this->hasher->hashPart($result);
     }
 
     /**
@@ -921,7 +640,7 @@ class Parser
 
         $level = $matches[2]{0} == '=' ? 1 : 2;
         $block = "<h$level>".$this->runSpanGamut($matches[1])."</h$level>";
-        return "\n" . $this->hashBlock($block) . "\n\n";
+        return "\n" . $this->hasher->hashBlock($block) . "\n\n";
     }
 
     /**
@@ -933,7 +652,7 @@ class Parser
     {
         $level = strlen($matches[1]);
         $block = "<h$level>".$this->runSpanGamut($matches[2])."</h$level>";
-        return "\n" . $this->hashBlock($block) . "\n\n";
+        return "\n" . $this->hasher->hashBlock($block) . "\n\n";
     }
 
     /**
@@ -1027,7 +746,7 @@ class Parser
         $list .= "\n";
         $result = $this->processListItems($list, $marker_any_re);
 
-        $result = $this->hashBlock("<$list_type>\n" . $result . "</$list_type>");
+        $result = $this->hasher->hashBlock("<$list_type>\n" . $result . "</$list_type>");
         return "\n". $result ."\n\n";
     }
 
@@ -1153,41 +872,7 @@ class Parser
         $codeblock = preg_replace('/\A\n+|\n+\z/', '', $codeblock);
 
         $codeblock = "<pre><code>$codeblock\n</code></pre>";
-        return "\n\n".$this->hashBlock($codeblock)."\n\n";
-    }
-
-    /**
-     * Create a code span markup for $code. Called from handleSpanToken.
-     *
-     * @param type $code
-     * @return type
-     */
-    protected function makeCodeSpan($code)
-    {
-        $code = htmlspecialchars(trim($code), ENT_NOQUOTES);
-        return $this->hashPart("<code>$code</code>");
-    }
-
-    /**
-     * Prepare regular expressions for searching emphasis tokens in any context.
-     */
-    protected function prepareItalicsAndBold()
-    {
-        foreach ($this->em_relist as $em => $em_re) {
-            foreach ($this->strong_relist as $strong => $strong_re) {
-                # Construct list of allowed token expressions.
-                $token_relist = array();
-                if (isset($this->em_strong_relist["$em$strong"])) {
-                    $token_relist[] = $this->em_strong_relist["$em$strong"];
-                }
-                $token_relist[] = $em_re;
-                $token_relist[] = $strong_re;
-
-                # Construct master expression from list.
-                $token_re = '{('. implode('|', $token_relist) .')}';
-                $this->em_strong_prepared_relist["$em$strong"] = $token_re;
-            }
-        }
+        return "\n\n".$this->hasher->hashBlock($codeblock)."\n\n";
     }
 
     /**
@@ -1195,19 +880,22 @@ class Parser
      * @param type $text
      * @return type
      */
-    protected function doItalicsAndBold($text) {
+    protected function doItalicsAndBold($text)
+    {
         $token_stack = array('');
         $text_stack = array('');
         $em = '';
         $strong = '';
         $tree_char_em = false;
 
+        $xyztodo = $this->rem->getPattern('em_strong_prepared');
+
         while (1) {
             #
             # Get prepared regular expression for seraching emphasis tokens
             # in current context.
             #
-            $token_re = $this->em_strong_prepared_relist["$em$strong"];
+            $token_re = $xyztodo["$em$strong"];
 
             #
             # Each loop iteration search for the next emphasis token.
@@ -1237,7 +925,7 @@ class Parser
                     $span = array_shift($text_stack);
                     $span = $this->runSpanGamut($span);
                     $span = "<strong><em>$span</em></strong>";
-                    $text_stack[0] .= $this->hashPart($span);
+                    $text_stack[0] .= $this->hasher->hashPart($span);
                     $em = '';
                     $strong = '';
                 } else {
@@ -1248,7 +936,7 @@ class Parser
                     $span = $text_stack[0];
                     $span = $this->runSpanGamut($span);
                     $span = "<$tag>$span</$tag>";
-                    $text_stack[0] = $this->hashPart($span);
+                    $text_stack[0] = $this->hasher->hashPart($span);
                     $$tag = ''; # $$tag stands for $em or $strong
                 }
                 $tree_char_em = false;
@@ -1262,7 +950,7 @@ class Parser
                         $span = array_shift($text_stack);
                         $span = $this->runSpanGamut($span);
                         $span = "<$tag>$span</$tag>";
-                        $text_stack[0] .= $this->hashPart($span);
+                        $text_stack[0] .= $this->hasher->hashPart($span);
                         $$tag = ''; # $$tag stands for $em or $strong
                     }
                 } else {
@@ -1286,7 +974,7 @@ class Parser
                     $span = array_shift($text_stack);
                     $span = $this->runSpanGamut($span);
                     $span = "<strong>$span</strong>";
-                    $text_stack[0] .= $this->hashPart($span);
+                    $text_stack[0] .= $this->hasher->hashPart($span);
                     $strong = '';
                 } else {
                     array_unshift($token_stack, $token);
@@ -1302,7 +990,7 @@ class Parser
                         $span = array_shift($text_stack);
                         $span = $this->runSpanGamut($span);
                         $span = "<em>$span</em>";
-                        $text_stack[0] .= $this->hashPart($span);
+                        $text_stack[0] .= $this->hasher->hashPart($span);
                         $em = '';
                     } else {
                         $text_stack[0] .= $token;
@@ -1357,7 +1045,7 @@ class Parser
         $bq = preg_replace_callback('{(\s*<pre>.+?</pre>)}sx',
             array(&$this, '_doBlockQuotes_callback2'), $bq);
 
-        return "\n". $this->hashBlock("<blockquote>\n$bq\n</blockquote>")."\n\n";
+        return "\n". $this->hasher->hashBlock("<blockquote>\n$bq\n</blockquote>")."\n\n";
     }
 
     /**
@@ -1393,13 +1081,13 @@ class Parser
                 $value = $this->runSpanGamut($value);
                 $value = preg_replace('/^([ ]*)/', "<p>", $value);
                 $value .= "</p>";
-                $grafs[$key] = $this->unhash($value);
+                $grafs[$key] = $this->hasher->unhash($value);
             }
             else {
                 # Is a block.
                 # Modify elements of @grafs in-place...
                 $graf = $value;
-                $block = $this->html_hashes[$graf];
+                $block = $this->hasher->getHashByKey($graf);
                 $graf = $block;
 //                if (preg_match('{
 //                    \A
@@ -1522,7 +1210,7 @@ class Parser
     {
         $url = $this->encodeAttribute($matches[1]);
         $link = "<a href=\"$url\">$url</a>";
-        return $this->hashPart($link);
+        return $this->hasher->hashPart($link);
     }
 
     /**
@@ -1534,7 +1222,7 @@ class Parser
     {
         $address = $matches[1];
         $link = $this->encodeEmailAddress($address);
-        return $this->hashPart($link);
+        return $this->hasher->hashPart($link);
     }
 
     /**
@@ -1582,95 +1270,6 @@ class Parser
     }
 
     /**
-     * Take the string $str and parse it into tokens, hashing embeded HTML,
-     * escaped characters and handling code spans.
-     *
-     * @param string $str
-     * @return string
-     */
-    protected function parseSpan($str)
-    {
-        $output = '';
-
-        $span_re = '{
-                (
-                    \\\\'.$this->escape_chars_re.'
-                |
-                    (?<![`\\\\])
-                    `+                        # code span marker
-            '.( $this->no_markup ? '' : '
-                |
-                    <!--    .*?     -->        # comment
-                |
-                    <\?.*?\?> | <%.*?%>        # processing instruction
-                |
-                    <[/!$]?[-a-zA-Z0-9:_]+    # regular tags
-                    (?>
-                        \s
-                        (?>[^"\'>]+|"[^"]*"|\'[^\']*\')*
-                    )?
-                    >
-            ').'
-                )
-                }xs';
-
-        while (1) {
-            #
-            # Each loop iteration seach for either the next tag, the next
-            # openning code span marker, or the next escaped character.
-            # Each token is then passed to handleSpanToken.
-            #
-            $parts = preg_split($span_re, $str, 2, PREG_SPLIT_DELIM_CAPTURE);
-
-            # Create token from text preceding tag.
-            if ($parts[0] != "") {
-                $output .= $parts[0];
-            }
-
-            # Check if we reach the end.
-            if (isset($parts[1])) {
-                $output .= $this->handleSpanToken($parts[1], $parts[2]);
-                $str = $parts[2];
-            }
-            else {
-                break;
-            }
-        }
-
-        return $output;
-    }
-
-    /**
-     * Handle $token provided by parseSpan by determining its nature and
-     * returning the corresponding value that should replace it.
-     *
-     * @param type $token
-     * @param type $str
-     * @return type
-     */
-    protected function handleSpanToken($token, &$str)
-    {
-        $matches = array();
-
-        switch ($token{0}) {
-            case "\\":
-                return $this->hashPart("&#". ord($token{1}). ";");
-            case "`":
-                # Search for end marker in remaining text.
-                if (preg_match('/^(.*?[^`])'.preg_quote($token).'(?!`)(.*)$/sm',
-                    $str, $matches))
-                {
-                    $str = $matches[2];
-                    $codespan = $this->makeCodeSpan($matches[1]);
-                    return $this->hashPart($codespan);
-                }
-                return $token; // return as text since no ending marker found.
-            default:
-                return $this->hashPart($token);
-        }
-    }
-
-    /**
      * Remove one level of line-leading tabs or spaces
      *
      * @param string $text
@@ -1679,68 +1278,5 @@ class Parser
     protected function outdent($text)
     {
         return preg_replace('/^(\t|[ ]{1,'.$this->tab_width.'})/m', '', $text);
-    }
-
-    /**
-     * Replace tabs with the appropriate amount of space.
-     *
-     * @param string $text
-     * @return string
-     */
-    protected function detab($text)
-    {
-        # For each line we separate the line in blocks delemited by
-        # tab characters. Then we reconstruct every line by adding the
-        # appropriate number of space between each blocks.
-
-        $text = preg_replace_callback('/^.*\t.*$/m',
-            array(&$this, '_detab_callback'), $text);
-
-        return $text;
-    }
-
-    /**
-     *
-     * @param type $matches
-     * @return string
-     */
-    protected function _detab_callback($matches)
-    {
-        $line = $matches[0];
-
-        # Split in blocks.
-        $blocks = explode("\t", $line);
-        # Add each blocks to the line.
-        $line = $blocks[0];
-        unset($blocks[0]); # Do not add first block twice.
-        foreach ($blocks as $block) {
-            # Calculate amount of space, insert spaces, insert block.
-            $amount = $this->tab_width -
-                mb_strlen($line, 'UTF-8') % $this->tab_width;
-            $line .= str_repeat(" ", $amount) . $block;
-        }
-        return $line;
-    }
-
-    /**
-     * Swap back in all the tags hashed by _HashHTMLBlocks.
-     *
-     * @param string $text
-     * @return string
-     */
-    protected function unhash($text)
-    {
-        return preg_replace_callback('/(.)\x1A[0-9]+\1/',
-            array($this, '_unhash_callback'), $text);
-    }
-
-    /**
-     *
-     * @param type $matches
-     * @return type
-     */
-    protected function _unhash_callback($matches)
-    {
-        return $this->html_hashes[$matches[0]];
     }
 }
