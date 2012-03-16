@@ -44,9 +44,9 @@ class DoAutoLinksFilter extends AbstractFilter
     public function run($text)
     {
         $text = preg_replace_callback('{<((https?|ftp|dict):[^\'">\s]+)>}i',
-            array(&$this, '_doAutoLinks_url_callback'), $text);
+            array($this, '_doAutoLinks_url_callback'), $text);
 
-        # Email addresses: <address@domain.foo>
+        // Email addresses: <address@domain.foo>
         $text = preg_replace_callback('{
             <
             (?:mailto:)?
@@ -65,15 +65,15 @@ class DoAutoLinksFilter extends AbstractFilter
             )
             >
             }xi',
-            array(&$this, '_doAutoLinks_email_callback'), $text);
+            array($this, '_doAutoLinks_email_callback'), $text);
 
         return $text;
     }
 
     /**
      *
-     * @param type $matches
-     * @return type
+     * @param  array  $matches
+     * @return string
      */
     protected function _doAutoLinks_url_callback($matches)
     {
@@ -84,8 +84,8 @@ class DoAutoLinksFilter extends AbstractFilter
 
     /**
      *
-     * @param type $matches
-     * @return type
+     * @param  array $matches
+     * @return string
      */
     protected function _doAutoLinks_email_callback($matches)
     {

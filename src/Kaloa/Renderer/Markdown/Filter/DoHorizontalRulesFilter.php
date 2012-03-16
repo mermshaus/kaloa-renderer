@@ -28,7 +28,7 @@ class DoHorizontalRulesFilter extends AbstractFilter
      */
     public function __construct(Hasher $hasher, $emptyElementSuffix)
     {
-        $this->hasher = $hasher;
+        $this->hasher               = $hasher;
         $this->empty_element_suffix = $emptyElementSuffix;
     }
 
@@ -39,7 +39,7 @@ class DoHorizontalRulesFilter extends AbstractFilter
      */
     public function run($text)
     {
-        # Do Horizontal Rules:
+        // Do Horizontal Rules:
         return preg_replace(
             '{
                 ^[ ]{0,3}      # Leading space

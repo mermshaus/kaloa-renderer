@@ -31,8 +31,8 @@ class HashHtmlBlocksFilter extends AbstractFilter
 
     /**
      *
-     * @param string $text
-     * @return type
+     * @param  string $text
+     * @return string
      */
     public function run($text)
     {
@@ -96,45 +96,45 @@ class HashHtmlBlocksFilter extends AbstractFilter
                 $nested_tags_level);
         $content2 = str_replace('\2', '\3', $content);
 
-        # First, look for nested blocks, e.g.:
-        #     <div>
-        #         <div>
-        #         tags for inner block must be indented.
-        #         </div>
-        #     </div>
-        #
-        # The outermost tags must start at the left margin for this to match, and
-        # the inner nested divs must be indented.
-        # We need to do this before the next, more liberal match, because the next
-        # match will start at the first `<div>` and stop at the first `</div>`.
+        // First, look for nested blocks, e.g.:
+        //     <div>
+        //         <div>
+        //         tags for inner block must be indented.
+        //         </div>
+        //    </div>
+        //
+        // The outermost tags must start at the left margin for this to match, and
+        // the inner nested divs must be indented.
+        // We need to do this before the next, more liberal match, because the next
+        // match will start at the first `<div>` and stop at the first `</div>`.
         $text = preg_replace_callback('{(?>
             (?>
                 (?<=\n\n)        # Starting after a blank line
                 |                # or
                 \A\n?            # the beginning of the doc
             )
-            (                        # save in $1
+            (                    # save in $1
 
               # Match from `\n<tag>` to `</tag>\n`, handling nested tags
               # in between.
 
                         [ ]{0,'.$less_than_tab.'}
                         <('.$block_tags_b_re.')# start tag = $2
-                        '.$attr.'>            # attributes followed by > and \n
-                        '.$content.'        # content, support nesting
-                        </\2>                # the matching end tag
-                        [ ]*                # trailing spaces/tabs
-                        (?=\n+|\Z)    # followed by a newline or end of document
+                        '.$attr.'>     # attributes followed by > and \n
+                        '.$content.'   # content, support nesting
+                        </\2>          # the matching end tag
+                        [ ]*           # trailing spaces/tabs
+                        (?=\n+|\Z)     # followed by a newline or end of document
 
             | # Special version for tags of group a.
 
                         [ ]{0,'.$less_than_tab.'}
-                        <('.$block_tags_a_re.')# start tag = $3
-                        '.$attr.'>[ ]*\n    # attributes followed by >
-                        '.$content2.'        # content, support nesting
-                        </\3>                # the matching end tag
-                        [ ]*                # trailing spaces/tabs
-                        (?=\n+|\Z)    # followed by a newline or end of document
+                        <('.$block_tags_a_re.') # start tag = $3
+                        '.$attr.'>[ ]*\n        # attributes followed by >
+                        '.$content2.'           # content, support nesting
+                        </\3>                   # the matching end tag
+                        [ ]*                    # trailing spaces/tabs
+                        (?=\n+|\Z)              # followed by a newline or end of document
 
             | # Special case just for <hr />. It was easier to make a special
               # case than to make the other regex more complicated.
@@ -142,7 +142,7 @@ class HashHtmlBlocksFilter extends AbstractFilter
                         [ ]{0,'.$less_than_tab.'}
                         <(hr)                # start tag = $2
                         '.$attr.'            # attributes
-                        /?>                    # the matching end tag
+                        /?>                  # the matching end tag
                         [ ]*
                         (?=\n{2,}|\Z)        # followed by a blank line or end of document
 
@@ -176,8 +176,8 @@ class HashHtmlBlocksFilter extends AbstractFilter
 
     /**
      *
-     * @param type $matches
-     * @return type
+     * @param  array  $matches
+     * @return string
      */
     protected function _hashHTMLBlocks_callback($matches)
     {

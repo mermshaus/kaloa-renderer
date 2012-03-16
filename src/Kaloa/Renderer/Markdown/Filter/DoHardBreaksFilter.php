@@ -35,20 +35,20 @@ class DoHardBreaksFilter extends AbstractFilter
 
     /**
      *
-     * @param string  $text
+     * @param  string $text
      * @return string
      */
     public function run($text)
     {
-        # Do hard breaks:
+        // Do hard breaks:
         return preg_replace_callback('/ {2,}\n/',
             array($this, '_doHardBreaks_callback'), $text);
     }
 
     /**
      *
-     * @param type $matches
-     * @return type
+     * @param  array $matches
+     * @return string
      */
     protected function _doHardBreaks_callback(/*$matches*/)
     {

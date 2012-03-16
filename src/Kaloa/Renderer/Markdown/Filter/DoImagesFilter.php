@@ -74,22 +74,20 @@ class DoImagesFilter extends AbstractFilter
     /**
      * Turn Markdown image shortcuts into <img> tags.
      *
-     * @param string $text
+     * @param  string $text
      * @return string
      */
     public function run($text)
     {
-        #
-        # First, handle reference-style labeled images: ![alt text][id]
-        #
+        // First, handle reference-style labeled images: ![alt text][id]
         $text = preg_replace_callback('{
             (                # wrap whole match in $1
               !\[
-                ('.$this->rem->getPattern('nested_brackets').')        # alt text = $2
+                ('.$this->rem->getPattern('nested_brackets').')  # alt text = $2
               \]
 
-              [ ]?                # one optional space
-              (?:\n[ ]*)?        # one optional newline followed by spaces
+              [ ]?           # one optional space
+              (?:\n[ ]*)?    # one optional newline followed by spaces
 
               \[
                 (.*?)        # id = $3
@@ -97,44 +95,42 @@ class DoImagesFilter extends AbstractFilter
 
             )
             }xs',
-            array(&$this, '_doImages_reference_callback'), $text);
+            array($this, '_doImages_reference_callback'), $text);
 
-        #
-        # Next, handle inline images:  ![alt text](url "optional title")
-        # Don't forget: encode * and _
-        #
+        // Next, handle inline images:  ![alt text](url "optional title")
+        // Don't forget: encode * and _
         $text = preg_replace_callback('{
             (                # wrap whole match in $1
               !\[
-                ('.$this->rem->getPattern('nested_brackets').')        # alt text = $2
+                ('.$this->rem->getPattern('nested_brackets').')  # alt text = $2
               \]
               \s?            # One optional whitespace character
-              \(            # literal paren
+              \(             # literal paren
                 [ \n]*
                 (?:
-                    <(\S*)>    # src url = $3
+                    <(\S*)>  # src url = $3
                 |
-                    ('.$this->rem->getPattern('nested_url_parenthesis').')    # src url = $4
+                    ('.$this->rem->getPattern('nested_url_parenthesis').') # src url = $4
                 )
                 [ \n]*
                 (            # $5
                   ([\'"])    # quote char = $6
-                  (.*?)        # title = $7
-                  \6        # matching quote
+                  (.*?)      # title = $7
+                  \6         # matching quote
                   [ \n]*
-                )?            # title is optional
+                )?           # title is optional
               \)
             )
             }xs',
-            array(&$this, '_doImages_inline_callback'), $text);
+            array($this, '_doImages_inline_callback'), $text);
 
         return $text;
     }
 
     /**
      *
-     * @param type $matches
-     * @return type
+     * @param  array  $matches
+     * @return string
      */
     protected function _doImages_reference_callback($matches)
     {
@@ -142,8 +138,9 @@ class DoImagesFilter extends AbstractFilter
         $alt_text    = $matches[2];
         $link_id     = strtolower($matches[3]);
 
-        if ($link_id == "") {
-            $link_id = strtolower($alt_text); # for shortcut links like ![this][].
+        if ($link_id === '') {
+            // for shortcut links like ![this][].
+            $link_id = strtolower($alt_text);
         }
 
         $alt_text = $this->encoder->encodeAttribute($alt_text);
@@ -157,9 +154,8 @@ class DoImagesFilter extends AbstractFilter
             }
             $result .= $this->empty_element_suffix;
             $result = $this->hasher->hashPart($result);
-        }
-        else {
-            # If there's no such link ID, leave intact:
+        } else {
+            // If there's no such link ID, leave intact:
             $result = $whole_match;
         }
 

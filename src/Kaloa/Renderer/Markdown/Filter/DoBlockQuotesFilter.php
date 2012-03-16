@@ -48,36 +48,36 @@ class DoBlockQuotesFilter extends AbstractFilter
                 )+
               )
             /xm',
-            array(&$this, '_doBlockQuotes_callback'), $text);
+            array($this, '_doBlockQuotes_callback'), $text);
 
         return $text;
     }
 
     /**
      *
-     * @param type $matches
-     * @return type
+     * @param  array  $matches
+     * @return string
      */
     protected function _doBlockQuotes_callback($matches)
     {
         $bq = $matches[1];
-        # trim one level of quoting - trim whitespace-only lines
+        // trim one level of quoting - trim whitespace-only lines
         $bq = preg_replace('/^[ ]*>[ ]?|^[ ]+$/m', '', $bq);
-        $bq = $this->parser->runBlockGamut($bq);        # recurse
+        $bq = $this->parser->runBlockGamut($bq);        // recurse
 
         $bq = preg_replace('/^/m', "  ", $bq);
-        # These leading spaces cause problem with <pre> content,
-        # so we need to fix that:
+        // These leading spaces cause problem with <pre> content,
+        // so we need to fix that:
         $bq = preg_replace_callback('{(\s*<pre>.+?</pre>)}sx',
-            array(&$this, '_doBlockQuotes_callback2'), $bq);
+            array($this, '_doBlockQuotes_callback2'), $bq);
 
         return "\n". $this->hasher->hashBlock("<blockquote>\n$bq\n</blockquote>")."\n\n";
     }
 
     /**
      *
-     * @param type $matches
-     * @return type
+     * @param  array  $matches
+     * @return string
      */
     protected function _doBlockQuotes_callback2($matches)
     {

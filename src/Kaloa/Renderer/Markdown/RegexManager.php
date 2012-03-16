@@ -74,7 +74,7 @@ class RegexManager
     {
         foreach ($this->em_relist as $em => $em_re) {
             foreach ($this->strong_relist as $strong => $strong_re) {
-                # Construct list of allowed token expressions.
+                // Construct list of allowed token expressions.
                 $token_relist = array();
                 if (isset($this->em_strong_relist["$em$strong"])) {
                     $token_relist[] = $this->em_strong_relist["$em$strong"];
@@ -82,7 +82,7 @@ class RegexManager
                 $token_relist[] = $em_re;
                 $token_relist[] = $strong_re;
 
-                # Construct master expression from list.
+                // Construct master expression from list.
                 $token_re = '{('. implode('|', $token_relist) .')}';
                 $this->patterns['em_strong_prepared'][$em . $strong] = $token_re;
             }

@@ -34,9 +34,9 @@ class DoCodeBlocksFilter extends AbstractFilter
      */
     public function __construct(Hasher $hasher, $tab_width, Parser $parser)
     {
-        $this->hasher = $hasher;
+        $this->hasher    = $hasher;
         $this->tab_width = $tab_width;
-        $this->parser = $parser;
+        $this->parser    = $parser;
     }
 
     /**
@@ -57,15 +57,15 @@ class DoCodeBlocksFilter extends AbstractFilter
                 )
                 ((?=^[ ]{0,'.$this->tab_width.'}\S)|\Z)    # Lookahead for non-space at line-start, or end of doc
             }xm',
-            array(&$this, '_doCodeBlocks_callback'), $text);
+            array($this, '_doCodeBlocks_callback'), $text);
 
         return $text;
     }
 
     /**
      *
-     * @param type $matches
-     * @return type
+     * @param  array  $matches
+     * @return string
      */
     protected function _doCodeBlocks_callback($matches)
     {
@@ -74,7 +74,7 @@ class DoCodeBlocksFilter extends AbstractFilter
         $codeblock = $this->parser->outdent($codeblock);
         $codeblock = htmlspecialchars($codeblock, ENT_NOQUOTES);
 
-        # trim leading newlines and trailing newlines
+        // trim leading newlines and trailing newlines
         $codeblock = preg_replace('/\A\n+|\n+\z/', '', $codeblock);
 
         $codeblock = "<pre><code>$codeblock\n</code></pre>";

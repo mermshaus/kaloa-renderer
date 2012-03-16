@@ -52,7 +52,7 @@ class ParseSpanFilter extends AbstractFilter
      * Take the string $str and parse it into tokens, hashing embeded HTML,
      * escaped characters and handling code spans.
      *
-     * @param string $str
+     * @param  string $str
      * @return string
      */
     public function run($text)
@@ -82,25 +82,22 @@ class ParseSpanFilter extends AbstractFilter
                 )
                 }xs';
 
-        while (1) {
-            #
-            # Each loop iteration seach for either the next tag, the next
-            # openning code span marker, or the next escaped character.
-            # Each token is then passed to handleSpanToken.
-            #
+        while (true) {
+            // Each loop iteration seach for either the next tag, the next
+            // openning code span marker, or the next escaped character.
+            // Each token is then passed to handleSpanToken.
             $parts = preg_split($span_re, $str, 2, PREG_SPLIT_DELIM_CAPTURE);
 
-            # Create token from text preceding tag.
+            // Create token from text preceding tag.
             if ($parts[0] != "") {
                 $output .= $parts[0];
             }
 
-            # Check if we reach the end.
+            // Check if we reach the end.
             if (isset($parts[1])) {
                 $output .= $this->handleSpanToken($parts[1], $parts[2]);
                 $str = $parts[2];
-            }
-            else {
+            } else {
                 break;
             }
         }
@@ -112,19 +109,19 @@ class ParseSpanFilter extends AbstractFilter
      * Handle $token provided by parseSpan by determining its nature and
      * returning the corresponding value that should replace it.
      *
-     * @param type $token
-     * @param type $str
-     * @return type
+     * @param  string $token
+     * @param  string $str
+     * @return string
      */
     protected function handleSpanToken($token, &$str)
     {
         $matches = array();
 
-        switch ($token{0}) {
+        switch (substr($token, 0, 1)) {
             case "\\":
                 return $this->hasher->hashPart("&#". ord($token{1}). ";");
             case "`":
-                # Search for end marker in remaining text.
+                // Search for end marker in remaining text.
                 if (preg_match('/^(.*?[^`])'.preg_quote($token).'(?!`)(.*)$/sm',
                     $str, $matches))
                 {
@@ -132,7 +129,8 @@ class ParseSpanFilter extends AbstractFilter
                     $codespan = $this->makeCodeSpan($matches[1]);
                     return $this->hasher->hashPart($codespan);
                 }
-                return $token; // return as text since no ending marker found.
+                // return as text since no ending marker found.
+                return $token;
             default:
                 return $this->hasher->hashPart($token);
         }

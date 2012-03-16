@@ -42,55 +42,53 @@ class DoHeadersFilter extends AbstractFilter
      */
     public function run($text)
     {
-        # Setext-style headers:
-        #      Header 1
-        #      ========
-        #
-        #      Header 2
-        #      --------
-        #
+        // Setext-style headers:
+        //      Header 1
+        //      ========
+        //
+        //      Header 2
+        //      --------
         $text = preg_replace_callback('{ ^(.+?)[ ]*\n(=+|-+)[ ]*\n+ }mx',
-            array(&$this, '_doHeaders_callback_setext'), $text);
+            array($this, '_doHeaders_callback_setext'), $text);
 
-        # atx-style headers:
-        #    # Header 1
-        #    ## Header 2
-        #    ## Header 2 with closing hashes ##
-        #    ...
-        #    ###### Header 6
-        #
+        // atx-style headers:
+        //    # Header 1
+        //    ## Header 2
+        //    ## Header 2 with closing hashes ##
+        //    ...
+        //    ###### Header 6
         $text = preg_replace_callback('{
-                ^(\#{1,6})    # $1 = string of #\'s
+                ^(\#{1,6})   # $1 = string of #\'s
                 [ ]*
                 (.+?)        # $2 = Header text
                 [ ]*
-                \#*            # optional closing #\'s (not counted)
+                \#*          # optional closing #\'s (not counted)
                 \n+
             }xm',
-            array(&$this, '_doHeaders_callback_atx'), $text);
+            array($this, '_doHeaders_callback_atx'), $text);
 
         return $text;
     }
 
     /**
      *
-     * @param  array $matches
+     * @param  array  $matches
      * @return string
      */
     protected function _doHeaders_callback_setext($matches)
     {
-        # Terrible hack to check we haven't found an empty list item.
-        if ($matches[2] == '-' && preg_match('{^-(?: |$)}', $matches[1]))
+        // Terrible hack to check we haven't found an empty list item.
+        if ($matches[2] === '-' && preg_match('{^-(?: |$)}', $matches[1]))
             return $matches[0];
 
-        $level = $matches[2]{0} == '=' ? 1 : 2;
+        $level = (substr($matches[2], 0, 1) === '=') ? 1 : 2;
         $block = "<h$level>".$this->parser->runSpanGamut($matches[1])."</h$level>";
         return "\n" . $this->hasher->hashBlock($block) . "\n\n";
     }
 
     /**
      *
-     * @param  array $matches
+     * @param  array  $matches
      * @return string
      */
     protected function _doHeaders_callback_atx($matches)

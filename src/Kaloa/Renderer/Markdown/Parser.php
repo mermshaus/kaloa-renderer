@@ -25,6 +25,8 @@ use Kaloa\Renderer\Markdown\Filter\DoListsFilter;
 use Kaloa\Renderer\Markdown\Filter\DoCodeBlocksFilter;
 use Kaloa\Renderer\Markdown\Filter\DoBlockQuotesFilter;
 
+use Kaloa\Renderer\Markdown\Filter\FormParagraphsFilter;
+
 /**
  * Markdown Parser
  *
@@ -91,13 +93,13 @@ class Parser
     /**
      * Change to `true` to disallow markup or entities.
      */
-    public $no_markup = false;
+    public $no_markup   = false;
     public $no_entities = false;
 
     /**
      * Predefined urls and titles for reference links and images.
      */
-    public $predef_urls = array();
+    public $predef_urls   = array();
     public $predef_titles = array();
 
     public $list_level = 0;
@@ -106,7 +108,7 @@ class Parser
      * Internal hashes used during transformation.
      * @var type
      */
-    protected $urls = array();
+    protected $urls   = array();
     protected $titles = array();
 
     /**
@@ -142,8 +144,8 @@ class Parser
      */
     public function __construct(Hasher $hasher, RegexManager $rem, Encoder $encoder)
     {
-        $this->hasher  = $hasher;
-        $this->rem     = $rem;
+        $this->hasher = $hasher;
+        $this->rem    = $rem;
 
         $encoder->setNoEntities($this->no_entities);
         $this->encoder = $encoder;
@@ -154,8 +156,8 @@ class Parser
      */
     protected function setup()
     {
-        # Clear global hashes.
-        $this->urls = new ArrayObject($this->predef_urls);
+        // Clear global hashes.
+        $this->urls   = new ArrayObject($this->predef_urls);
         $this->titles = new ArrayObject($this->predef_titles);
         $this->hasher->clear();
 
@@ -168,7 +170,7 @@ class Parser
      */
     protected function teardown()
     {
-        $this->urls = array();
+        $this->urls   = array();
         $this->titles = array();
         $this->hasher->clear();
     }
@@ -184,19 +186,16 @@ class Parser
     {
         $this->setup();
 
-        $sf   = new SetupFilter($this->tab_width);
-        $text = $sf->run($text);
+        $f = new SetupFilter($this->tab_width);
+        $text = $f->run($text);
 
-        $hf   = new HashHtmlBlocksFilter($this->hasher, $this->tab_width, $this->no_markup);
-        $text = $hf->run($text);
+        $f = new HashHtmlBlocksFilter($this->hasher, $this->tab_width, $this->no_markup);
+        $text = $f->run($text);
 
-        # Strip any lines consisting only of spaces and tabs.
-        # This makes subsequent regexen easier to write, because we can
-        # match consecutive blank lines with /\n+/ instead of something
-        # contorted like /[ ]*\n+/ .
+        // Strip any lines consisting only of spaces and tabs. This makes
+        // subsequent regexen easier to write, because we can match consecutive
+        // blank lines with /\n+/ instead of something like /[ ]*\n+/ .
         $text = preg_replace('/^[ ]+$/m', '', $text);
-
-
 
         $f = new StripLinkDefinitionsFilter($this->urls, $this->titles, $this->tab_width);
         $text = $f->run($text);
@@ -213,18 +212,21 @@ class Parser
      *
      * These are all the transformations that form block-level tags like
      * paragraphs, headers, and list items.
+     *
+     * @param  string $text
+     * @return string
      */
     public function runBlockGamut($text)
     {
-        # We need to escape raw HTML in Markdown source before doing anything
-        # else. This need to be done for each block, and not only at the
-        # begining in the Markdown function since hashed blocks can be part of
-        # list items and could have been indented. Indented blocks would have
-        # been seen as a code block in a previous pass of hashHTMLBlocks.
-        #$text = $this->hashHTMLBlocks($text);
+        // We need to escape raw HTML in Markdown source before doing anything
+        // else. This need to be done for each block, and not only at the
+        // begining in the Markdown function since hashed blocks can be part of
+        // list items and could have been indented. Indented blocks would have
+        // been seen as a code block in a previous pass of hashHTMLBlocks.
+        // $text = $this->hashHTMLBlocks($text);
 
-        $hf   = new HashHtmlBlocksFilter($this->hasher, $this->tab_width, $this->no_markup);
-        $text = $hf->run($text);
+        $f = new HashHtmlBlocksFilter($this->hasher, $this->tab_width, $this->no_markup);
+        $text = $f->run($text);
 
         return $this->runBasicBlockGamut($text);
     }
@@ -254,8 +256,8 @@ class Parser
         $f = new DoBlockQuotesFilter($this->hasher, $this);
         $text = $f->run($text);
 
-        # Finally form paragraph and restore hashed blocks.
-        $text = $this->formParagraphs($text);
+        $f = new FormParagraphsFilter($this->hasher, $this);
+        $text = $f->run($text);
 
         return $text;
     }
@@ -298,80 +300,9 @@ class Parser
     }
 
     /**
-     *
-     * @param string $text string to process with html <p> tags
-     * @return type
-     */
-    protected function formParagraphs($text)
-    {
-        # Strip leading and trailing lines:
-        $text = preg_replace('/\A\n+|\n+\z/', '', $text);
-
-        $grafs = preg_split('/\n{2,}/', $text, -1, PREG_SPLIT_NO_EMPTY);
-
-        #
-        # Wrap <p> tags and unhashify HTML blocks
-        #
-        foreach ($grafs as $key => $value) {
-            if (!preg_match('/^B\x1A[0-9]+B$/', $value)) {
-                # Is a paragraph.
-                $value = $this->runSpanGamut($value);
-                $value = preg_replace('/^([ ]*)/', "<p>", $value);
-                $value .= "</p>";
-                $grafs[$key] = $this->hasher->unhash($value);
-            }
-            else {
-                # Is a block.
-                # Modify elements of @grafs in-place...
-                $graf = $value;
-                $block = $this->hasher->getHashByKey($graf);
-                $graf = $block;
-//                if (preg_match('{
-//                    \A
-//                    (                            # $1 = <div> tag
-//                      <div  \s+
-//                      [^>]*
-//                      \b
-//                      markdown\s*=\s*  ([\'"])    #    $2 = attr quote char
-//                      1
-//                      \2
-//                      [^>]*
-//                      >
-//                    )
-//                    (                            # $3 = contents
-//                    .*
-//                    )
-//                    (</div>)                    # $4 = closing tag
-//                    \z
-//                    }xs', $block, $matches))
-//                {
-//                    list(, $div_open, , $div_content, $div_close) = $matches;
-//
-//                    # We can't call Markdown(), because that resets the hash;
-//                    # that initialization code should be pulled into its own sub, though.
-//                    $div_content = $this->hashHTMLBlocks($div_content);
-//
-//                    # Run document gamut methods on the content.
-//                    foreach ($this->document_gamut as $method => $priority) {
-//                        $div_content = $this->$method($div_content);
-//                    }
-//
-//                    $div_open = preg_replace(
-//                        '{\smarkdown\s*=\s*([\'"]).+?\1}', '', $div_open);
-//
-//                    $graf = $div_open . "\n" . $div_content . "\n" . $div_close;
-//                }
-                $grafs[$key] = $graf;
-            }
-        }
-
-        return implode("\n\n", $grafs);
-    }
-
-    /**
      * Remove one level of line-leading tabs or spaces
      *
-     * @param string $text
+     * @param  string $text
      * @return string
      */
     public function outdent($text)

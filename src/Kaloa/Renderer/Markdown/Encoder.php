@@ -17,8 +17,8 @@ class Encoder
      * Encode text for a double-quoted HTML attribute. This function
      * is *not* suitable for attributes enclosed in single quotes.
      *
-     * @param type $text
-     * @return type
+     * @param  string $text
+     * @return string
      */
     public function encodeAttribute($text)
     {
@@ -31,6 +31,9 @@ class Encoder
      * Smart processing for ampersands and angle brackets that need to
      * be encoded. Valid character entities are left alone unless the
      * no-entities mode is set.
+     *
+     * @param  string $text
+     * @return string
      */
     public function encodeAmpsAndAngles($text)
     {
@@ -41,12 +44,12 @@ class Encoder
         if ($this->no_entities) {
             $text = str_replace('&', '&amp;', $text);
         } else {
-            # Ampersand-encoding based entirely on Nat Irons's Amputator
-            # MT plugin: <http://bumppo.net/projects/amputator/>
+            // Ampersand-encoding based entirely on Nat Irons's Amputator
+            // MT plugin: <http://bumppo.net/projects/amputator/>
             $text = preg_replace('/&(?!#?[xX]?(?:[0-9a-fA-F]+|\w+);)/',
                                 '&amp;', $text);;
         }
-        # Encode remaining <'s
+        // Encode remaining <'s
         $text = str_replace('<', '&lt;', $text);
 
         return $text;
@@ -68,22 +71,24 @@ class Encoder
      * Based by a filter by Matthew Wickline, posted to BBEdit-Talk. With some
      * optimizations by Milian Wolff.
      *
-     * @param type $addr
-     * @return type
+     * @param  string $addr
+     * @return string
      */
     public function encodeEmailAddress($addr)
     {
         $addr = "mailto:" . $addr;
         $chars = preg_split('/(?<!^)(?!$)/', $addr);
-        $seed = (int)abs(crc32($addr) / strlen($addr)); # Deterministic seed.
+        // Deterministic seed.
+        $seed = (int)abs(crc32($addr) / strlen($addr));
 
         foreach ($chars as $key => $char) {
             $ord = ord($char);
-            # Ignore non-ascii chars.
+            // Ignore non-ascii chars.
             if ($ord < 128) {
-                $r = ($seed * (1 + $key)) % 100; # Pseudo-random function.
-                # roughly 10% raw, 45% hex, 45% dec
-                # '@' *must* be encoded. I insist.
+                // Pseudo-random function.
+                $r = ($seed * (1 + $key)) % 100;
+                // roughly 10% raw, 45% hex, 45% dec
+                // '@' *must* be encoded. I insist.
                 if ($r > 90 && $char != '@') /* do nothing */;
                 else if ($r < 45) $chars[$key] = '&#x'.dechex($ord).';';
                 else              $chars[$key] = '&#'.$ord.';';
@@ -91,7 +96,7 @@ class Encoder
         }
 
         $addr = implode('', $chars);
-        $text = implode('', array_slice($chars, 7)); # text without `mailto:`
+        $text = implode('', array_slice($chars, 7)); // text without `mailto:`
         $addr = "<a href=\"$addr\">$text</a>";
 
         return $addr;
