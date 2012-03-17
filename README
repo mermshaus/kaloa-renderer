@@ -21,7 +21,7 @@ Parts of this package contain and/or expand on work of the following people:
 
   - Michel Fortin <http://michelf.com/>
 
-    The markdown renderer of the package is a partial rewrite of PHP Markdown
+    The Markdown renderer of the package is a partial rewrite of PHP Markdown
     <http://michelf.com/projects/php-markdown/> (see LICENSE for full license
     info).
 
