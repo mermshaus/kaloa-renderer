@@ -1,4 +1,9 @@
 <?php
+/**
+ * This is a PHP 5.3 port of the PHP Markdown class written by Michel Fortin.
+ * PHP Markdown is based on the work of John Gruber. See README and LICENSE
+ * files in the root directory of this package for full license info.
+ */
 
 namespace Kaloa\Renderer\Markdown\Filter;
 
@@ -8,11 +13,6 @@ use Kaloa\Renderer\Markdown\Hasher;
 
 /**
  * Turn block-level HTML blocks into hash entries.
- *
- * This is a PHP 5.3 port of the PHP Markdown class written by Michel Fortin.
- * PHP Markdown is based on the work of John Gruber.
- *
- * See Kaloa\Renderer\Markdown\Parser for full license info.
  *
  * @author Marc Ermshaus <marc@ermshaus.org>
  */

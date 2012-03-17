@@ -1,16 +1,15 @@
 <?php
+/**
+ * This is a PHP 5.3 port of the PHP Markdown class written by Michel Fortin.
+ * PHP Markdown is based on the work of John Gruber. See README and LICENSE
+ * files in the root directory of this package for full license info.
+ */
 
 namespace Kaloa\Renderer\Markdown\Filter;
 
 use ArrayObject;
 
 /**
- *
- *
- * This is a PHP 5.3 port of the PHP Markdown class written by Michel Fortin.
- * PHP Markdown is based on the work of John Gruber.
- *
- * See Kaloa\Renderer\Markdown\Parser for full license info.
  *
  * @author Marc Ermshaus <marc@ermshaus.org>
  */
@@ -83,7 +82,7 @@ class StripLinkDefinitionsFilter extends AbstractFilter
         $url = ($matches[2] === '') ? $matches[3] : $matches[2];
 
         $this->urls[$link_id]   = $url;
-        $this->titles[$link_id] = $matches[4];
+        $this->titles[$link_id] = (isset($matches[4])) ? $matches[4] : '';
 
         // String that will replace the block
         return '';
