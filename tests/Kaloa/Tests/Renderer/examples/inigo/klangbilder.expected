@@ -4,7 +4,7 @@
 <div class="img">
   <div class="img_left" style="width: 408px;">
     <div class="img_border">
-      <img src="/home/public_html/marc/kaloa-renderer/tests/Kaloa/Tests/Renderer/examples/inigo/klangbilder/example.png" alt="Bild: /home/public_html/marc/kaloa-renderer/tests/Kaloa/Tests/Renderer/examples/inigo/klangbilder/example.png" title="/home/public_html/marc/kaloa-renderer/tests/Kaloa/Tests/Renderer/examples/inigo/klangbilder/example.png" width="400" height="300" />
+      <img src="__RESOURCE_BASE_PATH__/example.png" alt="Bild: __RESOURCE_BASE_PATH__/example.png" title="__RESOURCE_BASE_PATH__/example.png" width="400" height="300" />
     </div>
     <div class="img_content">Bildunterschrift</div>
   </div>

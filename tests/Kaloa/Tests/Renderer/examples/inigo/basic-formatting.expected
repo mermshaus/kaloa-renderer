@@ -1,0 +1,12 @@
+<p>A paragraph.</p>
+
+<p>Another paragraph.</p>
+
+<p>This is<br />
+one single paragraph with a <br /> break.</p>
+
+<p><strong>strong text</strong></p>
+
+<p><em>italic text</em></p>
+
+<p><strong>strong <em>italic</em> text</strong></p>
