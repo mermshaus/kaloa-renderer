@@ -10,32 +10,41 @@ use Kaloa\Renderer\Inigo\Parser;
  */
 class UrlHandler extends ProtoHandler
 {
+    /**
+     *
+     */
     public function __construct()
     {
         $this->name = 'url|link';
         $this->type = Parser::TAG_INLINE;
     }
 
+    /**
+     *
+     * @param  array  $data
+     * @return string
+     */
     public function draw(array $data)
     {
-        if ($data['front']) {
-            if (isset($data['params']['(default)'])) {
-                $href = $data['params']['(default)'];
-            } else if (isset($data['params']['href'])) {
-                $href = $data['params']['href'];
-            }
+        $ret = '';
 
+        if ($data['front']) {
+            $href = $this->fillParam($data, 'href', '', true);
             $href = htmlspecialchars($href, ENT_QUOTES, 'UTF-8');
 
-            if (isset($data['params']['title'])) {
-                $title = ' title="' . $data['params']['title'] . '"';
+            $title = $this->fillParam($data, 'title', null);
+
+            if ($title !== null) {
+                $title = ' title="' . $title . '"';
             } else {
                 $title = ' title="Open &quot;' . $href . '&quot;"';
             }
 
-            return '<a href="' . $href . '"' . $title . '>';
+            $ret = '<a href="' . $href . '"' . $title . '>';
         } else {
-            return '</a>';
+            $ret = '</a>';
         }
+
+        return $ret;
     }
 }

@@ -1,0 +1,9 @@
+<p>[b]this will not be converted[/b]</p>
+
+<p>A paragraph.</p>
+
+<p><br />
+[ul]<br />
+[li]Not a.[/li]<br />
+[li]paragraph.[/li]<br />
+[/ul]</p>

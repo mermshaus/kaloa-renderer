@@ -10,24 +10,26 @@ use Kaloa\Renderer\Inigo\Parser;
  */
 class YouTubeHandler extends ProtoHandler
 {
+    /**
+     *
+     */
     public function __construct()
     {
         $this->name = 'youtube';
         $this->type = Parser::TAG_OUTLINE;
     }
 
+    /**
+     *
+     * @param  array  $data
+     * @return string
+     */
     public function draw(array $data)
     {
         $ret = '';
 
         if ($data['front']) {
-            $vid = '';
-
-            if (isset($data['params']['(default)'])) {
-                $vid = $data['params']['(default)'];
-            } else if (isset($data['params']['id'])) {
-                $vid = $data['params']['id'];
-            }
+            $vid = $this->fillParam($data, 'id', '', true);
 
             $ret .= '<div class="blog_youtube_container">';
 

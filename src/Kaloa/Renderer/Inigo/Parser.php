@@ -1,12 +1,4 @@
 <?php
-/**
- * Inigo
- *
- * Copyright 2007-2012 Marc Ermshaus
- *
- * Do not use this renderer. The code is very (!) old. It's in here for
- * backwards compatibility reasons
- */
 
 namespace Kaloa\Renderer\Inigo;
 
@@ -16,7 +8,12 @@ use Kaloa\Renderer\Inigo\Tag;
 use SplStack;
 
 /**
+ * Inigo
  *
+ * Do not use this renderer. The code is very (!) old. It's in here for
+ * backwards compatibility reasons
+ *
+ * @author Marc Ermshaus
  */
 class Parser
 {
@@ -36,7 +33,7 @@ class Parser
     const PC_PARSER_QUOTE_RIGHT = '&#8220;');
     /**/
     /* "French" style */
-    const PC_PARSER_QUOTE_LEFT = '&raquo;';
+    const PC_PARSER_QUOTE_LEFT  = '&raquo;';
     const PC_PARSER_QUOTE_RIGHT = '&laquo;';
     /**/
 
@@ -50,12 +47,12 @@ class Parser
      */
     public function addHandler(ProtoHandler $class)
     {
-        $tags = explode("|", $class->name);
+        $tags = explode('|', $class->name);
 
         $j = 0;
 
         foreach ($tags as $tag) {
-            if (trim($tag) != '') {
+            if (trim($tag) !== '') {
                 $temp = array();
                 $temp['name'] = $tag;
 
@@ -64,7 +61,7 @@ class Parser
                 } else {
                     $temp['type'] = $class->type;
                 }
-                $temp['function'] =& $class;
+                $temp['function'] = $class;
 
                 $this->m_handlers[] = $temp;
             }
@@ -86,7 +83,7 @@ class Parser
     /**
      *
      */
-    private function printHandlerMarkup(Tag $tag, $front = true, $tag_content = '')
+    protected function printHandlerMarkup(Tag $tag, $front = true, $tag_content = '')
     {
         $data = array();
 
@@ -103,7 +100,7 @@ class Parser
 
         $tagCnt = count($this->m_handlers);
 
-        while (($i < $tagCnt) && !($this->m_handlers[$i]['name'] == $data['tag'])) {
+        while (($i < $tagCnt) && ($this->m_handlers[$i]['name'] !== $data['tag'])) {
             $i++;
         }
 
@@ -113,12 +110,13 @@ class Parser
     /**
      * Gets the next tag
      *
-     * @param string $s String to parse
-     * @param int $i Offset where search begins
-     * @param int $position Will be filled with next tag's offset (FALSE if there are no more tags)
+     * @param  string $s        String to parse
+     * @param  int    $i        Offset where search begins
+     * @param  int    $position Will be filled with next tag's offset (FALSE if
+     *                          there are no more tags)
      * @return Tag
      */
-    private function getNextTag(&$s, $i, &$position)
+    protected function getNextTag(&$s, $i, &$position)
     {
         $j = mb_strpos($s, '[', $i);
         $k = mb_strpos($s, ']', $j + 1);
@@ -144,8 +142,7 @@ class Parser
 
     /**
      *
-     *
-     * @return unknown
+     * @return
      */
     public function getHandlers()
     {
@@ -155,9 +152,9 @@ class Parser
     /**
      *
      */
-    public function Parse($s, $debug = false)
+    public function Parse($s)
     {
-        /* Cleaning the data that shall be parsed */
+        // Cleaning the data that shall be parsed
 
         $s = trim($s);
         $s = str_replace("\r\n", "\n", $s);
@@ -166,17 +163,17 @@ class Parser
 
         $this->s = $s;
 
-        /* Preprocessing */
+        // Preprocessing
 
         foreach ($this->m_handlers as $h) {
             $h['function']->initialize();
         }
 
-        /* Heavy lifting */
+        // Heavy lifting
 
-        $ret = ($this->s == '') ? '' : $this->parseEx();
+        $ret = ($this->s === '') ? '' : $this->parseEx();
 
-        /* Postprocessing */
+        // Postprocessing
 
         $data = array();
         $data['vars'] = $this->m_vars;
@@ -191,11 +188,10 @@ class Parser
 
     /**
      *
-     *
-     * @param Tag $tag
-     * @return unknown
+     * @param  Tag  $tag
+     * @return bool
      */
-    private function fitsStack(Tag $tag)
+    protected function fitsStack(Tag $tag)
     {
         return ($tag->getName() === $this->m_stack->top()->getName());
     }
@@ -203,7 +199,7 @@ class Parser
     /**
      *
      */
-    private function parseEx($debug = false)
+    protected function parseEx()
     {
         $ret = '';
 
@@ -218,18 +214,14 @@ class Parser
 
         $tag = $this->getNextTag($this->s, $pos, $tag_pos);
 
-        while ($tag != null) {
-            /*
-             * Handle all occurences of "[...]" that are not part of the list of
-             * registered tags (m_handlers) as CDATA
-             */
+        while ($tag !== null) {
+            // Handle all occurences of "[...]" that are not part of the list of
+            // registered tags (m_handlers) as CDATA
             $executeTag = $tag->isValid();
 
-            /*
-             * If we are parsing inside of a TAG_PRE tag, do not execute current
-             * tag (= pretend it is CDATA) unless it is the corresponding
-             * closing tag to the active TAG_PRE tag
-             */
+            // If we are parsing inside of a TAG_PRE tag, do not execute current
+            // tag (= pretend it is CDATA) unless it is the corresponding
+            // closing tag to the active TAG_PRE tag
             if ($executeTag
                 && $this->m_stack->count() > 0
                 && $this->m_stack->top()->isOfType(self::TAG_PRE)
@@ -238,17 +230,17 @@ class Parser
             }
 
             if ($executeTag) {
-                /* Tag is valid and not inside of a TAG_PRE tag, execute it */
+                // Tag is valid and not inside of a TAG_PRE tag, execute it
 
                 // Get CDATA
                 $cdata .= $this->formatString(mb_substr($this->s, $last_pos,
                         $tag_pos - $last_pos));
 
                 if (!$tag->isClosingTag()) {
-                    /* Opening tag */
+                    // Opening tag
 
                     if (!$tag->isOfType(self::TAG_INLINE)) {
-                        /* Opening tag, outline tag */
+                        // Opening tag, outline tag
 
                         if ($f_clear_content) {
                             $tag_content .= $this->printCData($cdata, true);
@@ -263,7 +255,7 @@ class Parser
                             $f_clear_content = true;
                         }
                     } else {
-                        /* Opening tag, inline tag */
+                        // Opening tag, inline tag
 
                         $cdata .= $this->printHandlerMarkup($tag, true);
                     }
@@ -272,20 +264,20 @@ class Parser
                         $this->m_stack->push($tag);
                     }
                 } else {
-                    /* Closing tag */
+                    // Closing tag
 
                     if (!$tag->isOfType(self::TAG_INLINE)) {
-                        /* Closing tag, outline tag */
+                        // Closing tag, outline tag
 
                         if ($tag->isOfType(self::TAG_CLEAR_CONTENT)) {
-                            /* Closing tag, outline tag, clear content tag */
+                            // Closing tag, outline tag, clear content tag
 
                             $f_clear_content = false;
                             $tag_content .= $this->printCData($cdata);
                             $ret .= $this->printHandlerMarkup($tag, false, $tag_content);
                             $tag_content = '';
                         } else {
-                            /* Closing tag, outline tag, NOT clear content tag */
+                            // Closing tag, outline tag, NOT clear content tag
 
                             if ($f_clear_content) {
                                 $tag_content .= $this->printCData($cdata);
@@ -296,20 +288,20 @@ class Parser
                             }
                         }
                     } else {
-                        /* Closing tag, inline tag */
+                        // Closing tag, inline tag
 
                         $cdata .= $this->printHandlerMarkup($tag, false);
                     }
 
-                    /* Tag complete, remove from stack */
+                    // Tag complete, remove from stack
                     if ($this->fitsStack($tag)) {
                         $this->m_stack->pop();
                     } else {
-                        /* Markup error */
+                        // Markup error
                     }
                 }
             } else {
-                /* Tag is CDATA */
+                // Tag is CDATA
 
                 $cdata .= $this->formatString(mb_substr($this->s,
                         $last_pos, $tag_pos - $last_pos) . $tag->getRawData());
@@ -320,7 +312,7 @@ class Parser
             $tag = $this->getNextTag($this->s, $pos, $tag_pos);
         }
 
-        /* Add string data after last tag as CDATA */
+        // Add string data after last tag as CDATA
         $cdata .= $this->formatString(mb_substr($this->s, $last_pos));
         $ret   .= $this->printCData($cdata, true);
 
@@ -330,17 +322,17 @@ class Parser
     /**
      * Formats small pieces of CDATA
      *
-     * @param string $s
+     * @param  string $s
      * @return string
      */
-    private function formatString($s)
+    protected function formatString($s)
     {
         static $last_tag = null;
 
         if ($this->m_stack->count() > 0
             && $this->m_stack->top()->isOfType(self::TAG_PRE)
         ) {
-            /* Do not format text inside of TAG_PRE tags */
+            // Do not format text inside of TAG_PRE tags
 
             return $s;
         }
@@ -350,16 +342,14 @@ class Parser
          * quotes
          */
 
-        if ($last_tag != null) {
+        if ($last_tag !== null) {
             #echo $last_tag->getName();
         }
 
         #echo '|' . $s . '|';
 
-
-
         // opening quote
-        if ($last_tag != null && $last_tag->isOfType(self::TAG_INLINE)) {
+        if ($last_tag !== null && $last_tag->isOfType(self::TAG_INLINE)) {
             $s = preg_replace('/([\s])&quot;/', '\1&raquo;', $s);
 
             #echo 'without';
@@ -378,9 +368,9 @@ class Parser
         $s = str_replace('--', '&ndash;', $s);
 
         if ($this->m_stack->count() > 0) {
-        $last_tag = $this->m_stack->top();
+            $last_tag = $this->m_stack->top();
         } else {
-        $last_tag = null;
+            $last_tag = null;
         }
 
         return $s;
@@ -389,11 +379,11 @@ class Parser
     /**
      * Formats whole blocks of CDATA
      *
-     * @param &string $cdata
-     * @param boolean $outline
+     * @param  &string $cdata
+     * @param  boolean $outline
      * @return string
      */
-    private function printCData(&$cdata, $outline = false)
+    protected function printCData(&$cdata, $outline = false)
     {
         $cdata = trim($cdata);
         $ret = '';
@@ -405,15 +395,15 @@ class Parser
             $t = ' yes';
         }*/
 
-        if ($cdata == '') {
+        if ($cdata === '') {
             return $ret;
         }
 
         if (
-            /* All top-level blocks of CDATA have to be surrounded with <p> */
+            // All top-level blocks of CDATA have to be surrounded with <p>
             //($this->m_stack->size() == 0)
 
-            /* An outline tag starts after this CDATA block */
+            // An outline tag starts after this CDATA block
             //|| ($tag != null)
             /*||*/ $outline
 

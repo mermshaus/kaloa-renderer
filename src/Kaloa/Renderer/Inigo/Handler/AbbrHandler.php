@@ -10,24 +10,26 @@ use Kaloa\Renderer\Inigo\Parser;
  */
 class AbbrHandler extends ProtoHandler
 {
+    /**
+     *
+     */
     public function __construct()
     {
         $this->name = 'abbr';
         $this->type = Parser::TAG_INLINE;
     }
 
+    /**
+     *
+     * @param  array  $data
+     * @return string
+     */
     public function draw(array $data)
     {
         $ret = '';
 
         if ($data['front']) {
-            $title = '';
-
-            if (isset($data['params']['(default)'])) {
-                $title = $data['params']['(default)'];
-            } else if (isset($data['params']['title'])) {
-                $title = $data['params']['title'];
-            }
+            $title = $this->fillParam($data, 'title', '', true);
 
             $title = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
 

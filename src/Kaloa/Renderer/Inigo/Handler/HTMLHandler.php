@@ -10,18 +10,28 @@ use Kaloa\Renderer\Inigo\Parser;
  */
 class HTMLHandler extends ProtoHandler
 {
+    /**
+     *
+     */
     public function __construct()
     {
         $this->name = 'html';
         $this->type = Parser::TAG_OUTLINE | Parser::TAG_PRE | Parser::TAG_CLEAR_CONTENT;
     }
 
+    /**
+     *
+     * @param  array  $data
+     * @return string
+     */
     public function draw(array $data)
     {
-        if ($data['front']) {
+        $ret = '';
 
-        } else {
-            return $data['content'];
+        if (!$data['front']) {
+            $ret = $data['content'];
         }
+
+        return $ret;
     }
 }

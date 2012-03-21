@@ -10,9 +10,21 @@ use Kaloa\Renderer\Inigo\Parser;
  */
 class FootnotesHandler extends ProtoHandler
 {
-    private $m_cnt;
-    private $m_footnotes;
+    /**
+     *
+     * @var int
+     */
+    protected $cnt;
 
+    /**
+     *
+     * @var array
+     */
+    protected $footnotes;
+
+    /**
+     *
+     */
     public function __construct()
     {
         $this->name = 'fn|fnt';
@@ -21,29 +33,47 @@ class FootnotesHandler extends ProtoHandler
         $this->type[1] = (Parser::TAG_OUTLINE | Parser::TAG_CLEAR_CONTENT);
     }
 
+    /**
+     *
+     * @param  array  $data
+     * @return string
+     */
     public function draw(array $data)
     {
+        $ret = '';
+
         if ($data['tag'] === 'fn' && $data['front']) {
-            $this->m_cnt++;
-            return '[' . $this->m_cnt . ']';
-        } else if ($data['tag'] == 'fnt' && !$data['front']) {
-            $this->m_footnotes[] = $data['content'];
+            $this->cnt++;
+            $ret = '[' . $this->cnt . ']';
+        } else if ($data['tag'] === 'fnt' && !$data['front']) {
+            $this->footnotes[] = $data['content'];
         }
+
+        return $ret;
     }
 
+    /**
+     *
+     */
     public function initialize()
     {
-        $this->m_cnt = 0;
-        $this->m_footnotes = array();
+        $this->cnt = 0;
+        $this->footnotes = array();
     }
 
+    /**
+     *
+     * @param  string $s
+     * @param  array  $data
+     * @return string
+     */
     public function postProcess($s, array $data)
     {
         $ret = '';
 
-        if (($data['tag'] === 'fnt') && ($this->m_cnt > 0)) {
+        if (($data['tag'] === 'fnt') && ($this->cnt > 0)) {
             $ret .= '<ol>' . "\n";
-            foreach ($this->m_footnotes as $f) {
+            foreach ($this->footnotes as $f) {
                 $ret .= '<li>' . $f . '</li>' . "\n";
             }
             $ret .= '</ol>';

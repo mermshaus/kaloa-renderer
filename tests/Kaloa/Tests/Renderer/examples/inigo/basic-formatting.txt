@@ -10,3 +10,5 @@ one single paragraph with a <br /> break.
 [i]italic text[/i]
 
 [b]strong [i]italic[/i] text[/b]
+
+[em]emphasized [strong]strong[/strong] text[/em]

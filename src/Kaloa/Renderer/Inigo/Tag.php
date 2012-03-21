@@ -14,8 +14,8 @@ class Tag
 
     /**
      *
-     *
-     * @param unknown_type $s
+     * @param string $s
+     * @param Parser $inigo
      */
     public function __construct($s, Parser $inigo)
     {
@@ -26,6 +26,10 @@ class Tag
         $this->m_isClosingTag = $this->_extractIsClosingTag($s);
     }
 
+    /**
+     *
+     * @return string
+     */
     public function getRawData()
     {
         return $this->m_rawData;
@@ -33,23 +37,21 @@ class Tag
 
     /**
      *
-     *
-     * @param unknown_type $s
-     * @return unknown
+     * @param  string $s
+     * @return bool
      */
     private static function _extractIsClosingTag($s)
     {
         $s = trim(mb_substr($s, 1, mb_strlen($s) - 2));
-        return (mb_substr($s, 0, 1) == '/');
+        return (mb_substr($s, 0, 1) === '/');
     }
 
     /**
      *
-     *
-     * @param unknown_type $s
-     * @return unknown
+     * @param  string $s
+     * @return array
      */
-    private static function _extractTagAttributes($s)
+    protected static function _extractTagAttributes($s)
     {
         $ret = array();
 
