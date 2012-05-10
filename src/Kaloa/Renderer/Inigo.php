@@ -20,7 +20,9 @@ use Kaloa\Renderer\Inigo\Handler\YouTubeHandler;
  */
 class Inigo extends AbstractRenderer
 {
-    /** @var Parser */
+    /**
+     * @var Parser
+     */
     protected $inigoParser = null;
 
     /**
