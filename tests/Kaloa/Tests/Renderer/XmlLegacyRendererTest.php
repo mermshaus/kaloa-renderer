@@ -11,7 +11,8 @@ class XmlLegacyRendererTest extends PHPUnit_Framework_TestCase
     public function testIntegrity()
     {
         // Environment
-        $contentToRender = file_get_contents(__DIR__ . '/examples/xmllegacy/arrayobject.xml');
+        #$contentToRender = file_get_contents(__DIR__ . '/examples/xmllegacy/arrayobject.xml');
+        $contentToRender = file_get_contents(__DIR__ . '/examples/xmllegacy/youtube.xml');
         $resourceBasePath = __DIR__ . '/examples/xmllegacy';
         $filter = 'xmllegacy';
 
@@ -25,6 +26,6 @@ class XmlLegacyRendererTest extends PHPUnit_Framework_TestCase
 
         $output = $renderer->render($contentToRender);
 
-        #var_dump($output);
+        var_dump($output);
     }
 }

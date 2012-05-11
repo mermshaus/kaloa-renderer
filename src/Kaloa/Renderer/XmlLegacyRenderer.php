@@ -6,13 +6,24 @@ use DOMDocument;
 use XSLTProcessor;
 use Kaloa\Renderer\AbstractRenderer;
 
+/**
+ *
+ */
 class XmlLegacyRenderer extends AbstractRenderer
 {
+    /**
+     * @var type
+     */
     protected static $myself;
 
-    /** @var XSLTProcessor */
+    /**
+     * @var XSLTProcessor
+     */
     protected $xsltProcessor = null;
 
+    /**
+     *
+     */
     protected function init()
     {
         self::$myself = $this;
@@ -20,53 +31,14 @@ class XmlLegacyRenderer extends AbstractRenderer
         $this->initXsltProcessor();
     }
 
+    /**
+     *
+     */
     protected function initXsltProcessor()
     {
-        $className = __CLASS__;
+        $xsl = file_get_contents(__DIR__ . '/xmllegacy.xsl');
 
-        $xsl = <<<EOT
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:php="http://php.net/xsl">
-<xsl:output method="xml" encoding="UTF-8" indent="no"/>
-
-<xsl:template match="youtube">
-<div class="blog_youtube_container">
-    <object type="application/x-shockwave-flash"
-            class="blog_youtube"
-            data="http://www.youtube.com/v/{@id}"
-    >
-      <param name="movie"
-             value="http://www.youtube.com/v/{@id}&amp;hl=en&amp;fs=0"
-      />
-    </object>
-</div>
-</xsl:template>
-
-<xsl:template match="code">
-    <xsl:copy-of select="php:function('$className::highlight', string(.), string(@lang))" />
-</xsl:template>
-
-<xsl:template match="img/@src">
-    <xsl:attribute name="src">
-        <xsl:copy-of select="php:function('$className::imageUrl', string(.))" />
-    </xsl:attribute>
-</xsl:template>
-
-<xsl:template match="a/@href">
-    <xsl:attribute name="href">
-        <xsl:copy-of select="php:function('$className::linkUrl', string(.))" />
-    </xsl:attribute>
-</xsl:template>
-
-<!-- the identity template -->
-<xsl:template match="@*|node()">
-  <xsl:copy>
-    <xsl:apply-templates select="@*|node()"/>
-  </xsl:copy>
-</xsl:template>
-
-</xsl:stylesheet>
-EOT;
+        $xsl = str_replace('__CLASS__', __CLASS__, $xsl);
 
         $xslDoc = new DOMDocument();
         $xslDoc->loadXML($xsl);
@@ -78,6 +50,11 @@ EOT;
         $this->xsltProcessor = $xsltProcessor;
     }
 
+    /**
+     *
+     * @param  string $input
+     * @return string
+     */
     public function render($input)
     {
         $xmlCode = '<?xml version="1.0" encoding="utf-8"?>
@@ -92,9 +69,17 @@ EOT;
 
         $tmp = $this->xsltProcessor->transformToDoc($xmldoc);
 
-        return substr($tmp->saveXML($tmp->documentElement), 6, -7);
+        $html = $tmp->saveHTML($tmp->documentElement);
+        $html = substr($html, 6, -7);
+
+        return $html;
     }
 
+    /**
+     *
+     * @param  string $path
+     * @return string
+     */
     public static function imageUrl($path)
     {
         if (preg_match('/^https?:\/\//', $path)) {
@@ -105,6 +90,11 @@ EOT;
                . $path;
     }
 
+    /**
+     *
+     * @param  string $path
+     * @return string
+     */
     public static function linkUrl($path)
     {
         if (preg_match('/^(https?:\/\/|mailto:)/', $path)) {
@@ -120,8 +110,8 @@ EOT;
      *
      * @todo OMG this method can't be efficient
      *
-     * @param string $source
-     * @param string $lang
+     * @param  string $source
+     * @param  string $language
      * @return DOMElement?
      */
     public static function highlight($source, $language)
@@ -195,7 +185,13 @@ EOT;
                 #        . '</span>';
             }
 
-            $code[$i] = preg_replace_callback('/>(.*?)</s', function ($matches) { return '>' . str_replace(' ', '&nbsp;<wbr/>', $matches[1]) . '<'; }, $code[$i]);
+            $code[$i] = preg_replace_callback(
+                    '/>(.*?)</s',
+                    function ($matches)
+                    {
+                        return '>' . str_replace(' ', '&nbsp;<wbr/>', $matches[1]) . '<';
+                    },
+                    $code[$i]);
 
             $parsed_code .= $code[$i] . "\n";
         }

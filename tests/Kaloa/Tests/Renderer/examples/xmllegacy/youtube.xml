@@ -1,0 +1,19 @@
+<p>Test1</p>
+
+<youtube id="uzQ4f35JMUk" />
+
+<p>Test2</p>
+
+<youtube id="uzQ4f35JMUk" />
+
+<p>Test3</p>
+
+<code lang="php"><![CDATA[
+echo "bla";
+]]></code>
+
+<p>Test4</p>
+
+<x>x_bla_x</x>
+
+<p>Test5</p>
