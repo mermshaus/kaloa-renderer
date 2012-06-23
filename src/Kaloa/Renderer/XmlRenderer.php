@@ -40,6 +40,17 @@ class XmlRenderer extends AbstractRenderer
         return $retVal;
     }
 
+    /**
+     * http://www.php.net/manual/en/domdocument.savexml.php#95252
+     */
+    protected function xml2xhtml($xml)
+    {
+        return preg_replace_callback('#<(\w+)([^>]*)\s*/>#s', create_function('$m', '
+            $xhtml_tags = array("br", "hr", "input", "frame", "img", "area", "link", "col", "base", "basefont", "param");
+            return in_array($m[1], $xhtml_tags) ? "<$m[1]$m[2] />" : "<$m[1]$m[2]></$m[1]>";
+        '), $xml);
+    }
+
     public function registerRule(AbstractRule $rule, $weight = 0)
     {
         if (!isset($this->rules[$weight])) {
@@ -81,7 +92,12 @@ class XmlRenderer extends AbstractRenderer
             }
         }
 
-        return preg_replace('!<root[^>]*>(.*)</root>!s', '$1', $xmldoc->saveXML($xmldoc->documentElement));
+        $s = preg_replace('!<root[^>]*>(.*)</root>!s', '$1', $xmldoc->saveXML($xmldoc->documentElement));
+
+        // Handle self-closing tags
+        $s = $this->xml2xhtml($s);
+
+        return $s;
     }
 
     public function firePreSaveEvent($xmlCode)

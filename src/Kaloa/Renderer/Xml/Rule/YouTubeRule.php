@@ -18,16 +18,8 @@ class YouTubeRule extends AbstractRule
             $id = $node->getAttribute('id');
 
             $xml = <<<EOT
-<div class="blog_youtube_container" style="width: 400px; height: 300px;">
-<object type="application/x-shockwave-flash"
-        class="blog_youtube"
-            style="display: block; width: 100%; height: 100%;"
-        data="http://www.youtube.com/v/$id"
->
-  <param name="movie"
-         value="http://www.youtube.com/v/$id&amp;hl=en&amp;fs=0"
-  />
-</object>
+<div class="videoWrapper">
+<iframe src="http://www.youtube.com/embed/$id" frameborder="0"></iframe>
 </div>
 EOT;
 
