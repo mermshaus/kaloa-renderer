@@ -26,6 +26,6 @@ class XmlLegacyRendererTest extends PHPUnit_Framework_TestCase
 
         $output = $renderer->render($contentToRender);
 
-        var_dump($output);
+        #var_dump($output);
     }
 }
