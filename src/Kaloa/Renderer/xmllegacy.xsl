@@ -12,8 +12,8 @@
         </div>
     </xsl:template>
 
-    <xsl:template match="x">
-        <p>y</p>
+    <xsl:template match="var">
+        <code><xsl:copy-of select="string(.)" /></code>
     </xsl:template>
 
     <xsl:template match="code">

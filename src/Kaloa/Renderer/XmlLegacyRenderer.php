@@ -116,89 +116,14 @@ class XmlLegacyRenderer extends AbstractRenderer
      */
     public static function highlight($source, $language)
     {
-        #$geshi = new Geshi_Parser();
-
-        #$geshi->overall_class = 'geshi';
-        #$geshi->keyword_links = false;
-        #$geshi->overall_id = 'test';
-
-        #$geshi->enable_classes();
-        #$geshi->enable_ids();
-
         // Smart trim code
         $source = preg_replace('/(?:\s*\n)?(.*)$/s', '$1', $source);
         $source = rtrim($source);
 
-        #$geshi->set_language($language);
-        #$geshi->set_source($source);
-
-        #$geshi->highlight_lines_extra(array(-1));
-
-
-        #$source = $geshi->parse_code();
 
         $source = self::$myself->config->getSyntaxHighlighter()->highlight($source, $language);
 
-        /** @todo Otherwise, DOMDocument would warn about unknown 'nbsp' entities */
-        //$source = str_replace('&nbsp;', ' ', $source);
-
-        //$source = preg_replace('/^(<pre[^>]*>)(.*)(<\/pre>)$/ms', '$1<code>$2</code>$3', $source);
-
-
-        // Post process Geshi output
-        // Get stuff between <pre>...</pre>
-
-        $preTop = preg_replace('/(<pre[^>]*>).*/s', '\\1', $source);
-        $code = preg_replace('/<pre[^>]*>(.*)<\/pre>/s', '\\1', $source);
-
-        $code = explode("\n", $code);
-        $count = count($code);
-        $parsed_code = '';
-
-        for ($i = 0; $i < $count; $i++) {
-            /** @todo mermshaus Downstream hack */
-            if (true) {
-                $c = 0;
-                if ($code[$i] === '&nbsp;') {
-                    // Empty line
-                    $c = 6;
-                } else {
-                    while (substr($code[$i], $c, 1) === ' ') {
-                        $c++;
-                    }
-                }
-
-                /*$code[$i] = substr($code[$i], 0, $c)
-                        . '<span style="display: block; background: #eee;" id="' . $geshi->overall_id . '-' . $i . '">'
-                        . substr($code[$i], $c)
-                        . '</span>';*/
-
-                $class = '';
-                if (in_array($i, array(5, 9, 12))) {
-                    $class = 'line hl';
-                } else {
-                    $class = 'line';
-                }
-
-                #$code[$i] = '<span class="'.$class.'" id="' . $geshi->overall_id . '-' . $i . '">'
-                #        . $code[$i]
-                #        . '</span>';
-            }
-
-            $code[$i] = preg_replace_callback(
-                    '/>(.*?)</s',
-                    function ($matches)
-                    {
-                        return '>' . str_replace(' ', '&nbsp;<wbr/>', $matches[1]) . '<';
-                    },
-                    $code[$i]);
-
-            $parsed_code .= $code[$i] . "\n";
-        }
-
-        $parsed_code = $preTop . '<code>'
-        . rtrim($parsed_code)
-        . '</code></pre>';
+        $parsed_code = $source;
 
         $parsed_code = '<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE root [
