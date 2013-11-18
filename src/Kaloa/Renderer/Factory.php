@@ -5,14 +5,13 @@ namespace Kaloa\Renderer;
 use Exception;
 use Kaloa\Renderer\Config;
 use Kaloa\Renderer\Inigo;
-use Kaloa\Renderer\XmlRenderer;
-use Kaloa\Renderer\Xml\Rule\TocRule;
-use Kaloa\Renderer\Xml\Rule\YouTubeRule;
+use Kaloa\Renderer\Xml\Rule\FootnotesRule;
 use Kaloa\Renderer\Xml\Rule\ListingsRule;
 use Kaloa\Renderer\Xml\Rule\PrefixRelativeUrisRule;
-use Kaloa\Renderer\Xml\Rule\FootnotesRule;
+use Kaloa\Renderer\Xml\Rule\TocRule;
+use Kaloa\Renderer\Xml\Rule\YouTubeRule;
 use Kaloa\Renderer\XmlLegacyRenderer;
-use Kaloa\Renderer\SyntaxHighlighter;
+use Kaloa\Renderer\XmlRenderer;
 
 class Factory
 {
@@ -29,8 +28,6 @@ class Factory
                 $renderer = new Inigo($config);
                 break;
             case 'xml':
-                $sh = new SyntaxHighlighter();
-
                 /*$geshi->overall_class = 'geshi';
                 $geshi->keyword_links = false;
                 $geshi->overall_id = 'test';
@@ -41,7 +38,7 @@ class Factory
                 $renderer = new XmlRenderer($config);
                 $renderer->registerRule(new TocRule());
                 $renderer->registerRule(new YouTubeRule());
-                $renderer->registerRule(new ListingsRule($sh));
+                $renderer->registerRule(new ListingsRule($config->getSyntaxHighlighter()));
                 $renderer->registerRule(new PrefixRelativeUrisRule());
                 $renderer->registerRule(new FootnotesRule());
                 break;

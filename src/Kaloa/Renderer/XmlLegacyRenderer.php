@@ -137,7 +137,7 @@ class XmlLegacyRenderer extends AbstractRenderer
 
         #$source = $geshi->parse_code();
 
-        $source = '<pre>' . htmlspecialchars($source, ENT_QUOTES, 'UTF-8') . '</pre>';
+        $source = self::$myself->config->getSyntaxHighlighter()->highlight($source, $language);
 
         /** @todo Otherwise, DOMDocument would warn about unknown 'nbsp' entities */
         //$source = str_replace('&nbsp;', ' ', $source);

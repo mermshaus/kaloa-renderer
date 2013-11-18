@@ -4,6 +4,7 @@ namespace Kaloa\Renderer\Inigo\Handler;
 
 use Kaloa\Renderer\Inigo\Handler\ProtoHandler;
 use Kaloa\Renderer\Inigo\Parser;
+use Kaloa\Renderer\SyntaxHighlighter;
 
 /**
  *
@@ -18,13 +19,22 @@ class CodeHandler extends ProtoHandler
 
     /**
      *
+     * @var SyntaxHighlighter
      */
-    public function __construct()
+    protected $syntaxHighlighter = null;
+
+    /**
+     *
+     * @param SyntaxHighlighter $syntaxHighlighter
+     */
+    public function __construct(SyntaxHighlighter $syntaxHighlighter)
     {
         $this->name = 'code';
 
         $this->type = Parser::TAG_OUTLINE | Parser::TAG_PRE
                 | Parser::TAG_CLEAR_CONTENT;
+
+        $this->syntaxHighlighter = $syntaxHighlighter;
     }
 
     /**
@@ -40,12 +50,10 @@ class CodeHandler extends ProtoHandler
             $lang = $this->fillParam($data, 'lang', '', true);
 
             $this->lang = $lang;
-
-            $ret = '<pre>';
         } else {
-            $ret = $data['content'];
+            $ret = $this->syntaxHighlighter->highlight($data['content'], $this->lang);
 
-            $ret .= '</pre>' . "\n\n";
+            $ret .= "\n\n";
         }
 
         return $ret;

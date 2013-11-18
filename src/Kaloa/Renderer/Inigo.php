@@ -83,7 +83,7 @@ class Inigo extends AbstractRenderer
         ->addHandler(new AmazonHandler())
         ->addHandler(new AbbrHandler())
         ->addHandler(new HTMLHandler())
-        ->addHandler(new CodeHandler())
+        ->addHandler(new CodeHandler($this->config->getSyntaxHighlighter()))
         ->addHandler(new FootnotesHandler())
         ->addHandler(new YouTubeHandler());
     }
