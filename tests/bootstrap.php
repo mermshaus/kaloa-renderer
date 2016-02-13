@@ -1,12 +1,10 @@
 <?php
 
-if ((!$loader = @include __DIR__.'/../../../autoload.php')
-        && (!$loader = @include __DIR__.'/../vendor/autoload.php')
+if (
+    (!$loader = @include __DIR__.'/../../../autoload.php')
+    && (!$loader = @include __DIR__.'/../vendor/autoload.php')
 ) {
-    die('You must set up the project dependencies, run the following commands:'.PHP_EOL.
-        'curl -s http://getcomposer.org/installer | php'.PHP_EOL.
-        'php composer.phar install'.PHP_EOL);
+    die("You must set up the project dependencies, run the following commands:\n"
+        . "curl -s http://getcomposer.org/installer | php\n"
+        . "php composer.phar install\n");
 }
-
-$loader->add('Kaloa\\Tests', __DIR__);
-$loader->register();

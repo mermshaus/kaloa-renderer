@@ -1,4 +1,4 @@
-/nbproject/
-/vendor/
-/composer.phar
-/composer.lock
+build
+nbproject
+vendor
+composer.lock
