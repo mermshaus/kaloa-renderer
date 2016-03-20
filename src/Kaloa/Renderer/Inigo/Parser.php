@@ -15,7 +15,7 @@ use SplStack;
  *
  * @author Marc Ermshaus
  */
-class Parser
+final class Parser
 {
     const TAG_OUTLINE          = 0x1;
     const TAG_INLINE           = 0x2;
@@ -37,10 +37,10 @@ class Parser
     const PC_PARSER_QUOTE_RIGHT = '&laquo;';
     /**/
 
-    protected $s = '';
-    protected $m_stack;
-    protected $m_handlers;
-    protected $m_vars;
+    private $s = '';
+    private $m_stack;
+    private $m_handlers;
+    private $m_vars;
 
     /**
      *
@@ -83,7 +83,7 @@ class Parser
     /**
      *
      */
-    protected function printHandlerMarkup(Tag $tag, $front = true, $tag_content = '')
+    private function printHandlerMarkup(Tag $tag, $front = true, $tag_content = '')
     {
         $data = array();
 
@@ -116,7 +116,7 @@ class Parser
      *                          there are no more tags)
      * @return Tag
      */
-    protected function getNextTag(&$s, $i, &$position)
+    private function getNextTag(&$s, $i, &$position)
     {
         $j = mb_strpos($s, '[', $i);
         $k = mb_strpos($s, ']', $j + 1);
@@ -152,7 +152,7 @@ class Parser
     /**
      *
      */
-    public function Parse($s)
+    public function parse($s)
     {
         // Cleaning the data that shall be parsed
 
@@ -191,7 +191,7 @@ class Parser
      * @param  Tag  $tag
      * @return bool
      */
-    protected function fitsStack(Tag $tag)
+    private function fitsStack(Tag $tag)
     {
         return ($tag->getName() === $this->m_stack->top()->getName());
     }
@@ -199,7 +199,7 @@ class Parser
     /**
      *
      */
-    protected function parseEx()
+    private function parseEx()
     {
         $ret = '';
 
@@ -233,8 +233,11 @@ class Parser
                 // Tag is valid and not inside of a TAG_PRE tag, execute it
 
                 // Get CDATA
-                $cdata .= $this->formatString(mb_substr($this->s, $last_pos,
-                        $tag_pos - $last_pos));
+                $cdata .= $this->formatString(mb_substr(
+                    $this->s,
+                    $last_pos,
+                    $tag_pos - $last_pos
+                ));
 
                 if (!$tag->isClosingTag()) {
                     // Opening tag
@@ -303,8 +306,11 @@ class Parser
             } else {
                 // Tag is CDATA
 
-                $cdata .= $this->formatString(mb_substr($this->s,
-                        $last_pos, $tag_pos - $last_pos) . $tag->getRawData());
+                $cdata .= $this->formatString(mb_substr(
+                    $this->s,
+                    $last_pos,
+                    $tag_pos - $last_pos
+                ) . $tag->getRawData());
             }
 
             $pos = $tag_pos + mb_strlen($tag->getRawData());
@@ -325,7 +331,7 @@ class Parser
      * @param  string $s
      * @return string
      */
-    protected function formatString($s)
+    private function formatString($s)
     {
         static $last_tag = null;
 
@@ -383,7 +389,7 @@ class Parser
      * @param  boolean $outline
      * @return string
      */
-    protected function printCData(&$cdata, $outline = false)
+    private function printCData(&$cdata, $outline = false)
     {
         $cdata = trim($cdata);
         $ret = '';

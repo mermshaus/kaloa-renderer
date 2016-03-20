@@ -6,12 +6,24 @@ namespace Kaloa\Renderer;
  * This is a transitional dummy class. GeSHi had to be removed because it was
  * licensed as GPL, not MIT.
  */
-class SyntaxHighlighter
+final class SyntaxHighlighter implements SyntaxHighlighterInterface
 {
+    /**
+     *
+     * @param string $source
+     * @param string $language
+     * @return string
+     */
     public function highlight($source, $language)
     {
-        // I miss GeSHi
+        $e = function ($s) {
+            return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+        };
 
-        return '<pre>' . htmlspecialchars($source, ENT_QUOTES, 'UTF-8') . '</pre>';
+//        return '<pre><code class="language-' . $e($language) . '">'
+//                . $e($source)
+//                . '</code></pre>';
+
+        return '<pre>' . $e($source) . '</pre>';
     }
 }

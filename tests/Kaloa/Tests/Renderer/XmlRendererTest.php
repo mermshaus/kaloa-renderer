@@ -19,16 +19,13 @@ class XmlRendererTest extends PHPUnit_Framework_TestCase
         #$resourceBasePath = './examples/xml/kaloa_renderer';
         #$filter = 'xml';
 
-        $config = new Config();
-        $config->setResourceBasePath($resourceBasePath);
+        $config = new Config($resourceBasePath);
 
-        $renderer = Factory::createRenderer($config, $filter);
+        $renderer = Factory::createRenderer($filter, $config);
 
         /* Simulate run of preSave hook */
         $contentToRender = $renderer->firePreSaveEvent($contentToRender);
 
-        $output = $renderer->render($contentToRender);
-
-        #var_dump($output);
+        $renderer->render($contentToRender);
     }
 }

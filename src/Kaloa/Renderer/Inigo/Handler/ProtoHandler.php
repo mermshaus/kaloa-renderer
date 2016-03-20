@@ -23,7 +23,7 @@ abstract class ProtoHandler
 
         if ($isDefaultParam && isset($sourceData['params']['(default)'])) {
             $ret = $sourceData['params']['(default)'];
-        } else if (isset($sourceData['params'][$key])) {
+        } elseif (isset($sourceData['params'][$key])) {
             $ret = $sourceData['params'][$key];
         }
 

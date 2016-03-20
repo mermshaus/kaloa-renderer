@@ -16,10 +16,9 @@ class XmlLegacyRendererTest extends PHPUnit_Framework_TestCase
         $resourceBasePath = __DIR__ . '/examples/xmllegacy';
         $filter = 'xmllegacy';
 
-        $config = new Config();
-        $config->setResourceBasePath($resourceBasePath);
+        $config = new Config($resourceBasePath);
 
-        $renderer = Factory::createRenderer($config, $filter);
+        $renderer = Factory::createRenderer($filter, $config);
 
         /* Simulate run of preSave hook */
         $contentToRender = $renderer->firePreSaveEvent($contentToRender);

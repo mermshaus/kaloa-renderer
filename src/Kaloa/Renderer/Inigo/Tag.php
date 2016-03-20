@@ -4,13 +4,40 @@ namespace Kaloa\Renderer\Inigo;
 
 use Kaloa\Renderer\Inigo\Parser;
 
-class Tag
+/**
+ *
+ */
+final class Tag
 {
-    protected $m_name;
-    protected $m_attributes;
-    protected $m_isClosingTag;
-    protected $m_rawData;
-    protected $m_inigo;
+    /**
+     *
+     * @var string
+     */
+    private $name;
+
+    /**
+     *
+     * @var array
+     */
+    private $attributes;
+
+    /**
+     *
+     * @var boolean
+     */
+    private $isClosingTag;
+
+    /**
+     *
+     * @var string
+     */
+    private $rawData;
+
+    /**
+     *
+     * @var Parser
+     */
+    private $inigo;
 
     /**
      *
@@ -19,11 +46,11 @@ class Tag
      */
     public function __construct($s, Parser $inigo)
     {
-        $this->m_rawData      = $s;
-        $this->m_inigo        = $inigo;
-        $this->m_name         = $this->_extractTagName($s);
-        $this->m_attributes   = $this->_extractTagAttributes($s);
-        $this->m_isClosingTag = $this->_extractIsClosingTag($s);
+        $this->rawData      = $s;
+        $this->inigo        = $inigo;
+        $this->name         = $this->extractTagName($s);
+        $this->attributes   = $this->extractTagAttributes($s);
+        $this->isClosingTag = $this->extractIsClosingTag($s);
     }
 
     /**
@@ -32,15 +59,15 @@ class Tag
      */
     public function getRawData()
     {
-        return $this->m_rawData;
+        return $this->rawData;
     }
 
     /**
      *
      * @param  string $s
-     * @return bool
+     * @return boolean
      */
-    private static function _extractIsClosingTag($s)
+    private function extractIsClosingTag($s)
     {
         $s = trim(mb_substr($s, 1, mb_strlen($s) - 2));
         return (mb_substr($s, 0, 1) === '/');
@@ -51,7 +78,7 @@ class Tag
      * @param  string $s
      * @return array
      */
-    protected static function _extractTagAttributes($s)
+    private function extractTagAttributes($s)
     {
         $ret = array();
 
@@ -110,10 +137,10 @@ class Tag
     /**
      *
      *
-     * @param unknown_type $s
-     * @return unknown
+     * @param string $s
+     * @return string
      */
-    private static function _extractTagName($s)
+    private function extractTagName($s)
     {
         if (trim($s) == '') {
             return '';
@@ -138,30 +165,30 @@ class Tag
      */
     public function getName()
     {
-        return $this->m_name;
+        return $this->name;
     }
 
     /**
      *
-     * @return unknown
+     * @return array
      */
     public function getAttributes()
     {
-        return $this->m_attributes;
+        return $this->attributes;
     }
 
     /**
      *
-     * @return bool
+     * @return boolean
      */
     public function isClosingTag()
     {
-        return $this->m_isClosingTag;
+        return $this->isClosingTag;
     }
 
     /**
      *
-     * @return bool
+     * @return boolean
      */
     public function isOfType($tagType)
     {
@@ -169,11 +196,11 @@ class Tag
         $b    = false;
         $i    = 0;
 
-        $tags = $this->m_inigo->getHandlers();
+        $tags = $this->inigo->getHandlers();
         $cnt  = count($tags);
 
         while (!$b && $i < $cnt) {
-            if ($this->m_name == $tags[$i]['name']) {
+            if ($this->name == $tags[$i]['name']) {
                 if ($tags[$i]['type'] & $tagType) {
                     $ret = true;
                 }
@@ -189,18 +216,18 @@ class Tag
 
     /**
      *
-     * @return bool
+     * @return boolean
      */
     public function isValid()
     {
         $b    = false;
         $i    = 0;
 
-        $tags = $this->m_inigo->getHandlers();
+        $tags = $this->inigo->getHandlers();
         $cnt  = count($tags);
 
         while (!$b && $i < $cnt) {
-            if ($this->m_name == $tags[$i]['name']) {
+            if ($this->name == $tags[$i]['name']) {
                 $b = true;
             } else {
                 $i++;

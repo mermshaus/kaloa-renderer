@@ -25,10 +25,9 @@ class InigoRendererTest extends PHPUnit_Framework_TestCase
         $resourceBasePath = __DIR__ . '/examples/inigo/res';
         $filter = 'inigo';
 
-        $config = new Config();
-        $config->setResourceBasePath($resourceBasePath);
+        $config = new Config($resourceBasePath);
 
-        $renderer = Factory::createRenderer($config, $filter);
+        $renderer = Factory::createRenderer($filter, $config);
 
         /* Simulate run of preSave hook */
         $contentToRender = $renderer->firePreSaveEvent($contentToRender);
@@ -51,16 +50,19 @@ class InigoRendererTest extends PHPUnit_Framework_TestCase
         $parser->addHandler(new AbbrHandler());
 
         $this->assertEquals(
-                '<p><abbr title="PHP&gt;=5.4">Traits</abbr></p>',
-                $parser->Parse('[abbr="PHP>=5.4"]Traits[/abbr]'));
+            '<p><abbr title="PHP&gt;=5.4">Traits</abbr></p>',
+            $parser->Parse('[abbr="PHP>=5.4"]Traits[/abbr]')
+        );
 
         $this->assertEquals(
-                '<p><abbr title="PHP&gt;=5.4">Traits</abbr></p>',
-                $parser->Parse('[abbr title="PHP>=5.4"]Traits[/abbr]'));
+            '<p><abbr title="PHP&gt;=5.4">Traits</abbr></p>',
+            $parser->Parse('[abbr title="PHP>=5.4"]Traits[/abbr]')
+        );
 
         $this->assertEquals(
-                '<p><abbr>Traits</abbr></p>',
-                $parser->Parse('[abbr]Traits[/abbr]'));
+            '<p><abbr>Traits</abbr></p>',
+            $parser->Parse('[abbr]Traits[/abbr]')
+        );
     }
 
     /**
@@ -74,10 +76,9 @@ class InigoRendererTest extends PHPUnit_Framework_TestCase
             $resourceBasePath = __DIR__ . '/examples/inigo/res';
             $filter = 'inigo';
 
-            $config = new Config();
-            $config->setResourceBasePath($resourceBasePath);
+            $config = new Config($resourceBasePath);
 
-            $renderer = Factory::createRenderer($config, $filter);
+            $renderer = Factory::createRenderer($filter, $config);
 
             /* Simulate run of preSave hook */
             $contentToRender = $renderer->firePreSaveEvent($contentToRender);

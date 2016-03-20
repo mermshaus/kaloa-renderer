@@ -11,7 +11,7 @@ function sanitizeMagicQuotes()
 {
     // Magic Quotes will be removed in PHP6
     if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) {
-        if (!function_exists('array_stripslashes')) {            
+        if (!function_exists('array_stripslashes')) {
             // Instead of this, array_walk_recursive could be used in PHP5+
             function array_stripslashes(&$var) {
                 if (is_string($var)) {

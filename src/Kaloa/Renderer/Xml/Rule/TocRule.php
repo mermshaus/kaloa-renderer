@@ -46,14 +46,16 @@ class TocRule extends AbstractRule
                 $identifier = rtrim($identifier, '-');
             }
 
-            $identifierFormatted = sprintf($this->config['idFormat'],
-                    $identifier);
+            $identifierFormatted = sprintf(
+                $this->config['idFormat'],
+                $identifier
+            );
 
             $node->setAttribute('id', $identifierFormatted);
 
             if ($thisDepth > $curDepth) {
                 $toc .= "\n".str_repeat('  ', $thisDepth - 1)."<ul>\n";
-            } else if ($i > 0) {
+            } elseif ($i > 0) {
                 $toc .= "</li>\n";
             }
 

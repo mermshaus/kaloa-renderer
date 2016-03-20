@@ -23,7 +23,7 @@ class Inigo extends AbstractRenderer
     /**
      * @var Parser
      */
-    protected $inigoParser = null;
+    private $inigoParser = null;
 
     /**
      *
@@ -36,12 +36,12 @@ class Inigo extends AbstractRenderer
     /**
      *
      */
-    protected function initInigoParser()
+    private function initInigoParser()
     {
         $this->inigoParser = new Parser();
         $inigo = $this->inigoParser;
 
-        $inigo->addSetting('image-dir', $this->config->getResourceBasePath() . '/');
+        $inigo->addSetting('image-dir', $this->getConfig()->getResourceBasePath() . '/');
         $inigo->addSetting('quisp-dir', '');
         //
 
@@ -58,7 +58,12 @@ class Inigo extends AbstractRenderer
         //->addHandler(new SimpleHandler('u', Parser::TAG_INLINE, '<span class="underline">', '</span>'))
         ->addHandler(new SimpleHandler('var', Parser::TAG_INLINE | Parser::TAG_PRE, '<var>', '</var>'))
         //->addHandler(new SimpleHandler('strike', Parser::TAG_INLINE, '<span class="strike">', '</span>'))
-        ->addHandler(new SimpleHandler('quote', Parser::TAG_OUTLINE | Parser::TAG_FORCE_PARAGRAPHS, '<blockquote>', "</blockquote>\n\n"))
+        ->addHandler(new SimpleHandler(
+            'quote',
+            Parser::TAG_OUTLINE | Parser::TAG_FORCE_PARAGRAPHS,
+            '<blockquote>',
+            "</blockquote>\n\n"
+        ))
 
         /* Most replacements are rather simple */
         ->addHandler(new SimpleHandler('h1', Parser::TAG_OUTLINE, "<h1>", "</h1>\n\n"))
@@ -83,7 +88,7 @@ class Inigo extends AbstractRenderer
         ->addHandler(new AmazonHandler())
         ->addHandler(new AbbrHandler())
         ->addHandler(new HTMLHandler())
-        ->addHandler(new CodeHandler($this->config->getSyntaxHighlighter()))
+        ->addHandler(new CodeHandler($this->getConfig()->getSyntaxHighlighter()))
         ->addHandler(new FootnotesHandler())
         ->addHandler(new YouTubeHandler());
     }
@@ -95,6 +100,6 @@ class Inigo extends AbstractRenderer
      */
     public function render($input)
     {
-        return $this->inigoParser->Parse($input);
+        return $this->inigoParser->parse($input);
     }
 }

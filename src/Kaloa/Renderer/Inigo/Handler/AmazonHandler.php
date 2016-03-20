@@ -26,7 +26,7 @@ class AmazonHandler extends ProtoHandler
      * @param  string $author
      * @return string
      */
-    protected function DrawBox($asin, $title, $author)
+    private function drawBox($asin, $title, $author)
     {
         $img = 'http://images.amazon.com/images/P/' . $asin
                 . '.01._SCMZZZZZZZ_V65020934_.jpg';
@@ -56,7 +56,7 @@ class AmazonHandler extends ProtoHandler
             $title  = $this->fillParam($data, 'title', '');
             $author = $this->fillParam($data, 'author', '');
 
-            $ret = $this->DrawBox($asin, $title, $author);
+            $ret = $this->drawBox($asin, $title, $author);
         }
 
         return $ret;

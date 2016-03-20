@@ -28,9 +28,13 @@ class ImgHandler extends ProtoHandler
      * @param  string $dir
      * @return string
      */
-    protected function DrawImage($path, $alt = '', $title = '',
-            $align = Parser::PC_IMG_ALIGN_LEFT, $dir = '')
-    {
+    private function drawImage(
+        $path,
+        $alt = '',
+        $title = '',
+        $align = Parser::PC_IMG_ALIGN_LEFT,
+        $dir = ''
+    ) {
         // width of framing div's border (one side)
         $border_width = 1;
 
@@ -65,7 +69,7 @@ class ImgHandler extends ProtoHandler
                       . $alt . '" ' . $attr . ' />' . "\n"
                   . '    </div>' . "\n"
                   . '    <div class="img_content">';
-        } else if ($align == Parser::PC_IMG_ALIGN_CENTER) {
+        } elseif ($align == Parser::PC_IMG_ALIGN_CENTER) {
             $ret .= '<div class="center">' . "\n"
                   . '  <div class="img">' . "\n"
                   . '    <div class="img_center" style="' . $style . '">' . "\n"
@@ -74,7 +78,7 @@ class ImgHandler extends ProtoHandler
                       . $alt . '" ' . $attr . ' />' . "\n"
                   . '      </div>' . "\n"
                   . '      <div class="img_content">';
-        } else if ($align == Parser::PC_IMG_ALIGN_LEFT) {
+        } elseif ($align == Parser::PC_IMG_ALIGN_LEFT) {
             $ret .= '<div class="img">' . "\n"
                   . '  <div class="img_left" style="' . $style . '">' . "\n"
                   . '    <div class="img_border">' . "\n"
@@ -103,7 +107,7 @@ class ImgHandler extends ProtoHandler
 
             if (isset($data['params']['(default)'])) {
                 $src = $data['params']['(default)'];
-            } else if (isset($data['params']['src'])) {
+            } elseif (isset($data['params']['src'])) {
                 $src = $data['params']['src'];
             }
 
@@ -130,8 +134,8 @@ class ImgHandler extends ProtoHandler
                     break;
             }
 
-            $ret = $this->DrawImage($src, $title, '', $align, $data['vars']['image-dir']);
-        } else if ($this->last_img_align === 'center') {
+            $ret = $this->drawImage($src, $title, '', $align, $data['vars']['image-dir']);
+        } elseif ($this->last_img_align === 'center') {
             $this->last_img_align = '';
             $ret = "</div>\n    </div>\n  </div>\n</div>\n\n";
         } else {

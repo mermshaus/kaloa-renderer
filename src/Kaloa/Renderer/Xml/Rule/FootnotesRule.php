@@ -39,8 +39,10 @@ class FootnotesRule extends AbstractRule
             // Generate random footnote identifier for all footnotes without name
             // attribute
             foreach ($this->runXpathQuery('//footnote[not(@name)]') as $node) {
-                $node->setAttribute('name',
-                        $this->generateRandomFootnoteIdentifier());
+                $node->setAttribute(
+                    'name',
+                    $this->generateRandomFootnoteIdentifier()
+                );
             }
         }
     }

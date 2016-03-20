@@ -13,13 +13,24 @@ use Kaloa\Renderer\Xml\Rule\YouTubeRule;
 use Kaloa\Renderer\XmlLegacyRenderer;
 use Kaloa\Renderer\XmlRenderer;
 
-class Factory
+/**
+ *
+ * @api
+ */
+final class Factory
 {
-    public static function createRenderer(Config $config = null, $type = 'xml')
+    /**
+     *
+     * @param string $type
+     * @param Config $config
+     * @return RendererInterface
+     * @throws Exception
+     */
+    public static function createRenderer($type, Config $config = null)
     {
         $renderer = null;
 
-        if ($config === null) {
+        if (null === $config) {
             $config = new Config();
         }
 
@@ -28,13 +39,6 @@ class Factory
                 $renderer = new Inigo($config);
                 break;
             case 'xml':
-                /*$geshi->overall_class = 'geshi';
-                $geshi->keyword_links = false;
-                $geshi->overall_id = 'test';
-
-                $geshi->enable_classes();
-                $geshi->enable_ids();*/
-
                 $renderer = new XmlRenderer($config);
                 $renderer->registerRule(new TocRule());
                 $renderer->registerRule(new YouTubeRule());
@@ -50,7 +54,7 @@ class Factory
                 break;
             default:
                 throw new Exception('Unknown renderer "' . $type . '"');
-                break;
+                // no break
         }
 
         return $renderer;

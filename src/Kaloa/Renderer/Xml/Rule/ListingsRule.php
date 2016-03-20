@@ -62,9 +62,9 @@ class ListingsRule extends AbstractRule
                 if ($from === null && $length === null) {
                     $from = 1;
                     $length = count($lines);
-                } else if ($from !== null && $length === null) {
+                } elseif ($from !== null && $length === null) {
                     $length = count($lines) - $from + 1;
-                } else if ($from === null && $length !== null) {
+                } elseif ($from === null && $length !== null) {
                     if (isset($this->positionCache[$file])) {
                         $from = $this->positionCache[$file];
                     } else {
@@ -169,7 +169,8 @@ class ListingsRule extends AbstractRule
                         . '</span>';*/
             }
 
-            //$code[$i] = preg_replace_callback('/>(.*?)</s', function ($matches) { return '>' . str_replace(' ', '&nbsp;<wbr/>', $matches[1]) . '<'; }, $code[$i]);
+            //$code[$i] = preg_replace_callback('/>(.*?)</s', function ($matches) { return '>'
+            //. str_replace(' ', '&nbsp;<wbr/>', $matches[1]) . '<'; }, $code[$i]);
 
             $parsed_code .= $code[$i] . "\n";
         }

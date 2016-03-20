@@ -9,6 +9,6 @@ class MarkdownRenderer extends AbstractRenderer
 {
     public function render($input)
     {
-        return $parser = Markdown::defaultTransform($input);
+        return Markdown::defaultTransform($input);
     }
 }

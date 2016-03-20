@@ -6,27 +6,38 @@ use Kaloa\Renderer\Config;
 
 /**
  *
- *
- * @author Marc Ermshaus <marc@ermshaus.org>
  */
-abstract class AbstractRenderer
+abstract class AbstractRenderer implements RendererInterface
 {
-    /** @var Config */
-    protected $config;
+    /**
+     *
+     * @var Config
+     */
+    private $config;
 
-    abstract public function render($input);
-
-    public function firePreSaveEvent($input)
-    {
-        return $input;
-    }
-
+    /**
+     *
+     * @param Config $config
+     */
     public function __construct(Config $config)
     {
         $this->config = $config;
         $this->init();
     }
 
+    /**
+     *
+     * @param string $input
+     * @return string
+     */
+    public function firePreSaveEvent($input)
+    {
+        return $input;
+    }
+
+    /**
+     *
+     */
     protected function init()
     {
         // nop
@@ -36,13 +47,8 @@ abstract class AbstractRenderer
      *
      * @return Config
      */
-    public function getConfig()
+    protected function getConfig()
     {
         return $this->config;
-    }
-
-    public function setConfig(Config $config)
-    {
-        $this->config = $config;
     }
 }

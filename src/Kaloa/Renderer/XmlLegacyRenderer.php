@@ -3,23 +3,25 @@
 namespace Kaloa\Renderer;
 
 use DOMDocument;
-use XSLTProcessor;
 use Kaloa\Renderer\AbstractRenderer;
+use XSLTProcessor;
 
 /**
  *
  */
-class XmlLegacyRenderer extends AbstractRenderer
+final class XmlLegacyRenderer extends AbstractRenderer
 {
     /**
-     * @var type
+     *
+     * @var XmlLegacyRenderer
      */
-    protected static $myself;
+    private static $myself;
 
     /**
+     *
      * @var XSLTProcessor
      */
-    protected $xsltProcessor = null;
+    private $xsltProcessor = null;
 
     /**
      *
@@ -34,7 +36,7 @@ class XmlLegacyRenderer extends AbstractRenderer
     /**
      *
      */
-    protected function initXsltProcessor()
+    private function initXsltProcessor()
     {
         $xsl = file_get_contents(__DIR__ . '/xmllegacy.xsl');
 
@@ -86,7 +88,7 @@ class XmlLegacyRenderer extends AbstractRenderer
             return $path;
         }
 
-        return self::$myself->config->getResourceBasePath() . '/'
+        return self::$myself->getConfig()->getResourceBasePath() . '/'
                . $path;
     }
 
@@ -101,12 +103,11 @@ class XmlLegacyRenderer extends AbstractRenderer
             return $path;
         }
 
-        return self::$myself->config->getResourceBasePath() . '/'
+        return self::$myself->getConfig()->getResourceBasePath() . '/'
                . $path;
     }
 
     /**
-     *
      *
      * @todo OMG this method can't be efficient
      *
@@ -121,7 +122,7 @@ class XmlLegacyRenderer extends AbstractRenderer
         $source = rtrim($source);
 
 
-        $source = self::$myself->config->getSyntaxHighlighter()->highlight($source, $language);
+        $source = self::$myself->getConfig()->getSyntaxHighlighter()->highlight($source, $language);
 
         $parsed_code = $source;
 
@@ -129,7 +130,6 @@ class XmlLegacyRenderer extends AbstractRenderer
 <!DOCTYPE root [
 <!ENTITY nbsp "&#160;">
 ]>' . $parsed_code;
-
 
         $tmp = new DOMDocument();
 

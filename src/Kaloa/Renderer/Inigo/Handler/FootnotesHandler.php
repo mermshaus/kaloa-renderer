@@ -45,7 +45,7 @@ class FootnotesHandler extends ProtoHandler
         if ($data['tag'] === 'fn' && $data['front']) {
             $this->cnt++;
             $ret = '[' . $this->cnt . ']';
-        } else if ($data['tag'] === 'fnt' && !$data['front']) {
+        } elseif ($data['tag'] === 'fnt' && !$data['front']) {
             $this->footnotes[] = $data['content'];
         }
 

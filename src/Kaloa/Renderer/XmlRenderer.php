@@ -8,12 +8,10 @@ use Kaloa\Renderer\Xml\Rule\AbstractRule;
 
 /**
  *
- *
- * @author Marc Ermshaus <marc@ermshaus.org>
  */
-class XmlRenderer extends AbstractRenderer
+final class XmlRenderer extends AbstractRenderer
 {
-    protected $rules = array();
+    private $rules = array();
 
     /**
      * Converts all HTML entities outside of CDATA elements to their corresponding
@@ -22,12 +20,16 @@ class XmlRenderer extends AbstractRenderer
      * @param string $xmlString
      * @return string
      */
-    protected function decodeEntitiesFromXml($xmlString)
+    private function decodeEntitiesFromXml($xmlString)
     {
         $retVal = '';
 
-        $parts = preg_split('/(<!\[CDATA\[.*?\]\]>)/s', $xmlString, -1,
-                PREG_SPLIT_DELIM_CAPTURE);
+        $parts = preg_split(
+            '/(<!\[CDATA\[.*?\]\]>)/s',
+            $xmlString,
+            -1,
+            PREG_SPLIT_DELIM_CAPTURE
+        );
 
         foreach ($parts as $part) {
             if (strpos($part, '<![CDATA[') === 0) {
@@ -41,16 +43,26 @@ class XmlRenderer extends AbstractRenderer
     }
 
     /**
+     *
      * http://www.php.net/manual/en/domdocument.savexml.php#95252
+     *
+     * @param string $xml
+     * @return string
      */
-    protected function xml2xhtml($xml)
+    private function xml2xhtml($xml)
     {
         return preg_replace_callback('#<(\w+)([^>]*)\s*/>#s', create_function('$m', '
-            $xhtml_tags = array("br", "hr", "input", "frame", "img", "area", "link", "col", "base", "basefont", "param");
+            $xhtml_tags = array("br", "hr", "input", "frame", "img",
+                "area", "link", "col", "base", "basefont", "param");
             return in_array($m[1], $xhtml_tags) ? "<$m[1]$m[2] />" : "<$m[1]$m[2]></$m[1]>";
         '), $xml);
     }
 
+    /**
+     *
+     * @param AbstractRule $rule
+     * @param int $weight
+     */
     public function registerRule(AbstractRule $rule, $weight = 0)
     {
         if (!isset($this->rules[$weight])) {
@@ -62,6 +74,11 @@ class XmlRenderer extends AbstractRenderer
         krsort($this->rules);
     }
 
+    /**
+     *
+     * @param string $xmlCode
+     * @return string
+     */
     public function render($xmlCode)
     {
         $xmlCode = '<root xmlns:k="lalalala">' . $xmlCode . '</root>';
@@ -100,6 +117,11 @@ class XmlRenderer extends AbstractRenderer
         return $s;
     }
 
+    /**
+     *
+     * @param string $xmlCode
+     * @return string
+     */
     public function firePreSaveEvent($xmlCode)
     {
         $xmlCode = '<root xmlns:k="lalalala">' . $xmlCode . '</root>';
@@ -107,7 +129,7 @@ class XmlRenderer extends AbstractRenderer
         $xmldoc = new DOMDocument('1.0', 'UTF-8');
         $xmldoc->loadXML($xmlCode);
 
-        foreach ($this->rules as $weight => $rulesArray) {
+        foreach ($this->rules as $rulesArray) {
             foreach ($rulesArray as $rule) {
                 $rule->setDocument($xmldoc);
                 $rule->setRenderer($this);
