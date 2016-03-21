@@ -18,6 +18,14 @@ pre {
     font-family: 'Ubuntu Mono', monospace;
 }
 
+pre > code {
+    display: block;
+    overflow-x: auto;
+    padding: 0.5em;
+    background: #3f3f3f;
+    color: #dcdcdc;
+}
+
 table, pre {
     width: 100%;
 }

@@ -5,10 +5,22 @@ Another paragraph.
 This is
 one single paragraph with a <br /> break.
 
+[icode]$x[/icode] and [icode]$y[/icode] are variables.
+
 [b]strong text[/b]
 
 [i]italic text[/i]
 
+[u]underlined[/u]
+
+[s]strike-through[/s]
+
+[strike]strike-through alias[/strike]
+
+[u][s]underline & strike-through[/s][/u]
+
 [b]strong [i]italic[/i] text[/b]
 
 [em]emphasized [strong]strong[/strong] text[/em]
+
+[off][b]Foo & Bar[/b][/off]

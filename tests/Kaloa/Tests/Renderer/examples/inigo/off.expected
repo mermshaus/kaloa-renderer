@@ -7,3 +7,9 @@
 [li]Not a.[/li]<br />
 [li]paragraph.[/li]<br />
 [/ul]</p>
+
+<p>Foo</p>
+
+<p>[off][/off]</p>
+
+<p>[noparse][/noparse]</p>

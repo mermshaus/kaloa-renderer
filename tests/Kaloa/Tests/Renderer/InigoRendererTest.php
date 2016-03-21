@@ -4,8 +4,6 @@ namespace Kaloa\Tests;
 
 use Kaloa\Renderer\Config;
 use Kaloa\Renderer\Factory;
-use Kaloa\Renderer\Inigo\Handler\AbbrHandler;
-use Kaloa\Renderer\Inigo\Parser;
 use PHPUnit_Framework_TestCase;
 
 /**

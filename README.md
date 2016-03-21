@@ -25,6 +25,37 @@ echo $md->render('**Hello *[World](http://example.org)*!**');
 ~~~
 
 
+## Renderers
+
+### `inigo`
+
+This is basically a BBCode renderer. The parser tries to automatically add `<p>` elements where appropriate. Therefore, a concept of outline and inline tags is supported.
+
+Available tags:
+
+* `i`, `em`, `b`, `strong`
+* `u`, `s`|`strike`
+* `icode`
+* `h1`-`h6`
+* `dl`, `dt`, `dd`
+* `ul`, `ol`, `li`
+* `table`, `tr`, `th`, `td`
+* `quote` (`=@author`)
+* `off`|`noparse`
+* `var`
+* `url`|`link` (`=@href`, `@title`)
+* `img` (`=@src`)
+* `abbr` (`=@title`)
+* `html`
+* `code` (`=@lang`)
+* `fn`, `fnt`
+* `youtube`
+
+---
+
+* `amazon`
+
+
 ## Testing
 
 ~~~ bash

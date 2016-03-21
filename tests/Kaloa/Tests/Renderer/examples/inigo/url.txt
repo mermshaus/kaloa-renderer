@@ -6,4 +6,6 @@
 
 [url href="http://www.ermshaus.org/" title="Foo"]Link[/url]
 
-[url="http://www.ermshaus.org/" title="Foo>bar"]Link[/url]
+[url="http://www.ermshaus.org/?x&y" title="Foo>bar"]Link[/url]
+
+[URL]https://github.com/GeSHi/geshi-1.0/?x&y[/URL]

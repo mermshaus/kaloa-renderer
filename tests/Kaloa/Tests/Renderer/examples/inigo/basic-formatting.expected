@@ -3,12 +3,24 @@
 <p>Another paragraph.</p>
 
 <p>This is<br />
-one single paragraph with a <br /> break.</p>
+one single paragraph with a &lt;br /&gt; break.</p>
 
-<p><strong>strong text</strong></p>
+<p><code>$x</code> and <code>$y</code> are variables.</p>
 
-<p><em>italic text</em></p>
+<p><b>strong text</b></p>
 
-<p><strong>strong <em>italic</em> text</strong></p>
+<p><i>italic text</i></p>
+
+<p><u>underlined</u></p>
+
+<p><s>strike-through</s></p>
+
+<p><s>strike-through alias</s></p>
+
+<p><u><s>underline &amp; strike-through</s></u></p>
+
+<p><b>strong <i>italic</i> text</b></p>
 
 <p><em>emphasized <strong>strong</strong> text</em></p>
+
+<p>[b]Foo &amp; Bar[/b]</p>

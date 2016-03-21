@@ -1,0 +1,6 @@
+[indent]foo
+
+bar
+
+    [indent][h3]baz & boz[/h3][/indent]
+[/indent]

@@ -8,3 +8,9 @@ A paragraph.
 [li]paragraph.[/li]
 [/ul]
 [/off]
+
+Foo
+
+[noparse][off][/off][/noparse]
+
+[off][noparse][/noparse][/off]

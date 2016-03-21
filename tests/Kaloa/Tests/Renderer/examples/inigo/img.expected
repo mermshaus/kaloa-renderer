@@ -3,7 +3,7 @@
     <div class="img_border">
       <img src="__RESOURCE_BASE_PATH__/example.png" alt="Bild: __RESOURCE_BASE_PATH__/example.png" title="__RESOURCE_BASE_PATH__/example.png" width="400" height="300" />
     </div>
-    <div class="img_content"><strong>foo</strong></div>
+    <div class="img_content"><b>foo</b></div>
   </div>
 </div>
 
