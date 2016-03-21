@@ -1,4 +1,4 @@
-<pre><code>1 &gt; 2</code></pre>
+<pre><code class="language-none">1 &gt; 2</code></pre>
 
 <pre><code class="language-php">function f($x) {
     return $x * $x;

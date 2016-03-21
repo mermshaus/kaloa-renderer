@@ -136,7 +136,7 @@ final class Parser
 
         $tagString = mb_substr($s, $j, $k - $j + 1);
 
-        return new Tag($tagString, $this);
+        return new Tag($tagString, $this->getHandlers());
     }
 
     /**

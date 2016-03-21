@@ -17,6 +17,7 @@ final class UrlHandler extends ProtoHandler
     {
         $this->name = 'url|link';
         $this->type = Parser::TAG_INLINE;
+        $this->defaultParam = 'href';
     }
 
     /**
@@ -29,7 +30,7 @@ final class UrlHandler extends ProtoHandler
         $ret = '';
 
         if ($data['front']) {
-            $href = $this->fillParam($data, 'href', '', true);
+            $href = $this->fillParam($data, 'href', '');
 
             $title = $this->fillParam($data, 'title', null);
 

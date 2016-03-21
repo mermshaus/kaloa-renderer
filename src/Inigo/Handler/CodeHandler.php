@@ -34,6 +34,8 @@ final class CodeHandler extends ProtoHandler
                 | Parser::TAG_CLEAR_CONTENT;
 
         $this->syntaxHighlighter = $syntaxHighlighter;
+
+        $this->defaultParam = 'lang';
     }
 
     /**
@@ -46,7 +48,7 @@ final class CodeHandler extends ProtoHandler
         $ret = '';
 
         if ($data['front']) {
-            $this->lang = $this->fillParam($data, 'lang', '', true);
+            $this->lang = $this->fillParam($data, 'lang', '');
         } else {
             $ret = $this->syntaxHighlighter->highlight($data['content'], $this->lang);
             $ret .= "\n\n";

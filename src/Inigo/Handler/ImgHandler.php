@@ -17,6 +17,8 @@ final class ImgHandler extends ProtoHandler
     {
         $this->name = 'img';
         $this->type = Parser::TAG_OUTLINE;
+
+        $this->defaultParam = 'src';
     }
 
     /**
@@ -37,10 +39,8 @@ final class ImgHandler extends ProtoHandler
     ) {
         // width of framing div's border (one side)
         $border_width = 1;
-
         $padding      = 2;
         $ret          = '';
-
         $path         = $dir . $path;
 
         //$title = $this->ParseInline($title);
@@ -102,23 +102,9 @@ final class ImgHandler extends ProtoHandler
         $ret = '';
 
         if ($data['front']) {
-            $src   = '';
-            $title = '';
-            $align = null;
-
-            if (isset($data['params']['(default)'])) {
-                $src = $data['params']['(default)'];
-            } elseif (isset($data['params']['src'])) {
-                $src = $data['params']['src'];
-            }
-
-            if (isset($data['params']['title'])) {
-                $title = $data['params']['title'];
-            }
-
-            if (isset($data['params']['align'])) {
-                $align = $data['params']['align'];
-            }
+            $src   = $this->fillParam($data, 'src', '');
+            $title = $this->fillParam($data, 'title', '');
+            $align = $this->fillParam($data, 'align', null);
 
             //$src = $this->m_image_path . $src;
             $this->last_img_align = $align;
