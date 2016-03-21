@@ -1,5 +1,7 @@
 # kaloa/renderer
 
+[![Build status](https://img.shields.io/travis/mermshaus/kaloa-renderer/master.svg?style=flat-square)](https://travis-ci.org/mermshaus/kaloa-renderer)
+
 The package as a whole is published under the MIT License. See LICENSE for full
 license info.
 
@@ -11,8 +13,14 @@ Marc Ermshaus <marc@ermshaus.org>
 ## Usage
 
 ~~~ php
-$renderer = Kaloa\Renderer\Factory::createRenderer('markdown');
-echo $renderer->render('**Hello *[World](http://example.org)*!**');
+use Kaloa\Renderer\Factory;
+
+$cm = Factory::createRenderer('commonmark');
+echo $cm->render('**Hello *[World](http://example.org)*!**');
+// <p><strong>Hello <em><a href="http://example.org">World</a></em>!</strong></p>
+
+$md = Factory::createRenderer('markdown');
+echo $md->render('**Hello *[World](http://example.org)*!**');
 // <p><strong>Hello <em><a href="http://example.org">World</a></em>!</strong></p>
 ~~~
 

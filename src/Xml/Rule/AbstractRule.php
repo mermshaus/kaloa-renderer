@@ -132,25 +132,25 @@ abstract class AbstractRule
         return $arrayList;
     }
 
-//    /**
-//     * @see http://www.php.net/manual/en/class.domelement.php#86803
-//     * @param mixed $elem
-//     */
-//    protected function getInnerXml($elem)
-//    {
-//        $innerHtml = '';
-//
-//        foreach ($elem->childNodes as $child) {
-//            $tmp_doc = new DOMDocument('1.0', 'UTF-8');
-//            $tmp_doc->appendChild($tmp_doc->importNode($child, true));
-//
-//            $tmp = $tmp_doc->saveXML();
-//            $tmp = preg_replace('/<\?xml[^>]*>\n/', '', $tmp);
-//            $tmp = rtrim($tmp, "\n");
-//
-//            $innerHtml .= $tmp;
-//        }
-//
-//        return $innerHtml;
-//    }
+    /**
+     * @see http://www.php.net/manual/en/class.domelement.php#86803
+     * @param mixed $elem
+     */
+    protected function getInnerXml($elem)
+    {
+        $innerHtml = '';
+
+        foreach ($elem->childNodes as $child) {
+            $tmp_doc = new DOMDocument('1.0', 'UTF-8');
+            $tmp_doc->appendChild($tmp_doc->importNode($child, true));
+
+            $tmp = $tmp_doc->saveXML();
+            $tmp = preg_replace('/<\?xml[^>]*>\n/', '', $tmp);
+            $tmp = rtrim($tmp, "\n");
+
+            $innerHtml .= $tmp;
+        }
+
+        return $innerHtml;
+    }
 }

@@ -1,0 +1,260 @@
+<h1>PHP: Using XML as a "lightweight" markup language</h1>
+
+<p>I have never been a particular fan of lightweight markup languages that introduce their own highly optimized syntax, like Markdown or Textile. Although they should be sufficient in most cases, some of their parsing rules always seemed a bit unstable and ambiguous to me. I would use them for smaller tasks (user comments or simple content editing), but I never found them to be flexible enough for anything more "sophisticated." My major quarrel has always been extensibility. I wanted to have a markup language that is 100 % extensible in an elegant way that seamlessly integrates with the existing syntax.</p>
+
+<p>For quite some time, my answer was a modified version of BBCode that could be transformed into a tag-based tree structure by a custom parser. Using this approach, I was able to define a basic set of tags which could be extended dynamically by any number of new tags designed for different purposes. For instance, apart from the default HTML markup tags like <var>[h1]</var> oder <var>[ul]</var>, I created a plugin that added a <var>[youtube]</var> tag to the set of available tags. This tag took a YouTube video id as an attribute and was transformed into the corresponding code for YouTube video embedding during the rendering routine.</p>
+
+<p>Besides: A different, more business-oriented example would be markup like <var>[article id="12345" mode="preview"]</var> that might add a database-driven info box with a nice product image (à la Amazon) to the output. But for the sake of simplicity, we will stick with examples that are easier to implement.</p>
+
+<p>This system worked quite well, but it always bothered me that I had to add a lot of tags to the markup that would be transformed to HTML output just by replacing the framing BBCode square brackets by HTML's angle ones. That felt rather pointless. So, during the last major overhaul of my website, I gave this some thought and finally, after a lengthy conversation with a friend, it became obvious to me that all I ever wanted as a markup language was indeed a custom version of XHTML. All I had to do was to write HTML in its XML-compliant syntax and add custom XML tags to the markup that would be transformed to standard HTML through rules defined in the parser.</p>
+
+<p>The obvious way to perform the actual transformation from a custom XML markup dialect to HTML is via an XSLT stylesheet. Thankfully, this can be implemented pretty easily, because PHP's <a href="http://php.net/manual/en/book.dom.php">DOM extension</a> offers a comprehensive set of classes for working with XML trees, for applying XSL transformations, or for running XPath queries. During the remainder of this article, I will give you a simple example on how it might be done.</p>
+
+<h3>Something to work with</h3>
+
+<p>Let us start with some rather self-explanatory front-end code (index.php):</p>
+
+<code lang="php"><![CDATA[
+<!DOCTYPE html>
+
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>XML Markup</title>
+    </head>
+
+    <body>
+
+        <?php
+        if (isset($_POST['content'])) {
+            $output = render($_POST['content']);
+            echo '<pre>' . htmlspecialchars($output) . '</pre>';
+            echo $output;
+        }
+        ?>
+
+        <form method="post" action="">
+            <textarea name="content" cols="80" rows="20"><?php
+            if (isset($_POST['content'])) {
+                echo htmlspecialchars($_POST['content']);
+            } else {
+                echo htmlspecialchars("<h1>Hello World!</h1>\n<p>Content goes here</p>");
+            }
+            ?></textarea>
+            <p><input type="submit" value="Go" /></p>
+        </form>
+
+    </body>
+
+</html>
+]]></code>
+
+<p>The code creates a page containing a textarea which holds the custom XML code that should be rendered by clicking the submit button. Once that happens, the submitted XML code string will be transformed to HTML via the <var>render</var> function (which we will add in a second) and displayed both in rendered form and in source code form. For convenience, the XML input is again written into the textarea.</p>
+
+<p>Regarding the XSLT stylesheet, the most simple version does nothing but transform the input to itself, e. g. it does not apply any modifications (transform.xsl):</p>
+
+<code lang="xsl"><![CDATA[
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:php="http://php.net/xsl">
+    <xsl:output method="xml" encoding="UTF-8" indent="yes"/>
+
+    <!-- The identity template -->
+    <xsl:template match="@*|node()">
+        <xsl:copy>
+            <xsl:apply-templates select="@*|node()"/>
+        </xsl:copy>
+    </xsl:template>
+
+</xsl:stylesheet>
+]]></code>
+
+<p>The XSL rule featured in the example is called the "<a href="http://www.xmlplease.com/xsltidentity">identity template</a>." As I do not intend to go into the details of XSL, please refer to a different resource if you have trouble understanding this or one of the following stylesheets.</p>
+
+<p>The next step is to add the <var>render</var> function at the top of index.php:</p>
+
+<code lang="php"><![CDATA[
+<?php
+
+// Everybody loves magic quotes
+if (isset($_POST['content']) && get_magic_quotes_gpc()) {
+    $_POST['content'] = stripslashes($_POST['content']);
+}
+
+function render($xmlCode)
+{
+    // XML documents need one distinct root tag
+    $xmlCode = '<root>' . $xmlCode . '</root>';
+
+    $xmldoc = new DOMDocument();
+    $xmldoc->loadXML($xmlCode);
+    $xsldoc = new DOMDocument();
+    $xsldoc->load('./transform.xsl');
+
+    $proc = new XSLTProcessor();
+    $proc->importStyleSheet($xsldoc);
+
+    $tmp = $proc->transformToDoc($xmldoc);
+
+    // Strip <root> tag and return processed XML
+    return substr($tmp->saveXML($tmp->documentElement), 6, -7);
+}
+
+?><!DOCTYPE html>
+...
+]]></code>
+
+<p>Fire up the example in a browser, type in some HTML code (or leave the default content), and click the submit button. If your PHP distribution is configured correctly, you should see your input as processed by the XSLT stylesheet. For further explanations on how this code works, please consult <a href="http://www.php.net/manual/en/book.dom.php">the corresponding part</a> of the official PHP documentation.</p>
+
+<h3>Simple XSL transformations (<var>&lt;youtube&gt;</var> tag)</h3>
+
+<p>Custom tags may now be added to the markup by simply appending corresponding transformation rules to the XSLT stylesheet.</p>
+
+<code lang="xsl"><![CDATA[
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:php="http://php.net/xsl">
+    <xsl:output method="xml" encoding="UTF-8" indent="yes"/>
+
+    <!-- YouTube tag -->
+    <xsl:template match="youtube">
+        <object type="application/x-shockwave-flash"
+                width="425"
+                height="350"
+                data="http://www.youtube.com/v/{@id}"
+        >
+            <param name="movie"
+                   value="http://www.youtube.com/v/{@id}&amp;hl=en&amp;fs=0"
+            />
+        </object>
+    </xsl:template>
+
+    <!-- The identity template -->
+    <xsl:template match="@*|node()">
+        <xsl:copy>
+            <xsl:apply-templates select="@*|node()"/>
+        </xsl:copy>
+    </xsl:template>
+
+</xsl:stylesheet>
+]]></code>
+
+<p>This rule introduces a <var>&lt;youtube id="xyz" /&gt;</var> tag that gets transformed to the correct HTML code for YouTube video embedding by the XSL processor.</p>
+
+<p>Here is a snippet to try it out:</p>
+
+<code lang="html"><![CDATA[
+<h1>YouTube tag test</h1>
+
+<p>
+    <youtube id="4XpnKHJAok8" />
+</p>
+]]></code>
+
+<p>It should not be hard to see how powerful XSL transformations are even without additional back-end processing. But it gets even more interesting if XSL rules are connected with server-side PHP callbacks.</p>
+
+
+<h3>XSL transformations using PHP callbacks (<var>&lt;php&gt;</var> tag)</h3>
+
+<p>To illustrate the idea of PHP callbacks in XSL, we are going to create a <var>&lt;php&gt;</var> tag that is used to display PHP soure code with proper syntax highlighting.</p>
+
+<p>The additional "PHP tag" XSL rule is rather short. Here is the complete transformation stylesheet:</p>
+
+<code lang="xsl"><![CDATA[
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:php="http://php.net/xsl">
+    <xsl:output method="xml" encoding="UTF-8" indent="yes"/>
+
+    <!-- YouTube tag -->
+    <xsl:template match="youtube">
+        <object type="application/x-shockwave-flash"
+                width="425"
+                height="350"
+                data="http://www.youtube.com/v/{@id}"
+        >
+            <param name="movie"
+                   value="http://www.youtube.com/v/{@id}&amp;hl=en&amp;fs=0"
+            />
+        </object>
+    </xsl:template>
+
+    <!-- PHP tag -->
+    <xsl:template match="php">
+        <pre>
+        <xsl:copy-of select="php:function('hl', string(.))" />
+        </pre>
+    </xsl:template>
+
+    <!-- The identity template -->
+    <xsl:template match="@*|node()">
+        <xsl:copy>
+            <xsl:apply-templates select="@*|node()"/>
+        </xsl:copy>
+    </xsl:template>
+
+</xsl:stylesheet>
+]]></code>
+
+<p>To allow the execution of PHP functions in the stylesheet, <a href="http://php.net/manual/en/xsltprocessor.registerphpfunctions.php"><var>registerPHPFunctions</var></a> needs to be called after the initialization of the <var>XSLTProcessor</var> instance. Additionally, the callback function, called <var>hl</var> (for "highlight"), needs to be defined.</p>
+
+<code lang="php"><![CDATA[
+<?php
+
+// Everybody loves magic quotes
+if (isset($_POST['content']) && get_magic_quotes_gpc()) {
+    $_POST['content'] = stripslashes($_POST['content']);
+}
+
+function hl($s)
+{
+    $tmp = new DOMDocument();
+    $code = highlight_string($s, true);
+    // Ignore non-defined entity issues for now
+    $code = str_replace('&nbsp;', ' ', $code);
+    $tmp->loadXML($code);
+    return $tmp;
+}
+
+function render($xmlCode)
+{
+    // XML documents need one distinct root tag
+    $xmlCode = '<root>' . $xmlCode . '</root>';
+
+    $xmldoc = new DOMDocument();
+    $xmldoc->loadXML($xmlCode);
+    $xsldoc = new DOMDocument();
+    $xsldoc->load('./transform.xsl');
+
+    $proc = new XSLTProcessor();
+    $proc->registerPHPFunctions(); // NEW
+    $proc->importStyleSheet($xsldoc);
+
+    $tmp = $proc->transformToDoc($xmldoc);
+
+    // Strip <root> tag and return processed XML
+    return substr($tmp->saveXML($tmp->documentElement), 6, -7);
+}
+
+?><!DOCTYPE html>
+...
+]]></code>
+
+<p>The <var>hl</var> function uses PHP's built-in <var>highlight_string</var> function to do the actual highlighting. The return value has to be a DOM node instead of a simple string because it should be added as proper HTML code to the transformed output. Otherwise, tag delimiters would get escaped and the final output would contain the HTML source code used to do the highlighting instead of the rendered highlighting.</p>
+
+<p>An example snippet:</p>
+
+<code lang="text"><![CDATA[
+<php><![CDATA[
+<?php
+function helloWorld()
+{
+    // Say hello
+    echo 'Hello World!';
+}
+]]]]><![CDATA[></php>
+]]></code>
+
+<p>The example is wrapped with a <var>&lt;![CDATA[ ... ]]&gt;</var> container to be able to use &lt; and &gt; in their non-entity form in the source code. As we need to write valid XML code, this is a necessity.</p>
+
+<h3>Conclusion</h3>
+
+<p>I am quite satisfied with this approach to a custom markup language, although I admit that writing valid XML code can be a bit of a hassle. Nevertheless, XML is a very well-defined and widespread format that can be processed by <em>a lot</em> of existing tools. The syntax is 100 % non-ambiguous, transformable, seamlessly extensible, and rather easy to learn if your users have basic knowledge of HTML or a comparable markup dialect like BBCode. I also assume that some of the <a href="http://en.wikipedia.org/wiki/Category:JavaScript-based_HTML_editors">JavaScript-based HTML editors</a> can be extended by custom XML tags so that UI-based editing should be a possibility.</p>

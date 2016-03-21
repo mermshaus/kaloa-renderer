@@ -1,0 +1,49 @@
+body {
+    padding: 30px;
+    background-color: #ddd;
+    color: #333;
+}
+
+a {
+    text-decoration: none;
+    color: #09f;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+pre {
+    font-size: 14px;
+    font-family: 'Ubuntu Mono', monospace;
+}
+
+table, pre {
+    width: 100%;
+}
+
+.example-wrapper {
+    margin-left: 50px;
+    margin-right: 50px;
+}
+
+.example {
+    border-collapse: collapse;
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.example td {
+    border: 3px solid #ccc;
+    width: 50%;
+    padding: 20px;
+    vertical-align: top;
+}
+
+.example .input {
+    font-family: monospace;
+}
+
+.example .output {
+    font-family: Ubuntu, sans-serif;
+}

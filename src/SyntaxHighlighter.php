@@ -20,7 +20,7 @@ final class SyntaxHighlighter implements SyntaxHighlighterInterface
             return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
         };
 
-        $classStr = ('' === $language) ? '' : ' class="language-' . $e($language) . '"';
+        $classStr = ('' === $language) ? ' class="language-none"' : ' class="language-' . $e($language) . '"';
 
         return '<pre><code' . $classStr . '>' . $e($source) . '</code></pre>';
     }

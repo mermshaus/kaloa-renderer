@@ -150,7 +150,7 @@ final class ListingsRule extends AbstractRule
 
         $code = explode("\n", $code);
         $count = count($code);
-        $parsed_code = '';
+        $parsedCode = '';
 
         for ($i = 0; $i < $count; $i++) {
             /** @todo mermshaus Downstream hack */
@@ -189,11 +189,11 @@ final class ListingsRule extends AbstractRule
             //$code[$i] = preg_replace_callback('/>(.*?)</s', function ($matches) { return '>'
             //. str_replace(' ', '&nbsp;<wbr/>', $matches[1]) . '<'; }, $code[$i]);
 
-            $parsed_code .= $code[$i] . "\n";
+            $parsedCode .= $code[$i] . "\n";
         }
 
-        $parsed_code = $preTop . '<code>' . rtrim($parsed_code) . '</code></pre>';
+        $parsedCode = $preTop . '<code>' . rtrim($parsedCode) . '</code></pre>';
 
-        return $parsed_code;
+        return $parsedCode;
     }
 }

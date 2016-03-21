@@ -13,18 +13,18 @@ final class SimpleHandler extends ProtoHandler
      *
      * @var string
      */
-    protected $front;
+    private $front;
 
     /**
      *
      * @var string
      */
-    protected $back;
+    private $back;
 
     /**
      *
      * @param string $name
-     * @param string $type
+     * @param int $type
      * @param string $front
      * @param string $back
      */
@@ -38,7 +38,8 @@ final class SimpleHandler extends ProtoHandler
 
     /**
      *
-     * @param  array  $data
+     * @param array $data
+     *
      * @return string
      */
     public function draw(array $data)

@@ -1,0 +1,26 @@
+[h1][Composer] Package ohne „echte“ Release-Version sinnvoll einbinden[/h1]
+
+Hallo.
+
+Das Package, um das es mir geht, ist GeSHi. [URL]https://github.com/GeSHi/geshi-1.0/[/URL] Es ist als geshi/geshi [URL="https://packagist.org/packages/geshi/geshi"]auf Packagist verfügbar[/URL]. Dort existieren jedoch keine Release-Versionen außer dev-master, weil GeSHi [URL="https://github.com/GeSHi/geshi-1.0/issues/62"]aus historischen Gründen[/URL] ein Tag-Format RELEASE_<major>_<minor>_<parser>_<release> (z. B. "RELEASE_1_0_8_12") nutzt. Dieses Format wird von Packagist nicht erkannt.
+
+Möchte ich nun in einem eigenen Package GeSHi via Packagist einbinden, schreibe ich also [I]"require": { "geshi/geshi": "dev-master" }[/I]. Das funktioniert, hat aber den Nachteil, dass mein eigenes Package (nennen wir das mal "mermshaus/package") dann nicht mehr [I]"minimum-stability": "stable"[/I] erfüllt, wenn es in ein Projekt eingebunden werden soll. Das ist – soweit ich das „herausgefunden“/ausprobiert habe – im Projekt dadurch zu beheben, dass ich dort auch noch mal explizit "geshi/geshi" mit "dev-master" hinzufüge. Beispielsweise:
+
+[code]{
+    "require": {
+        "mermshaus/package": "~1.0",
+        "geshi/geshi": "dev-master"
+    }
+}[/code]
+
+Das gefällt mir aber nicht. Ich hätte es gern so, dass ich nur "mermshaus/package" hinzufügen muss, dass ich in mermshaus/package aber dennoch geshi/geshi nutzen kann.
+
+Hat jemand eine Idee, ob und wie das hinzubiegen ist?
+
+Es hängt im Grunde daran, dass GeSHi ein eigenes Tag-Format nutzt, das Composer/Packagist nicht versteht. "RELEASE_1_0_8_12" müsste für Composer/Packagist so grob "v1.0.8-p12" heißen, obwohl es inhaltlich wohl das Gleiche bedeutet. Ich würde jetzt ungern versuchen, GeSHi dazu zu bringen, was an der Tagging-Strategie zu ändern. (Die machen das wohl seit 10+ Jahren so und haben dazu meines Erachtens auch jede Berechtigung. Was können die dafür, dass ein random Package-Manager das nicht versteht.) Ich möchte auch nicht warten, ob vielleicht jemals ein „Tag-Remapping“-Feature in Composer eingebaut wird. Ich möchte auch nicht wirklich gern den GeSHi-Quellcode in mein Package integrieren (gibt möglicherweise was per Git-Submodule, das halbwegs sinnvoll funktionieren könnte).
+
+Klar ist wohl, dass das Fehlen von Stable-Versionen auf Packagist die Nutzung von GeSHi erschwert. Es gibt „ordentlich getaggte“ [URL="https://packagist.org/packages/easybook/geshi"]Forks von GeSHi[/URL]. Aber was soll man die nutzen, wenn das Original auch grundsätzlich verfügbar ist. Ich würde es gern irgendwie upstream lösen, sodass die tatsächlichen GeSHi-Entwickler/-Maintainer auch die Integration mit Composer/Packagist verwalten können.
+
+Was tun?
+
+[strike]Edit: Vielleicht könnte man mit dem version-Feld in der composer.json-Datei von GeSHi was machen. Von der Nutzung wird zwar zugunsten von Tags abgeraten, aber Tags fallen ja in diesem Fall vermutlich raus. Hat damit jemand Erfahrung? Naheliegende Frage wäre etwa: Wenn ich bei Commit #1 in composer.json [I]"version": "1.0"[/I] stehen habe und das bei Commit #2 nicht ändere, ist dann auf Packagist Commit #1 oder Commit #2 mit dem 1.0-Release verknüpft? Das kann ich aber nachher einfach mal ausprobieren.[/strike]  [INDENT]Okay, das funktoniert nicht, weil Packagist ausschließlich Tags erkennt: [URL="https://github.com/composer/packagist/issues/587#issuecomment-142686483"]https://github.com/composer/packagis...ment-142686483[/URL][/INDENT]

@@ -1,0 +1,125 @@
+<h1>Proin quis nisl sollicitudin, faucibus ipsum quis</h1>
+
+<k:toc/>
+
+
+
+<h2>Test</h2>
+
+<p>Aenean pellentesque cursus ligula vitae molestie. Proin tempor nunc lorem, vel euismod ex vestibulum vel.<footnote>Proin vel lectus nec felis porttitor porttitor at in ligula. Cras libero mauris, commodo at porttitor nec, sagittis nec velit. In varius facilisis pellentesque. Donec ornare malesuada nisl.</footnote> Vestibulum ac orci sapien. Mauris ultricies lectus vitae metus semper consectetur sollicitudin id mi. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus quis arcu felis. Aenean eget quam massa. Sed congue fringilla mauris sit amet ultricies.</p>
+
+
+
+<h3>Foo</h3>
+
+<p>Donec nulla ante, commodo vitae nisi non, pulvinar sodales lectus. In pretium vitae urna vel maximus. Quisque lorem turpis, interdum non dolor vitae, porttitor suscipit quam. Vestibulum id vestibulum orci. Pellentesque vel dapibus justo, sit amet viverra sapien. Sed mollis eros in magna elementum blandit. Duis blandit velit ac feugiat commodo. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Vestibulum efficitur a sapien non luctus. Cras eu pulvinar diam. Donec semper, enim condimentum consequat cursus, ipsum enim pellentesque est, nec volutpat magna tellus id lectus. Integer sodales aliquet tellus eu tristique.</p>
+
+<img src="test.png" />
+<img src="http://test.png" />
+<a href="foo">link</a>
+<a href="https://example.org">link</a>
+<listing caption="Cras gravida lectus">1+1=2</listing>
+
+
+
+<h4>Bar</h4>
+
+<p>Duis mollis rhoncus commodo. Mauris sed ex facilisis lorem maximus vestibulum sed eget nibh. Integer blandit imperdiet pulvinar. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Proin tristique arcu non est luctus egestas. Integer egestas metus vitae sem fringilla iaculis. Pellentesque semper porta aliquet. Nullam consequat porttitor luctus. Nunc sed faucibus felis. Nam tincidunt quis tellus a semper. Integer placerat turpis eu nibh hendrerit, eu imperdiet libero ultricies. Praesent quis eleifend sapien, sed rhoncus orci. Nullam a fringilla nulla. Nunc non sem rhoncus ipsum ultrices consequat.</p>
+
+<p>Curabitur dapibus quis diam in venenatis. Proin semper sagittis auctor. Etiam efficitur accumsan scelerisque. Donec faucibus lorem ullamcorper malesuada dignissim. Pellentesque eleifend accumsan libero, in cursus tortor luctus non. Praesent eu rhoncus ipsum, sed varius nulla. Praesent pulvinar consequat ultrices.</p>
+
+<youtube id="nBQkauAi8SA" />
+<p>Test.<footnote>bla</footnote></p>
+
+
+
+<h2>Quz</h2>
+
+<p>Qux.<footnote><strong>Test</strong></footnote></p>
+<p>
+  Qix.<footnote name="x">
+    <p>Pellentesque tortor quam, sollicitudin a tempor et, sodales nec nunc. Proin pulvinar nunc ut pellentesque tempus. Donec cursus, enim eu fringilla fringilla, felis diam euismod odio, nec semper dui nisl accumsan est. Curabitur ac tortor mi. Quisque eget dui ut ligula aliquet bibendum id nec velit. Praesent sodales sapien vitae velit commodo pulvinar. Vivamus mollis pretium dui vitae tincidunt. Donec fermentum, felis quis ultricies sagittis, felis magna pretium nisl, eget hendrerit ligula tortor nec mi. Nam non nunc quis lectus venenatis commodo vitae quis dui.</p>
+    <p>Sed ut est tristique, pulvinar dolor ac, dignissim turpis. Donec sagittis sollicitudin mi, et euismod leo suscipit congue. Donec et libero vitae orci congue ornare lobortis sit amet libero. Sed eget mauris at lacus molestie efficitur sit amet eu sapien. Vivamus vitae rhoncus ex, nec scelerisque tortor. Suspendisse potenti. Cras vitae nunc nisl. Mauris pretium velit arcu, vitae tristique sem blandit non. Vivamus nec semper lectus.</p>
+  </footnote>
+</p>
+<p>Qaz.<footnote name="x">Qaz</footnote></p>
+<p>Quz.<footnote name="x">Quz</footnote></p>
+
+<p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Quisque maximus feugiat ante, quis cursus magna fermentum mattis. Nullam arcu metus, vehicula at nunc vel, laoreet aliquet ipsum. Sed cursus sem in lectus porttitor, vel tempus nunc vestibulum. Aliquam erat volutpat. Nullam fermentum semper aliquam. Duis semper risus suscipit turpis aliquam efficitur. Etiam sollicitudin enim a convallis interdum.</p>
+
+<p>Phasellus quis mauris massa. Pellentesque accumsan malesuada ex, et condimentum ipsum vulputate nec. Sed eu hendrerit erat, vel sagittis lectus. Nam porta arcu erat. Proin volutpat feugiat ligula, et porttitor tellus luctus quis. Morbi dictum auctor faucibus. Pellentesque ut purus vel ipsum aliquet suscipit. Etiam dignissim venenatis quam ac interdum. Quisque semper pellentesque sagittis. Curabitur nibh dui, placerat vel varius aliquet, consequat vitae felis.</p>
+
+<ol>
+  <li>Quisque</li>
+  <li>Vivamus</li>
+  <li>Mauris</li>
+  <li>Aenean</li>
+  <li>Vestibulum</li>
+</ol>
+
+<p>Nulla blandit purus ac dignissim congue. Proin laoreet erat eget aliquam tincidunt. Aliquam turpis est, posuere eu metus vitae, molestie maximus dolor. In ut elementum lectus. Sed erat arcu, bibendum a erat tincidunt, pellentesque lobortis leo. Donec ac volutpat lorem. In laoreet finibus pretium. Ut finibus viverra mi vitae ullamcorper. Morbi a tempus est. Morbi non pellentesque dolor, eget suscipit enim. Morbi eleifend congue nunc id tristique.</p>
+
+<p>Proin eu lorem congue tellus tristique aliquet nec sed lorem. In euismod enim sit amet tempor molestie. Duis iaculis, risus eu venenatis condimentum, nulla enim sollicitudin nulla, id blandit turpis lorem sit amet orci. Sed commodo dui sit amet diam mollis accumsan. Aliquam ultricies ipsum vel porta imperdiet. Nunc facilisis eget tortor dignissim dictum. Pellentesque urna nisi, luctus et commodo ut, faucibus et urna. Nullam condimentum eleifend nisl. Vestibulum euismod vehicula quam, non molestie enim ullamcorper sit amet.</p>
+
+
+
+<h2>Foo</h2>
+
+
+
+<h3>Bar</h3>
+
+<p>Etiam ligula enim<footnote name="fn:5">Quisque accumsan luctus<footnote><p>Footnote in footnote.</p><p>This doesn’t work, does it?</p></footnote> volutpat. Duis pellentesque, massa in auctor tempor, ex tortor cursus nisl, nec aliquam enim lectus eu dolor. Integer nec egestas purus. In placerat nisl et sapien commodo mollis. Nullam sed scelerisque nunc, non varius purus. Duis aliquet lobortis augue, sit amet pretium lacus aliquet a. Fusce pellentesque sed sem at gravida. Nullam gravida vehicula urna vitae venenatis.</footnote>, vulputate<footnote name="fn:6">Ut a ex tempus, pretium ante id, ullamcorper justo. Ut ac quam dolor. Donec interdum mauris eget mollis auctor.</footnote> eget ligula<footnote name="fn:6">Aenean quam ante, tincidunt a quam at, maximus sollicitudin enim. Quisque id elit sed nibh convallis dignissim. Nullam vitae nisl in mauris mollis maximus.</footnote> fermentum, vulputate elementum sem. Aliquam porta sem justo, eu tempus arcu interdum non. Nunc ullamcorper vestibulum scelerisque. Donec luctus, urna vel maximus laoreet, est quam pharetra magna, ultrices aliquet leo erat nec nulla. Ut risus arcu, finibus a luctus lobortis, maximus sed ex. Vestibulum vitae turpis id arcu luctus dignissim nec sed nunc. Morbi iaculis sollicitudin quam, vel bibendum turpis egestas quis.</p>
+
+<ul>
+  <li><p>Integer at tortor tincidunt, varius arcu vitae, eleifend tellus. Pellentesque posuere diam in nisl cursus rutrum. Aliquam urna velit, placerat lobortis rutrum ultrices, consectetur ut urna. Fusce pellentesque euismod urna at dictum. Quisque vitae nisl sit amet eros efficitur volutpat at porta mauris. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Integer id ante id mi iaculis viverra. Vestibulum nec congue nibh, vel interdum leo. Ut laoreet lectus vel sapien commodo, aliquam iaculis sapien efficitur. Phasellus cursus euismod tristique. Maecenas et lorem ac nisl auctor faucibus.</p></li>
+  <li><p>Donec orci purus, pulvinar blandit est quis, vehicula dapibus nunc. Vivamus sed nisi porta, lacinia quam eget, rhoncus nibh. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Pellentesque elementum dolor ut ipsum hendrerit, ut lacinia massa dictum. Fusce consectetur sem sed fringilla efficitur. Morbi finibus congue ultricies. In hac habitasse platea dictumst. Aliquam semper eros gravida neque vehicula, nec rutrum mauris commodo. Nam et mattis est. Morbi libero ipsum, gravida eget ultrices quis, congue eu erat.</p></li>
+  <li><p>Etiam et odio est. Sed accumsan tempus lacus non bibendum. Nunc vitae porttitor ex, malesuada elementum eros. In nec urna eu diam convallis lobortis. Maecenas pharetra eros eu nunc consectetur, sed vehicula sapien hendrerit. Nam ut erat ut dolor dapibus ullamcorper. Suspendisse eget tempor arcu. Aliquam erat volutpat. Nullam efficitur justo non vestibulum luctus. Pellentesque ac turpis mi.</p></li>
+</ul>
+
+<p>Sed accumsan malesuada vehicula. Integer venenatis elit nunc, sed placerat felis consequat ut. Donec tristique leo dolor, vel rhoncus eros faucibus at. Sed dignissim varius porttitor. Morbi mattis iaculis bibendum. Sed at felis in tortor hendrerit gravida sit amet sit amet velit. In ultricies fringilla dui eu finibus. Quisque tortor ante, condimentum ac finibus ultricies, pretium at ipsum. Pellentesque sed augue mauris. Fusce sollicitudin nibh mi, sed iaculis orci ultrices accumsan. Suspendisse potenti. Donec quis diam aliquet metus feugiat dapibus. In hac habitasse platea dictumst. Donec tempus urna vitae lorem dignissim, non elementum lorem rutrum. Curabitur et elementum urna, a tristique tortor. Vivamus id tortor sit amet dolor ullamcorper pulvinar vitae non mi.</p>
+
+<listing language="c" caption="Lomuto partition scheme"><![CDATA[
+int partition( int a[], int l, int r) {
+   int pivot, i, j, t;
+   pivot = a[l];
+   i = l; j = r+1;
+
+   while( 1)
+   {
+   	do ++i; while( a[i] <= pivot && i <= r );
+   	do --j; while( a[j] > pivot );
+   	if( i >= j ) break;
+   	t = a[i]; a[i] = a[j]; a[j] = t;
+   }
+   t = a[l]; a[l] = a[j]; a[j] = t;
+   return j;
+}
+]]></listing>
+
+<p>Nunc libero leo, finibus at maximus vel, vestibulum et leo. Vivamus ac scelerisque neque, sit amet convallis lorem. Aenean pellentesque ipsum sed nunc rutrum, ut hendrerit lectus congue. Praesent porta elit sem, id mollis nunc sollicitudin quis. Vestibulum in leo eu enim lobortis dapibus ac in ante. Suspendisse convallis mi sit amet diam volutpat, nec aliquet neque suscipit. Sed dignissim nisl id odio tincidunt, vitae efficitur leo porttitor.</p>
+
+<listing language="php" caption="Factorial"><![CDATA[
+function factorial($number)
+{
+    if ($number < 2) {
+        return 1;
+    } else {
+        return ($number * factorial($number - 1));
+    }
+}
+]]></listing>
+
+
+
+<h3>Baz</h3>
+
+
+
+<h3>Quz</h3>
+
+<p>In at feugiat augue. Nullam lorem metus, pulvinar et sem eget, volutpat elementum tellus. Donec non lectus et libero condimentum tempus et in mi. Mauris euismod fringilla velit, sagittis porttitor sapien euismod sit amet. Fusce vitae laoreet risus, quis blandit leo. Interdum et malesuada fames ac ante ipsum primis in faucibus. Duis semper sagittis diam et varius. Suspendisse potenti. Nullam sit amet velit vitae erat condimentum laoreet ac auctor erat. Vivamus pellentesque nunc vitae mattis fringilla. Mauris a odio nec eros tempor pellentesque iaculis nec lectus. Sed quis ipsum facilisis, posuere est quis, commodo turpis. Mauris feugiat ante risus, a dictum ligula faucibus at. Sed rutrum porttitor nisi, et dictum erat pharetra in.</p>
+
+<p>Pellentesque molestie est ac facilisis viverra. Donec tincidunt non magna vitae consectetur. Ut rutrum sodales felis et luctus. Pellentesque erat arcu, imperdiet at viverra in, accumsan ac mauris. Vivamus ut pellentesque neque. Proin in ipsum mollis, viverra quam at, tincidunt eros. Duis ante ligula, malesuada et feugiat vel, rutrum id dui. In eleifend semper erat, ac condimentum purus dignissim vel. Maecenas tincidunt eu odio id accumsan. Sed non dolor tellus. Suspendisse nec mauris tristique, sodales est a, interdum elit. Morbi justo risus, congue nec accumsan in, dictum porttitor risus. Nunc eget rhoncus nulla, quis vestibulum lectus. Integer eget imperdiet quam. Cras bibendum venenatis pretium.</p>
+
+<p>Etiam dignissim, urna eu faucibus sagittis, lorem mi dapibus ligula, eu tincidunt mi lectus a magna. Nunc vitae pretium ex. Fusce vel mauris odio. Vivamus vitae vestibulum nunc, sed dictum mi. Morbi tincidunt erat sit amet nibh eleifend mollis. Nulla facilisi. In hac habitasse platea dictumst. Sed accumsan aliquet purus, sed consequat eros tincidunt blandit. Nullam gravida arcu sed leo fermentum efficitur eget eu felis.</p>

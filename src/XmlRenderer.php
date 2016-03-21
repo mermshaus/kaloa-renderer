@@ -87,7 +87,7 @@ final class XmlRenderer implements RendererInterface
 
         $xmldoc->loadXML($xmlCode);
 
-        foreach ($this->rules as $weight => $rulesArray) {
+        foreach ($this->rules as $rulesArray) {
             foreach ($rulesArray as $rule) {
                 $rule->setDocument($xmldoc);
                 $rule->init();
@@ -95,13 +95,13 @@ final class XmlRenderer implements RendererInterface
             }
         }
 
-        foreach ($this->rules as $weight => $rulesArray) {
+        foreach ($this->rules as $rulesArray) {
             foreach ($rulesArray as $rule) {
                 $rule->render();
             }
         }
 
-        foreach ($this->rules as $weight => $rulesArray) {
+        foreach ($this->rules as $rulesArray) {
             foreach ($rulesArray as $rule) {
                 $rule->postRender();
             }
