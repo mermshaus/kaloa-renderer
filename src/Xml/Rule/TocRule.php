@@ -4,11 +4,18 @@ namespace Kaloa\Renderer\Xml\Rule;
 
 use Kaloa\Renderer\Xml\Rule\AbstractRule;
 
-class TocRule extends AbstractRule
+/**
+ *
+ */
+final class TocRule extends AbstractRule
 {
-    protected $config;
+    private $config;
 
-    public function __construct($config = array())
+    /**
+     *
+     * @param array $config
+     */
+    public function __construct(array $config = array())
     {
         $configDefault = array(
             'idFormat' => 'h:%s'
@@ -17,6 +24,9 @@ class TocRule extends AbstractRule
         $this->config = array_merge($configDefault, $config);
     }
 
+    /**
+     *
+     */
     public function preRender()
     {
         if (count($this->runXpathQuery('//k:toc')) > 0) {
@@ -24,7 +34,10 @@ class TocRule extends AbstractRule
         }
     }
 
-    protected function createToc()
+    /**
+     *
+     */
+    private function createToc()
     {
         $curDepth = 2;
         $i = 0;
@@ -79,7 +92,7 @@ class TocRule extends AbstractRule
             $curDepth--;
         }
 
-        $tocFragment = $this->document->createDocumentFragment();
+        $tocFragment = $this->getDocument()->createDocumentFragment();
         $tocFragment->appendXML($toc);
 
         foreach ($this->runXpathQuery('//k:toc') as $node) {

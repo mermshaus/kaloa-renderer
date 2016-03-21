@@ -5,17 +5,40 @@ namespace Kaloa\Renderer\Xml\Rule;
 use DOMElement;
 use Kaloa\Renderer\Xml\Rule\AbstractRule;
 
-class FootnotesRule extends AbstractRule
+/**
+ *
+ */
+final class FootnotesRule extends AbstractRule
 {
-    protected $config;
+    /**
+     *
+     * @var array
+     */
+    private $config;
 
-    protected $footnotes;
+    /**
+     *
+     * @var array
+     */
+    private $footnotes;
 
-    protected $randomIdStore;
+    /**
+     *
+     * @var array
+     */
+    private $randomIdStore;
 
-    protected $usedIdentifiers;
+    /**
+     *
+     * @var array
+     */
+    private $usedIdentifiers;
 
-    public function __construct($config = array())
+    /**
+     *
+     * @param array $config
+     */
+    public function __construct(array $config = array())
     {
         $configDefault = array(
             'footnoteIdFormat'       => 'fn:%s',
@@ -26,6 +49,9 @@ class FootnotesRule extends AbstractRule
         $this->config = array_merge($configDefault, $config);
     }
 
+    /**
+     *
+     */
     public function init()
     {
         $this->footnotes       = array();
@@ -33,6 +59,9 @@ class FootnotesRule extends AbstractRule
         $this->usedIdentifiers = array();
     }
 
+    /**
+     *
+     */
     public function preSave()
     {
         if ($this->config['useRandomIdsNotNumbers']) {
@@ -47,7 +76,11 @@ class FootnotesRule extends AbstractRule
         }
     }
 
-    protected function generateRandomFootnoteIdentifier()
+    /**
+     *
+     * @return string
+     */
+    private function generateRandomFootnoteIdentifier()
     {
         $letters = range('a', 'z');
 
@@ -63,6 +96,9 @@ class FootnotesRule extends AbstractRule
         return $randomId;
     }
 
+    /**
+     *
+     */
     public function render()
     {
         foreach ($this->runXpathQuery('//footnote') as $node) {
@@ -70,7 +106,7 @@ class FootnotesRule extends AbstractRule
 
             /* @var $node DOMElement */
 
-            $fragment = $this->document->createDocumentFragment();
+            $fragment = $this->getDocument()->createDocumentFragment();
 
             $identifier = (string) $node->getAttribute('name');
             $text = $this->getInnerXml($node);
@@ -115,13 +151,16 @@ EOT;
         }
     }
 
+    /**
+     *
+     */
     public function postRender()
     {
         if (count($this->footnotes) === 0) {
             return;
         }
 
-        $fragment = $this->document->createDocumentFragment();
+        $fragment = $this->getDocument()->createDocumentFragment();
 
         $i = 1;
         $xml = '';
@@ -145,6 +184,6 @@ EOT;
 
         $fragment->appendXML($xml);
 
-        $this->document->documentElement->appendChild($fragment);
+        $this->getDocument()->documentElement->appendChild($fragment);
     }
 }

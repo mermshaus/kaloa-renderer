@@ -17,3 +17,9 @@ echo "bla";
 <x>x_bla_x</x>
 
 <p>Test5</p>
+
+<a href="foo">foo</a>
+<a href="http://example.org/">foo</a>
+
+<img src="bar" />
+<img src="http://example.org/bar.png" />

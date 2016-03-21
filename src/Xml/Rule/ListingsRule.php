@@ -4,27 +4,36 @@ namespace Kaloa\Renderer\Xml\Rule;
 
 use DOMElement;
 use Kaloa\Renderer\Xml\Rule\AbstractRule;
-use Kaloa\Renderer\SyntaxHighlighter;
 
-class ListingsRule extends AbstractRule
+/**
+ *
+ */
+final class ListingsRule extends AbstractRule
 {
-    protected $listingCount;
+    /**
+     *
+     * @var int
+     */
+    private $listingCount;
 
-    protected $positionCache;
+    /**
+     *
+     * @var array
+     */
+    private $positionCache;
 
-    protected $sh;
-
-    public function __construct(SyntaxHighlighter $sh)
-    {
-        $this->sh = $sh;
-    }
-
+    /**
+     *
+     */
     public function init()
     {
         $this->listingCount = 0;
         $this->positionCache = array();
     }
 
+    /**
+     *
+     */
     public function render()
     {
         foreach ($this->runXpathQuery('//listing') as $node) {
@@ -32,7 +41,7 @@ class ListingsRule extends AbstractRule
             $parent = $node->parentNode;
 
 
-            $fragment = $this->document->createDocumentFragment();
+            $fragment = $this->getDocument()->createDocumentFragment();
 
             $language = (string) $node->getAttribute('language');
             $caption  = (string) $node->getAttribute('caption');
@@ -108,14 +117,22 @@ class ListingsRule extends AbstractRule
         }
     }
 
-    protected function shHighlight($source, $language)
+    /**
+     *
+     * @param string $source
+     * @param string $language
+     * @return string
+     */
+    private function shHighlight($source, $language)
     {
         /*$this->geshi->set_language($language);
         $this->geshi->set_source($source);
 
         $this->geshi->highlight_lines_extra(array(-1));*/
 
-        $source = $this->sh->highlight($source, $language);
+        //$source = $this->sh->highlight($source, $language);
+
+        $source = '<pre>' . htmlspecialchars($source, ENT_QUOTES, 'UTF-8') . '</pre>';
 
         #$source = $this->geshi->parse_code();
 
@@ -175,10 +192,7 @@ class ListingsRule extends AbstractRule
             $parsed_code .= $code[$i] . "\n";
         }
 
-        $parsed_code = $preTop . '<code>'
-        . rtrim($parsed_code)
-        . '</code></pre>';
-
+        $parsed_code = $preTop . '<code>' . rtrim($parsed_code) . '</code></pre>';
 
         return $parsed_code;
     }

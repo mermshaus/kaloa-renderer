@@ -3,59 +3,71 @@
 namespace Kaloa\Renderer\Xml\Rule;
 
 use DOMDocument;
+use DOMElement;
+use DOMNode;
 use DOMXPath;
-use Kaloa\Renderer\XmlRenderer;
 
+/**
+ *
+ */
 abstract class AbstractRule
 {
-    /** @var DOMDocument */
-    protected $document;
-
-    /** @var XmlRenderer */
-    protected $renderer;
+    /**
+     *
+     * @var DOMDocument
+     */
+    private $document;
 
     public function init()
     {
-
+        // nop
     }
 
     public function preSave()
     {
-
+        // nop
     }
 
-    public function getRenderer()
-    {
-        return $this->renderer;
-    }
-
-    public function setRenderer($renderer)
-    {
-        $this->renderer = $renderer;
-    }
-
+    /**
+     *
+     * @param DOMDocument $document
+     */
     public function setDocument(DOMDocument $document)
     {
         $this->document = $document;
     }
 
-    public function getDocument()
+    /**
+     *
+     * @return DOMDocument
+     */
+    protected function getDocument()
     {
         return $this->document;
     }
 
     public function preRender()
     {
+        // nop
     }
 
     public function render()
     {
+        // nop
     }
 
     public function postRender()
     {
+        // nop
     }
 
+    /**
+     *
+     * @param string $string
+     * @param int $flags
+     * @param string $charset
+     * @return string
+     */
     protected function escape($string, $flags = ENT_QUOTES, $charset = 'UTF-8')
     {
         return htmlspecialchars($string, $flags, $charset);
@@ -63,11 +75,12 @@ abstract class AbstractRule
 
     /**
      *
-     * @param <type> $xpathExpression
-     * @param <type> $contextNode
+     * @param string $xpathExpression
+     * @param DOMNode $contextNode
+     * @param boolean $documentOrdered
      * @return array
      */
-    protected function runXpathQuery($xpathExpression, $contextNode = null, $documentOrdered = true)
+    protected function runXpathQuery($xpathExpression, DOMNode $contextNode = null, $documentOrdered = true)
     {
         $xp = new DOMXPath($this->document);
         $xp->registerNamespace('k', 'lalalala');
@@ -119,25 +132,25 @@ abstract class AbstractRule
         return $arrayList;
     }
 
-    /**
-     * @see http://www.php.net/manual/en/class.domelement.php#86803
-     * @param mixed $elem
-     */
-    protected function getInnerXml($elem)
-    {
-        $innerHtml = '';
-
-        foreach ($elem->childNodes as $child) {
-            $tmp_doc = new DOMDocument('1.0', 'UTF-8');
-            $tmp_doc->appendChild($tmp_doc->importNode($child, true));
-
-            $tmp = $tmp_doc->saveXML();
-            $tmp = preg_replace('/<\?xml[^>]*>\n/', '', $tmp);
-            $tmp = rtrim($tmp, "\n");
-
-            $innerHtml .= $tmp;
-        }
-
-        return $innerHtml;
-    }
+//    /**
+//     * @see http://www.php.net/manual/en/class.domelement.php#86803
+//     * @param mixed $elem
+//     */
+//    protected function getInnerXml($elem)
+//    {
+//        $innerHtml = '';
+//
+//        foreach ($elem->childNodes as $child) {
+//            $tmp_doc = new DOMDocument('1.0', 'UTF-8');
+//            $tmp_doc->appendChild($tmp_doc->importNode($child, true));
+//
+//            $tmp = $tmp_doc->saveXML();
+//            $tmp = preg_replace('/<\?xml[^>]*>\n/', '', $tmp);
+//            $tmp = rtrim($tmp, "\n");
+//
+//            $innerHtml .= $tmp;
+//        }
+//
+//        return $innerHtml;
+//    }
 }

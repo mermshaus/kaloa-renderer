@@ -8,7 +8,7 @@ use Kaloa\Renderer\Inigo\Parser;
 /**
  *
  */
-class YouTubeHandler extends ProtoHandler
+final class YouTubeHandler extends ProtoHandler
 {
     /**
      *

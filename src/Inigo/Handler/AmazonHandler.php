@@ -8,7 +8,7 @@ use Kaloa\Renderer\Inigo\Parser;
 /**
  *
  */
-class AmazonHandler extends ProtoHandler
+final class AmazonHandler extends ProtoHandler
 {
     /**
      *

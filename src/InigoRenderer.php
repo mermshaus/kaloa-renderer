@@ -41,8 +41,6 @@ final class InigoRenderer implements RendererInterface
         $inigo = $this->inigoParser;
 
         $inigo->addSetting('image-dir', $config->getResourceBasePath() . '/');
-        $inigo->addSetting('quisp-dir', '');
-        //
 
         // Example for multiple tags being displayed in the same way
         $inigo

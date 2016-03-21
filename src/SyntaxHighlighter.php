@@ -14,16 +14,14 @@ final class SyntaxHighlighter implements SyntaxHighlighterInterface
      * @param string $language
      * @return string
      */
-    public function highlight($source, $language)
+    public function highlight($source, $language = '')
     {
         $e = function ($s) {
             return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
         };
 
-//        return '<pre><code class="language-' . $e($language) . '">'
-//                . $e($source)
-//                . '</code></pre>';
+        $classStr = ('' === $language) ? '' : ' class="language-' . $e($language) . '"';
 
-        return '<pre>' . $e($source) . '</pre>';
+        return '<pre><code' . $classStr . '>' . $e($source) . '</code></pre>';
     }
 }

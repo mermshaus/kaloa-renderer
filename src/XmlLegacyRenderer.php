@@ -120,13 +120,10 @@ final class XmlLegacyRenderer implements RendererInterface
     public static function highlight($source, $language)
     {
         // Smart trim code
-        $source = preg_replace('/(?:\s*\n)?(.*)$/s', '$1', $source);
-        $source = rtrim($source);
+        /*$source = preg_replace('/(?:\s*\n)?(.*)$/s', '$1', $source);
+        $source = rtrim($source);*/
 
-
-        $source = self::$myself->config->getSyntaxHighlighter()->highlight($source, $language);
-
-        $parsed_code = $source;
+        $parsed_code = self::$myself->config->getSyntaxHighlighter()->highlight($source, $language);
 
         $parsed_code = '<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE root [
@@ -136,6 +133,7 @@ final class XmlLegacyRenderer implements RendererInterface
         $tmp = new DOMDocument();
 
         $tmp->loadXML($parsed_code);
+
         return $tmp->documentElement;
     }
 }

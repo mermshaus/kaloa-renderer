@@ -5,15 +5,29 @@ namespace Kaloa\Renderer\Xml\Rule;
 use DOMElement;
 use Kaloa\Renderer\Xml\Rule\AbstractRule;
 
-class PrefixRelativeUrisRule extends AbstractRule
+/**
+ *
+ */
+final class PrefixRelativeUrisRule extends AbstractRule
 {
-    protected $prefix;
+    /**
+     *
+     * @var string
+     */
+    private $prefix;
 
+    /**
+     *
+     * @param string $prefix
+     */
     public function __construct($prefix = '')
     {
         $this->prefix = $prefix;
     }
 
+    /**
+     *
+     */
     public function postRender()
     {
         $imageNodes = $this->runXpathQuery('//img[@src]');

@@ -2,18 +2,23 @@
 
 namespace Kaloa\Renderer\Xml\Rule;
 
-use DOMDocument;
 use Kaloa\Renderer\Xml\Rule\AbstractRule;
 
-class YouTubeRule extends AbstractRule
+/**
+ *
+ */
+final class YouTubeRule extends AbstractRule
 {
+    /**
+     *
+     */
     public function render()
     {
         foreach ($this->runXpathQuery('//youtube') as $node) {
             /* @var $node DOMElement */
             $parent = $node->parentNode;
 
-            $fragment = $this->document->createDocumentFragment();
+            $fragment = $this->getDocument()->createDocumentFragment();
 
             $id = $node->getAttribute('id');
 

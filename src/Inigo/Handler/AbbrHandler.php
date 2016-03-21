@@ -8,7 +8,7 @@ use Kaloa\Renderer\Inigo\Parser;
 /**
  *
  */
-class AbbrHandler extends ProtoHandler
+final class AbbrHandler extends ProtoHandler
 {
     /**
      *

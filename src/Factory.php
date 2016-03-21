@@ -45,7 +45,7 @@ final class Factory
                 $renderer = new XmlRenderer();
                 $renderer->registerRule(new TocRule());
                 $renderer->registerRule(new YouTubeRule());
-                $renderer->registerRule(new ListingsRule($config->getSyntaxHighlighter()));
+                $renderer->registerRule(new ListingsRule());
                 $renderer->registerRule(new PrefixRelativeUrisRule());
                 $renderer->registerRule(new FootnotesRule());
                 break;

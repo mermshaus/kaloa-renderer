@@ -12,34 +12,34 @@ final class XmlRenderer implements RendererInterface
 {
     private $rules = array();
 
-    /**
-     * Converts all HTML entities outside of CDATA elements to their corresponding
-     * UTF-8 characters
-     *
-     * @param string $xmlString
-     * @return string
-     */
-    private function decodeEntitiesFromXml($xmlString)
-    {
-        $retVal = '';
-
-        $parts = preg_split(
-            '/(<!\[CDATA\[.*?\]\]>)/s',
-            $xmlString,
-            -1,
-            PREG_SPLIT_DELIM_CAPTURE
-        );
-
-        foreach ($parts as $part) {
-            if (strpos($part, '<![CDATA[') === 0) {
-                $retVal .= $part;
-            } else {
-                $retVal .= html_entity_decode($part, ENT_QUOTES, 'UTF-8');
-            }
-        }
-
-        return $retVal;
-    }
+//    /**
+//     * Converts all HTML entities outside of CDATA elements to their corresponding
+//     * UTF-8 characters
+//     *
+//     * @param string $xmlString
+//     * @return string
+//     */
+//    private function decodeEntitiesFromXml($xmlString)
+//    {
+//        $retVal = '';
+//
+//        $parts = preg_split(
+//            '/(<!\[CDATA\[.*?\]\]>)/s',
+//            $xmlString,
+//            -1,
+//            PREG_SPLIT_DELIM_CAPTURE
+//        );
+//
+//        foreach ($parts as $part) {
+//            if (strpos($part, '<![CDATA[') === 0) {
+//                $retVal .= $part;
+//            } else {
+//                $retVal .= html_entity_decode($part, ENT_QUOTES, 'UTF-8');
+//            }
+//        }
+//
+//        return $retVal;
+//    }
 
     /**
      *
@@ -90,7 +90,6 @@ final class XmlRenderer implements RendererInterface
         foreach ($this->rules as $weight => $rulesArray) {
             foreach ($rulesArray as $rule) {
                 $rule->setDocument($xmldoc);
-                $rule->setRenderer($this);
                 $rule->init();
                 $rule->preRender();
             }
@@ -131,7 +130,6 @@ final class XmlRenderer implements RendererInterface
         foreach ($this->rules as $rulesArray) {
             foreach ($rulesArray as $rule) {
                 $rule->setDocument($xmldoc);
-                $rule->setRenderer($this);
                 $rule->init();
                 $rule->preSave();
             }

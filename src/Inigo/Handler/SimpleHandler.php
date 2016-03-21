@@ -7,7 +7,7 @@ use Kaloa\Renderer\Inigo\Handler\ProtoHandler;
 /**
  *
  */
-class SimpleHandler extends ProtoHandler
+final class SimpleHandler extends ProtoHandler
 {
     /**
      *

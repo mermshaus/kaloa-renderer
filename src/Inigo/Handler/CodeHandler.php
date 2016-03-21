@@ -4,30 +4,29 @@ namespace Kaloa\Renderer\Inigo\Handler;
 
 use Kaloa\Renderer\Inigo\Handler\ProtoHandler;
 use Kaloa\Renderer\Inigo\Parser;
-use Kaloa\Renderer\SyntaxHighlighter;
+use Kaloa\Renderer\SyntaxHighlighterInterface;
 
 /**
  *
  */
-class CodeHandler extends ProtoHandler
+final class CodeHandler extends ProtoHandler
 {
     /**
      *
      * @var string
      */
-    protected $lang;
+    private $lang;
 
     /**
      *
-     * @var SyntaxHighlighter
+     * @var SyntaxHighlighterInterface
      */
-    protected $syntaxHighlighter = null;
+    private $syntaxHighlighter;
 
     /**
      *
-     * @param SyntaxHighlighter $syntaxHighlighter
      */
-    public function __construct(SyntaxHighlighter $syntaxHighlighter)
+    public function __construct(SyntaxHighlighterInterface $syntaxHighlighter)
     {
         $this->name = 'code';
 
@@ -47,16 +46,9 @@ class CodeHandler extends ProtoHandler
         $ret = '';
 
         if ($data['front']) {
-            $lang = $this->fillParam($data, 'lang', '', true);
-
-            $this->lang = $lang;
+            $this->lang = $this->fillParam($data, 'lang', '', true);
         } else {
-            $classStr = ('' === $this->lang) ? '' : ' class="language-' . $this->e($this->lang) . '"';
-
-            $ret = '<pre><code' . $classStr . '>' . $this->e($data['content']) . '</code></pre>';
-
-            #$ret = $this->syntaxHighlighter->highlight($data['content'], $this->lang);
-
+            $ret = $this->syntaxHighlighter->highlight($data['content'], $this->lang);
             $ret .= "\n\n";
         }
 

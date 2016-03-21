@@ -8,7 +8,7 @@ use Kaloa\Renderer\Inigo\Parser;
 /**
  *
  */
-class ImgHandler extends ProtoHandler
+final class ImgHandler extends ProtoHandler
 {
     /**
      *

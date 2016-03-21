@@ -8,7 +8,7 @@ use Kaloa\Renderer\Inigo\Parser;
 /**
  *
  */
-class UrlHandler extends ProtoHandler
+final class UrlHandler extends ProtoHandler
 {
     /**
      *

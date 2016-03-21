@@ -8,19 +8,19 @@ use Kaloa\Renderer\Inigo\Parser;
 /**
  *
  */
-class FootnotesHandler extends ProtoHandler
+final class FootnotesHandler extends ProtoHandler
 {
     /**
      *
      * @var int
      */
-    protected $cnt;
+    private $cnt;
 
     /**
      *
      * @var array
      */
-    protected $footnotes;
+    private $footnotes;
 
     /**
      *

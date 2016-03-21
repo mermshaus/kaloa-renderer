@@ -4,7 +4,6 @@ namespace Kaloa\Renderer\Inigo;
 
 use Kaloa\Renderer\Inigo\Handler\ProtoHandler;
 use Kaloa\Renderer\Inigo\Tag;
-
 use SplStack;
 
 /**
