@@ -12,8 +12,8 @@ Marc Ermshaus <marc@ermshaus.org>
 
 ~~~ php
 $renderer = Kaloa\Renderer\Factory::createRenderer('markdown');
-echo $renderer->render('**Hallo [Welt](http://example.org)!**');
-// <p><strong>Hallo <a href="http://example.org">Welt</a>!</strong></p>
+echo $renderer->render('**Hello *[World](http://example.org)*!**');
+// <p><strong>Hello <em><a href="http://example.org">World</a></em>!</strong></p>
 ~~~
 
 

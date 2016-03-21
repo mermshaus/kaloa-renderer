@@ -31,10 +31,8 @@ class AbbrHandler extends ProtoHandler
         if ($data['front']) {
             $title = $this->fillParam($data, 'title', '', true);
 
-            $title = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
-
             if ($title !== '') {
-                $ret = '<abbr title="' . $title . '">';
+                $ret = '<abbr title="' . $this->e($title) . '">';
             } else {
                 $ret = '<abbr>';
             }

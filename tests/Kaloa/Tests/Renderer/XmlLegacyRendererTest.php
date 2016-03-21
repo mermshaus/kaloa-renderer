@@ -20,11 +20,6 @@ class XmlLegacyRendererTest extends PHPUnit_Framework_TestCase
 
         $renderer = Factory::createRenderer($filter, $config);
 
-        /* Simulate run of preSave hook */
-        $contentToRender = $renderer->firePreSaveEvent($contentToRender);
-
-        $output = $renderer->render($contentToRender);
-
-        #var_dump($output);
+        $renderer->render($contentToRender);
     }
 }

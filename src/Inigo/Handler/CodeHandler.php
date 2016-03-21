@@ -51,7 +51,11 @@ class CodeHandler extends ProtoHandler
 
             $this->lang = $lang;
         } else {
-            $ret = $this->syntaxHighlighter->highlight($data['content'], $this->lang);
+            $classStr = ('' === $this->lang) ? '' : ' class="language-' . $this->e($this->lang) . '"';
+
+            $ret = '<pre><code' . $classStr . '>' . $this->e($data['content']) . '</code></pre>';
+
+            #$ret = $this->syntaxHighlighter->highlight($data['content'], $this->lang);
 
             $ret .= "\n\n";
         }

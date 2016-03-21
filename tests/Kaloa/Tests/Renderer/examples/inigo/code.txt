@@ -1,0 +1,16 @@
+[code]1 > 2[/code]
+[code=php]function f($x) {
+    return $x * $x;
+}[/code]
+[code="php"]function f($x) {
+    return $x * $x;
+}[/code]
+
+
+[code lang="php"]function f($x) {
+    return $x * $x;
+}[/code]
+
+[code lang=php]function f($x) {
+    return $x * $x;
+}[/code]

@@ -2,23 +2,21 @@
 
 namespace Kaloa\Renderer;
 
-use Kaloa\Renderer\AbstractRenderer;
-
-use Kaloa\Renderer\Inigo\Parser;
-use Kaloa\Renderer\Inigo\Handler\SimpleHandler;
-use Kaloa\Renderer\Inigo\Handler\UrlHandler;
-use Kaloa\Renderer\Inigo\Handler\ImgHandler;
-use Kaloa\Renderer\Inigo\Handler\AmazonHandler;
 use Kaloa\Renderer\Inigo\Handler\AbbrHandler;
-use Kaloa\Renderer\Inigo\Handler\HTMLHandler;
+use Kaloa\Renderer\Inigo\Handler\AmazonHandler;
 use Kaloa\Renderer\Inigo\Handler\CodeHandler;
 use Kaloa\Renderer\Inigo\Handler\FootnotesHandler;
+use Kaloa\Renderer\Inigo\Handler\HTMLHandler;
+use Kaloa\Renderer\Inigo\Handler\ImgHandler;
+use Kaloa\Renderer\Inigo\Handler\SimpleHandler;
+use Kaloa\Renderer\Inigo\Handler\UrlHandler;
 use Kaloa\Renderer\Inigo\Handler\YouTubeHandler;
+use Kaloa\Renderer\Inigo\Parser;
 
 /**
  *
  */
-class Inigo extends AbstractRenderer
+final class InigoRenderer implements RendererInterface
 {
     /**
      * @var Parser
@@ -27,21 +25,22 @@ class Inigo extends AbstractRenderer
 
     /**
      *
+     * @param Config $config
      */
-    protected function init()
+    public function __construct(Config $config)
     {
-        $this->initInigoParser();
+        $this->initInigoParser($config);
     }
 
     /**
      *
      */
-    private function initInigoParser()
+    private function initInigoParser(Config $config)
     {
         $this->inigoParser = new Parser();
         $inigo = $this->inigoParser;
 
-        $inigo->addSetting('image-dir', $this->getConfig()->getResourceBasePath() . '/');
+        $inigo->addSetting('image-dir', $config->getResourceBasePath() . '/');
         $inigo->addSetting('quisp-dir', '');
         //
 
@@ -88,7 +87,7 @@ class Inigo extends AbstractRenderer
         ->addHandler(new AmazonHandler())
         ->addHandler(new AbbrHandler())
         ->addHandler(new HTMLHandler())
-        ->addHandler(new CodeHandler($this->getConfig()->getSyntaxHighlighter()))
+        ->addHandler(new CodeHandler($config->getSyntaxHighlighter()))
         ->addHandler(new FootnotesHandler())
         ->addHandler(new YouTubeHandler());
     }

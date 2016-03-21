@@ -142,9 +142,8 @@ final class Tag
      */
     private function extractTagName($s)
     {
-        if (trim($s) == '') {
-            return '';
-        }
+        assert('"" !== trim($s)');
+
         $s = trim(mb_substr($s, 1, mb_strlen($s) - 2));
         if (mb_substr($s, 0, 1) == '/') {
             $s = mb_substr($s, 1);

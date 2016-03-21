@@ -1,0 +1,40 @@
+<div class="img">
+  <div class="img_right" style="width: 408px;">
+    <div class="img_border">
+      <img src="__RESOURCE_BASE_PATH__/example.png" alt="Bild: __RESOURCE_BASE_PATH__/example.png" title="__RESOURCE_BASE_PATH__/example.png" width="400" height="300" />
+    </div>
+    <div class="img_content"><strong>foo</strong></div>
+  </div>
+</div>
+
+<div class="img">
+  <div class="img_left" style="width: 158px;">
+    <div class="img_border">
+      <img src="__RESOURCE_BASE_PATH__/bogus.jpg" alt="Bild: __RESOURCE_BASE_PATH__/bogus.jpg" title="__RESOURCE_BASE_PATH__/bogus.jpg" width="150" height="150" />
+    </div>
+    <div class="img_content"></div>
+  </div>
+</div>
+
+<div class="img">
+  <div class="img_left" style="width: 408px;">
+    <div class="img_border">
+      <img src="__RESOURCE_BASE_PATH__/example.png" alt="Bild: test &lt;" title="test &lt;" width="400" height="300" />
+    </div>
+    <div class="img_content"></div>
+  </div>
+</div>
+
+<div class="center">
+  <div class="img">
+    <div class="img_center" style="width: 408px;">
+      <div class="img_border">
+        <img src="__RESOURCE_BASE_PATH__/example.png" alt="Bild: __RESOURCE_BASE_PATH__/example.png" title="__RESOURCE_BASE_PATH__/example.png" width="400" height="300" />
+      </div>
+      <div class="img_content"><p>foo</p>
+
+<p>&amp; &lt; &quot;bar</p>
+</div>
+    </div>
+  </div>
+</div>

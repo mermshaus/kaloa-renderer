@@ -4,14 +4,11 @@ namespace Kaloa\Renderer;
 
 use Exception;
 use Kaloa\Renderer\Config;
-use Kaloa\Renderer\Inigo;
 use Kaloa\Renderer\Xml\Rule\FootnotesRule;
 use Kaloa\Renderer\Xml\Rule\ListingsRule;
 use Kaloa\Renderer\Xml\Rule\PrefixRelativeUrisRule;
 use Kaloa\Renderer\Xml\Rule\TocRule;
 use Kaloa\Renderer\Xml\Rule\YouTubeRule;
-use Kaloa\Renderer\XmlLegacyRenderer;
-use Kaloa\Renderer\XmlRenderer;
 
 /**
  *
@@ -35,11 +32,17 @@ final class Factory
         }
 
         switch ($type) {
+            case 'commonmark':
+                $renderer = new CommonMarkRenderer($config);
+                break;
             case 'inigo':
-                $renderer = new Inigo($config);
+                $renderer = new InigoRenderer($config);
+                break;
+            case 'markdown':
+                $renderer = new MarkdownRenderer($config);
                 break;
             case 'xml':
-                $renderer = new XmlRenderer($config);
+                $renderer = new XmlRenderer();
                 $renderer->registerRule(new TocRule());
                 $renderer->registerRule(new YouTubeRule());
                 $renderer->registerRule(new ListingsRule($config->getSyntaxHighlighter()));
@@ -48,9 +51,6 @@ final class Factory
                 break;
             case 'xmllegacy':
                 $renderer = new XmlLegacyRenderer($config);
-                break;
-            case 'markdown':
-                $renderer = new MarkdownRenderer($config);
                 break;
             default:
                 throw new Exception('Unknown renderer "' . $type . '"');

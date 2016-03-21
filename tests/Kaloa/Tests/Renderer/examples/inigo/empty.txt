@@ -1,0 +1,5 @@
+[][bogus]
+
+[[url=http://example.org]link[/url]
+
+[url bar="foo"="foo"]

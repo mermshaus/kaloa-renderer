@@ -2,54 +2,47 @@
 
 namespace Kaloa\Tests;
 
-use PHPUnit_Framework_TestCase;
-use Kaloa\Renderer\Config;
 use Kaloa\Renderer\Factory;
+use PHPUnit_Framework_TestCase;
 
 class MarkdownRendererTest extends PHPUnit_Framework_TestCase
 {
     public function testIntegrity()
     {
-        // Environment
-        $contentToRender = file_get_contents(__DIR__ . '/examples/markdown/Auto Links.text');
-        $resourceBasePath = __DIR__ . '/examples/markdown';
-        $filter = 'markdown';
+        $renderer = Factory::createRenderer('markdown');
+        $output = $renderer->render('# Hello World!');
 
-        $config = new Config($resourceBasePath);
-
-        $renderer = Factory::createRenderer($filter, $config);
-
-        /* Simulate run of preSave hook */
-        $contentToRender = $renderer->firePreSaveEvent($contentToRender);
-
-        $output = $renderer->render($contentToRender);
+        $this->assertEquals("<h1>Hello World!</h1>\n", $output);
     }
 
-    public function testBasicParser()
+    public function basicParserProvider()
     {
-        foreach (glob(__DIR__ . '/examples/markdown/*.text') as $mdFile) {
-            // Environment
-            $contentToRender = file_get_contents($mdFile);
-            $resourceBasePath = __DIR__ . '/examples/markdown';
-            $filter = 'markdown';
+        $sets = array();
 
-            $config = new Config($resourceBasePath);
-
-            $renderer = Factory::createRenderer($filter, $config);
-
-            /* Simulate run of preSave hook */
-            $contentToRender = $renderer->firePreSaveEvent($contentToRender);
-
-            $output = $renderer->render($contentToRender);
-
-            #var_dump('blaaaaaaaa' . $output);
-
-            $expected = file_get_contents(substr($mdFile, 0, -5) . '.xhtml');
-
-            $output = str_replace(array("\r\n", "\r"), "\n", $output);
-            $expected = str_replace(array("\r\n", "\r"), "\n", $expected);
-
-            $this->assertEquals($expected, $output, $mdFile);
+        foreach (glob(__DIR__ . '/examples/markdown/*.text') as $file) {
+            $sets[] = array(
+                realpath($file),
+                realpath(substr($file, 0, -5) . '.xhtml')
+            );
         }
+
+        return $sets;
+    }
+
+    /**
+     * @dataProvider basicParserProvider
+     */
+    public function testBasicParser($fileInput, $fileExpected)
+    {
+        $renderer = Factory::createRenderer('markdown');
+
+        $output = $renderer->render(file_get_contents($fileInput));
+
+        $expected = file_get_contents($fileExpected);
+
+        $output   = str_replace(array("\r\n", "\r"), "\n", $output);
+        $expected = str_replace(array("\r\n", "\r"), "\n", $expected);
+
+        $this->assertEquals($expected, $output);
     }
 }

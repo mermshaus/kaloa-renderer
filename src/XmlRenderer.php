@@ -3,13 +3,12 @@
 namespace Kaloa\Renderer;
 
 use DOMDocument;
-use Kaloa\Renderer\AbstractRenderer;
 use Kaloa\Renderer\Xml\Rule\AbstractRule;
 
 /**
  *
  */
-final class XmlRenderer extends AbstractRenderer
+final class XmlRenderer implements RendererInterface
 {
     private $rules = array();
 

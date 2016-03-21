@@ -1,0 +1,9 @@
+[img=example.png align="right"][b]foo[/b][/img]
+
+[img=bogus.jpg][/img]
+
+[img src="example.png" title="test <"][/img]
+
+[img=example.png align="center"]foo
+
+& < "bar[/img]

@@ -45,12 +45,12 @@ class YouTubeHandler extends ProtoHandler
         if ($data['front']) {
             $vid = $this->fillParam($data, 'id', '', true);
 
-            $ret .= '<div class="videoWrapper">';
+            $ret .= '<div class="videoWrapper">' . "\n";
 
-            $ret .=  '<iframe width="560" height="349" src="http://www.youtube.com/embed/'.$vid.'" frameborder="0">';
+            $ret .= '  <iframe width="560" height="349" src="http://www.youtube.com/embed/' . $this->e($vid) . '" frameborder="0">';
 
         } else {
-            $ret .= '</iframe></div>';
+            $ret .= '</iframe>' . "\n" . '</div>' . "\n\n";
         }
 
         return $ret;

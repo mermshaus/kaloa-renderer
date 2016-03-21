@@ -8,6 +8,16 @@ echo '<table border=1>';
 
 
 echo '<tr>';
+echo '<td>commonmark</td>';
+echo '<td>';
+echo Factory::createRenderer('commonmark')->render(
+    file_get_contents(__DIR__ . '/php-markdown-readme.text')
+);
+echo '</td>';
+echo '</tr>';
+
+
+echo '<tr>';
 echo '<td>inigo</td>';
 echo '<td>';
 echo Factory::createRenderer('inigo')->render(

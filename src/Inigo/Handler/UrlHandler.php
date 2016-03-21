@@ -30,17 +30,16 @@ class UrlHandler extends ProtoHandler
 
         if ($data['front']) {
             $href = $this->fillParam($data, 'href', '', true);
-            $href = htmlspecialchars($href, ENT_QUOTES, 'UTF-8');
 
             $title = $this->fillParam($data, 'title', null);
 
             if ($title !== null) {
-                $title = ' title="' . $title . '"';
+                $title = ' title="' . $this->e($title) . '"';
             } else {
-                $title = ' title="Open &quot;' . $href . '&quot;"';
+                $title = ' title="Open &quot;' . $this->e($href) . '&quot;"';
             }
 
-            $ret = '<a href="' . $href . '"' . $title . '>';
+            $ret = '<a href="' . $this->e($href) . '"' . $title . '>';
         } else {
             $ret = '</a>';
         }

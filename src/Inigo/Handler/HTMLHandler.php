@@ -29,7 +29,7 @@ class HTMLHandler extends ProtoHandler
         $ret = '';
 
         if (!$data['front']) {
-            $ret = $data['content'];
+            $ret = $data['content'] . "\n\n";
         }
 
         return $ret;

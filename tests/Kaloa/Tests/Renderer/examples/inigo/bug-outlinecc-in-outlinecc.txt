@@ -1,0 +1,1 @@
+[html]foo[html]<div></div>[/html]bar[/html]

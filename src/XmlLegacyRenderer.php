@@ -3,13 +3,12 @@
 namespace Kaloa\Renderer;
 
 use DOMDocument;
-use Kaloa\Renderer\AbstractRenderer;
 use XSLTProcessor;
 
 /**
  *
  */
-final class XmlLegacyRenderer extends AbstractRenderer
+final class XmlLegacyRenderer implements RendererInterface
 {
     /**
      *
@@ -25,9 +24,14 @@ final class XmlLegacyRenderer extends AbstractRenderer
 
     /**
      *
+     * @var Config
      */
-    protected function init()
+    private $config;
+
+    public function __construct(Config $config)
     {
+        $this->config = $config;
+
         self::$myself = $this;
 
         $this->initXsltProcessor();
@@ -88,8 +92,7 @@ final class XmlLegacyRenderer extends AbstractRenderer
             return $path;
         }
 
-        return self::$myself->getConfig()->getResourceBasePath() . '/'
-               . $path;
+        return self::$myself->config->getResourceBasePath() . '/' . $path;
     }
 
     /**
@@ -103,8 +106,7 @@ final class XmlLegacyRenderer extends AbstractRenderer
             return $path;
         }
 
-        return self::$myself->getConfig()->getResourceBasePath() . '/'
-               . $path;
+        return self::$myself->config->getResourceBasePath() . '/' . $path;
     }
 
     /**
@@ -122,7 +124,7 @@ final class XmlLegacyRenderer extends AbstractRenderer
         $source = rtrim($source);
 
 
-        $source = self::$myself->getConfig()->getSyntaxHighlighter()->highlight($source, $language);
+        $source = self::$myself->config->getSyntaxHighlighter()->highlight($source, $language);
 
         $parsed_code = $source;
 

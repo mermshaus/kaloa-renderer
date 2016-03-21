@@ -2,10 +2,12 @@
 
 namespace Kaloa\Renderer;
 
-use Kaloa\Renderer\AbstractRenderer;
 use Michelf\Markdown;
 
-class MarkdownRenderer extends AbstractRenderer
+/**
+ *
+ */
+final class MarkdownRenderer implements RendererInterface
 {
     public function render($input)
     {

@@ -45,12 +45,13 @@ class ImgHandler extends ProtoHandler
 
         //$title = $this->ParseInline($title);
 
-        // Image exists?
-        if (getimagesize($path) === false) {
-            return;
-        }
+        $width = 150;
+        $attr = 'width="150" height="150"';
 
-        list($width, $height, $type, $attr) = getimagesize($path);
+        // Image exists?
+        if (@getimagesize($path) !== false) {
+            list($width, $height, $type, $attr) = getimagesize($path);
+        }
 
         //$path = $this->m_rel_path . $path;
 
@@ -65,8 +66,8 @@ class ImgHandler extends ProtoHandler
             $ret .= '<div class="img">' . "\n"
                   . '  <div class="img_right" style="' . $style . '">' . "\n"
                   . '    <div class="img_border">' . "\n"
-                  . '      <img src="' . $path . '" alt="Bild: ' . $alt . '" title="'
-                      . $alt . '" ' . $attr . ' />' . "\n"
+                  . '      <img src="' . $this->e($path) . '" alt="Bild: ' . $this->e($alt) . '" title="'
+                      . $this->e($alt) . '" ' . $attr . ' />' . "\n"
                   . '    </div>' . "\n"
                   . '    <div class="img_content">';
         } elseif ($align == Parser::PC_IMG_ALIGN_CENTER) {
@@ -74,16 +75,16 @@ class ImgHandler extends ProtoHandler
                   . '  <div class="img">' . "\n"
                   . '    <div class="img_center" style="' . $style . '">' . "\n"
                   . '      <div class="img_border">' . "\n"
-                  . '        <img src="' . $path . '" alt="Bild: ' . $alt . '" title="'
-                      . $alt . '" ' . $attr . ' />' . "\n"
+                  . '        <img src="' . $this->e($path) . '" alt="Bild: ' . $this->e($alt) . '" title="'
+                      . $this->e($alt) . '" ' . $attr . ' />' . "\n"
                   . '      </div>' . "\n"
                   . '      <div class="img_content">';
         } elseif ($align == Parser::PC_IMG_ALIGN_LEFT) {
             $ret .= '<div class="img">' . "\n"
                   . '  <div class="img_left" style="' . $style . '">' . "\n"
                   . '    <div class="img_border">' . "\n"
-                  . '      <img src="' . $path . '" alt="Bild: ' . $alt . '" title="'
-                      . $alt . '" ' . $attr . ' />' . "\n"
+                  . '      <img src="' . $this->e($path) . '" alt="Bild: ' . $this->e($alt) . '" title="'
+                      . $this->e($alt) . '" ' . $attr . ' />' . "\n"
                   . '    </div>' . "\n"
                   . '    <div class="img_content">';
         }

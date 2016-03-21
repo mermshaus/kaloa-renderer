@@ -28,15 +28,15 @@ class AmazonHandler extends ProtoHandler
      */
     private function drawBox($asin, $title, $author)
     {
-        $img = 'http://images.amazon.com/images/P/' . $asin
+        $img = 'http://images.amazon.com/images/P/' . $this->e($asin)
                 . '.01._SCMZZZZZZZ_V65020934_.jpg';
 
         $ret = '<div class="amazon clear">'
              . '<div class="img-border">'
-             . '<div class="img" style="background-image: url(' . $img . ');"></div>'
+             . '<div class="img" style="background-image: url(' . $this->e($img) . ');"></div>'
              . '</div>'
-             . '<p class="title"><strong>' . $title . '</strong></p>'
-             . '<p class="author">' . $author . '</p>'
+             . '<p class="title"><strong>' . $this->e($title) . '</strong></p>'
+             . '<p class="author">' . $this->e($author) . '</p>'
              . '</div>';
 
         return $ret;

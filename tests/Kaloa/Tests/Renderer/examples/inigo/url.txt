@@ -1,0 +1,9 @@
+[url=http://www.ermshaus.org/]Link[/url]
+
+[url="http://www.ermshaus.org/"]Link[/url]
+
+[url href="http://www.ermshaus.org/"]Link[/url]
+
+[url href="http://www.ermshaus.org/" title="Foo"]Link[/url]
+
+[url="http://www.ermshaus.org/" title="Foo>bar"]Link[/url]

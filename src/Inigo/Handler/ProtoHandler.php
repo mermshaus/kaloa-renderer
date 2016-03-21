@@ -9,13 +9,10 @@ abstract class ProtoHandler
 
     public function initialize()
     {
-
+        // nop
     }
 
-    public function draw(array $data)
-    {
-
-    }
+    abstract public function draw(array $data);
 
     public function fillParam(array $sourceData, $key, $defaultValue, $isDefaultParam = false)
     {
@@ -28,6 +25,11 @@ abstract class ProtoHandler
         }
 
         return $ret;
+    }
+
+    protected function e($s)
+    {
+        return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
     }
 
     public function postProcess($s, array $data)

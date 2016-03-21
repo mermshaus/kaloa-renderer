@@ -1,0 +1,5 @@
+[abbr="PHP>=5.4"]Traits[/abbr]
+
+[abbr title="PHP>=5.4"]Traits[/abbr]
+
+[abbr]Traits[/abbr]
