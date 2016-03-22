@@ -462,7 +462,7 @@ final class Parser
     /**
      * Formats whole blocks of CDATA
      *
-     * @param  &string $cdata
+     * @param  string $cdata
      * @param  boolean $outline
      * @return string
      */

@@ -33,13 +33,13 @@ final class Factory
 
         switch ($type) {
             case 'commonmark':
-                $renderer = new CommonMarkRenderer($config);
+                $renderer = new CommonMarkRenderer();
                 break;
             case 'inigo':
                 $renderer = new InigoRenderer($config);
                 break;
             case 'markdown':
-                $renderer = new MarkdownRenderer($config);
+                $renderer = new MarkdownRenderer();
                 break;
             case 'xml':
                 $renderer = new XmlRenderer();

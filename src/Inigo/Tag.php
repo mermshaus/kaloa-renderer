@@ -39,7 +39,7 @@ final class Tag
 
     /**
      *
-     * @var array
+     * @var array|null
      */
     private $myHandler;
 
@@ -171,7 +171,7 @@ final class Tag
         }
 
         if ($i === false) {
-            return false;
+            return array();
         }
 
         $tagString = trim(mb_substr($tagString, $i));

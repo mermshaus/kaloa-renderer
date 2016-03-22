@@ -12,6 +12,12 @@ final class ImgHandler extends ProtoHandler
 {
     /**
      *
+     * @var string
+     */
+    private $last_img_align = '';
+
+    /**
+     *
      */
     public function __construct()
     {

@@ -50,11 +50,14 @@ final class XmlRenderer implements RendererInterface
      */
     private function xml2xhtml($xml)
     {
-        return preg_replace_callback('#<(\w+)([^>]*)\s*/>#s', create_function('$m', '
-            $xhtml_tags = array("br", "hr", "input", "frame", "img",
-                "area", "link", "col", "base", "basefont", "param");
+        return preg_replace_callback('#<(\w+)([^>]*)\s*/>#s', function ($m) {
+            $xhtml_tags = array(
+                'br', 'hr', 'input', 'frame', 'img', 'area', 'link', 'col',
+                'base', 'basefont', 'param'
+            );
+
             return in_array($m[1], $xhtml_tags) ? "<$m[1]$m[2] />" : "<$m[1]$m[2]></$m[1]>";
-        '), $xml);
+        }, $xml);
     }
 
     /**
