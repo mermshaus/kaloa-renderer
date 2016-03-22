@@ -42,6 +42,12 @@ echo $cm->render('**Hello *[World](http://example.org)*!**');
 $md = Factory::createRenderer('markdown');
 echo $md->render('**Hello *[World](http://example.org)*!**');
 // <p><strong>Hello <em><a href="http://example.org">World</a></em>!</strong></p>
+
+$bb = Factory::createRenderer('inigo');
+echo $bb->render('[i]Hello [s]Moon[/s] [b]Earth[/b]![/i]');
+// <p><em>Hello <s>Moon</s> <strong>Earth</strong>!</em></p>
+
+// ...
 ~~~
 
 ### Renderers
@@ -56,7 +62,7 @@ This is basically a BBCode renderer. The parser tries to automatically add `<p>`
 
 Supported tags:
 
-- `i`, `em`, `b`, `strong`
+- `i`|`em`, `b`|`strong`
 - `u`, `s`|`strike`
 - `icode`
 - `h1`-`h6`

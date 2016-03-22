@@ -62,10 +62,8 @@ final class Parser
 
         // Example for multiple tags being displayed in the same way
         $this
-        ->addHandler(new SimpleHandler('b', Parser::TAG_INLINE, '<b>', '</b>'))
-        ->addHandler(new SimpleHandler('strong', Parser::TAG_INLINE, '<strong>', '</strong>'))
-        ->addHandler(new SimpleHandler('i', Parser::TAG_INLINE, '<i>', '</i>'))
-        ->addHandler(new SimpleHandler('em', Parser::TAG_INLINE, '<em>', '</em>'))
+        ->addHandler(new SimpleHandler('b|strong', Parser::TAG_INLINE, '<strong>', '</strong>'))
+        ->addHandler(new SimpleHandler('i|em', Parser::TAG_INLINE, '<em>', '</em>'))
 
         ->addHandler(new SimpleHandler('icode', Parser::TAG_INLINE, '<code>', '</code>'))
 
@@ -149,6 +147,7 @@ final class Parser
 
     /**
      *
+     * @param string $name
      */
     public function addSetting($name, $value = '')
     {
@@ -226,6 +225,7 @@ final class Parser
 
     /**
      *
+     * @param string $s
      */
     public function parse($s)
     {

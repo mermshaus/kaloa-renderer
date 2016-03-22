@@ -70,29 +70,29 @@ final class ImgHandler extends ProtoHandler
 
         if ($align == Parser::PC_IMG_ALIGN_RIGHT) {
             $ret .= '<div class="img">' . "\n"
-                  . '  <div class="img_right" style="' . $style . '">' . "\n"
-                  . '    <div class="img_border">' . "\n"
-                  . '      <img src="' . $this->e($path) . '" alt="Bild: ' . $this->e($alt) . '" title="'
-                      . $this->e($alt) . '" ' . $attr . ' />' . "\n"
-                  . '    </div>' . "\n"
-                  . '    <div class="img_content">';
+                    . '  <div class="img_right" style="' . $style . '">' . "\n"
+                    . '    <div class="img_border">' . "\n"
+                    . '      <img src="' . $this->e($path) . '" alt="Bild: ' . $this->e($alt) . '" title="'
+                        . $this->e($alt) . '" ' . $attr . ' />' . "\n"
+                    . '    </div>' . "\n"
+                    . '    <div class="img_content">';
         } elseif ($align == Parser::PC_IMG_ALIGN_CENTER) {
             $ret .= '<div class="center">' . "\n"
-                  . '  <div class="img">' . "\n"
-                  . '    <div class="img_center" style="' . $style . '">' . "\n"
-                  . '      <div class="img_border">' . "\n"
-                  . '        <img src="' . $this->e($path) . '" alt="Bild: ' . $this->e($alt) . '" title="'
-                      . $this->e($alt) . '" ' . $attr . ' />' . "\n"
-                  . '      </div>' . "\n"
-                  . '      <div class="img_content">';
+                    . '  <div class="img">' . "\n"
+                    . '    <div class="img_center" style="' . $style . '">' . "\n"
+                    . '      <div class="img_border">' . "\n"
+                    . '        <img src="' . $this->e($path) . '" alt="Bild: ' . $this->e($alt) . '" title="'
+                        . $this->e($alt) . '" ' . $attr . ' />' . "\n"
+                    . '      </div>' . "\n"
+                    . '      <div class="img_content">';
         } elseif ($align == Parser::PC_IMG_ALIGN_LEFT) {
             $ret .= '<div class="img">' . "\n"
-                  . '  <div class="img_left" style="' . $style . '">' . "\n"
-                  . '    <div class="img_border">' . "\n"
-                  . '      <img src="' . $this->e($path) . '" alt="Bild: ' . $this->e($alt) . '" title="'
-                      . $this->e($alt) . '" ' . $attr . ' />' . "\n"
-                  . '    </div>' . "\n"
-                  . '    <div class="img_content">';
+                    . '  <div class="img_left" style="' . $style . '">' . "\n"
+                    . '    <div class="img_border">' . "\n"
+                    . '      <img src="' . $this->e($path) . '" alt="Bild: ' . $this->e($alt) . '" title="'
+                        . $this->e($alt) . '" ' . $attr . ' />' . "\n"
+                    . '    </div>' . "\n"
+                    . '    <div class="img_content">';
         }
 
         return $ret;

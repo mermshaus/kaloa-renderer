@@ -32,12 +32,12 @@ final class AmazonHandler extends ProtoHandler
                 . '.01._SCMZZZZZZZ_V65020934_.jpg';
 
         $ret = '<div class="amazon clear">'
-             . '<div class="img-border">'
-             . '<div class="img" style="background-image: url(' . $this->e($img) . ');"></div>'
-             . '</div>'
-             . '<p class="title"><strong>' . $this->e($title) . '</strong></p>'
-             . '<p class="author">' . $this->e($author) . '</p>'
-             . '</div>';
+                . '<div class="img-border">'
+                . '<div class="img" style="background-image: url(' . $this->e($img) . ');"></div>'
+                . '</div>'
+                . '<p class="title"><strong>' . $this->e($title) . '</strong></p>'
+                . '<p class="author">' . $this->e($author) . '</p>'
+                . '</div>';
 
         return $ret;
     }

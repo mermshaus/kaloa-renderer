@@ -175,7 +175,7 @@ EOT;
 
             $xml .= '<li id="' . $id . '">';
             $xml .= $text;
-            $xml .= ' <a href="#'.$idRef.'">'."\xE2\x86\x91".'</a>';
+            $xml .= ' <a href="#' . $idRef . '">' . "\xE2\x86\x91" . '</a>';
             $xml .= '</li>';
 
             $i++;

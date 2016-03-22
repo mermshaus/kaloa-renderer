@@ -47,7 +47,7 @@ final class ListingsRule extends AbstractRule
             $caption  = (string) $node->getAttribute('caption');
 
             $file = (string) $node->getAttribute('file');
-            $from =  $node->getAttribute('from');
+            $from = $node->getAttribute('from');
             $length = $node->getAttribute('length');
 
             if ($from === '') {
@@ -177,7 +177,7 @@ final class ListingsRule extends AbstractRule
                     $class = 'line';
                 }
 
-                $code[$i] = '<span class="'.$class.'" id="hic-svnt-dracones">'
+                $code[$i] = '<span class="' . $class . '" id="hic-svnt-dracones">'
                         . $code[$i]
                         . '</span>';
 

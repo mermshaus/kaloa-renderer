@@ -67,7 +67,7 @@ final class TocRule extends AbstractRule
             $node->setAttribute('id', $identifierFormatted);
 
             if ($thisDepth > $curDepth) {
-                $toc .= "\n".str_repeat('  ', $thisDepth - 1)."<ul>\n";
+                $toc .= "\n" . str_repeat('  ', $thisDepth - 1) . "<ul>\n";
             } elseif ($i > 0) {
                 $toc .= "</li>\n";
             }
