@@ -24,3 +24,15 @@ Klar ist wohl, dass das Fehlen von Stable-Versionen auf Packagist die Nutzung vo
 Was tun?
 
 [strike]Edit: Vielleicht könnte man mit dem version-Feld in der composer.json-Datei von GeSHi was machen. Von der Nutzung wird zwar zugunsten von Tags abgeraten, aber Tags fallen ja in diesem Fall vermutlich raus. Hat damit jemand Erfahrung? Naheliegende Frage wäre etwa: Wenn ich bei Commit #1 in composer.json [I]"version": "1.0"[/I] stehen habe und das bei Commit #2 nicht ändere, ist dann auf Packagist Commit #1 oder Commit #2 mit dem 1.0-Release verknüpft? Das kann ich aber nachher einfach mal ausprobieren.[/strike]  [INDENT]Okay, das funktoniert nicht, weil Packagist ausschließlich Tags erkennt: [URL="https://github.com/composer/packagist/issues/587#issuecomment-142686483"]https://github.com/composer/packagis...ment-142686483[/URL][/INDENT]
+
+[center]* * *[/center]
+
+[quote=mermshaus]Ich glaube, es gibt wirklich nur die Optionen,
+
+[ol]
+  [li]geshi/geshi zusätzlich mit Packagist-kompatiblen Tags auszustatten,[/li]
+  [li]ein neues Repository zu starten und in dem auf irgendeine Weise den Code aus geshi/geshi zu mirrorn und dort passende Tags hinzuzufügen (da gibt es etwa: https://packagist.org/packages/easybook/geshi – ohne Gewähr) oder[/li]
+  [li]geshi/geshi weiterhin von Hand im obersten Projekt-Repository einzubinden (wie in Post #1).[/li]
+[/ol]
+
+Die haben für mich alle Vor- und Nachteile.[/quote]

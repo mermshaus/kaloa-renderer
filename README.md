@@ -43,6 +43,7 @@ Available tags:
 * `quote` (`=@author`)
 * `off`|`noparse`
 * `var`
+* `indent`, `center`
 * `url`|`link` (`=@href`, `@title`)
 * `img` (`=@src`)
 * `abbr` (`=@title`)

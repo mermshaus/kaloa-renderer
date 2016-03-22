@@ -10,6 +10,7 @@ use Kaloa\Renderer\Inigo\Handler\FootnotesHandler;
 use Kaloa\Renderer\Inigo\Handler\HTMLHandler;
 use Kaloa\Renderer\Inigo\Handler\ImgHandler;
 use Kaloa\Renderer\Inigo\Handler\ProtoHandler;
+use Kaloa\Renderer\Inigo\Handler\QuoteHandler;
 use Kaloa\Renderer\Inigo\Handler\SimpleHandler;
 use Kaloa\Renderer\Inigo\Handler\UrlHandler;
 use Kaloa\Renderer\Inigo\Handler\YouTubeHandler;
@@ -76,12 +77,14 @@ final class Parser
 
         ->addHandler(new SimpleHandler('off|noparse', Parser::TAG_INLINE | Parser::TAG_PRE, '', ''))
         ->addHandler(new SimpleHandler('var', Parser::TAG_INLINE | Parser::TAG_PRE, '<var>', '</var>'))
-        ->addHandler(new SimpleHandler(
-            'quote',
-            Parser::TAG_OUTLINE | Parser::TAG_FORCE_PARAGRAPHS,
-            '<blockquote>',
-            "</blockquote>\n\n"
-        ))
+//        ->addHandler(new SimpleHandler(
+//            'quote',
+//            Parser::TAG_OUTLINE | Parser::TAG_FORCE_PARAGRAPHS,
+//            '<blockquote>',
+//            "</blockquote>\n\n"
+//        ))
+
+        ->addHandler(new QuoteHandler())
 
         /* Most replacements are rather simple */
         ->addHandler(new SimpleHandler('h1', Parser::TAG_OUTLINE, "<h1>", "</h1>\n\n"))
@@ -102,8 +105,7 @@ final class Parser
         ->addHandler(new SimpleHandler('th', Parser::TAG_OUTLINE, "\n<th>", "</th>"))
 
         ->addHandler(new SimpleHandler('indent', Parser::TAG_OUTLINE, "<div style=\"margin-left: 30px;\">", "</div>\n\n"))
-
-
+        ->addHandler(new SimpleHandler('center', Parser::TAG_OUTLINE, "<div style=\"text-align: center;\">", "</div>\n\n"))
 
         ->addHandler(new UrlHandler())
         ->addHandler(new ImgHandler())

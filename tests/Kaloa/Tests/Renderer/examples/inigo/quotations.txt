@@ -1,0 +1,17 @@
+Other text.
+
+[quote]This is a test[/quote]
+
+Other text.
+
+[quote]This is another test.
+
+With two paragraphs.[/quote]
+
+Other text.
+
+[quote="Foo & Bar"]This is.
+
+A Test.[/quote]
+
+Other text.

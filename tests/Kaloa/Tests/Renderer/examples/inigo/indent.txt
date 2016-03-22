@@ -4,3 +4,7 @@ bar
 
     [indent][h3]baz & boz[/h3][/indent]
 [/indent]
+
+[center]* * *[/center]
+
+Foo
