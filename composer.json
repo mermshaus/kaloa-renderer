@@ -3,7 +3,7 @@
     "type": "library",
     "description": "A collection of different output renderers",
     "keywords": ["output", "renderer"],
-    "homepage": "http://www.kaloa.org/",
+    "homepage": "http://kaloa.ermshaus.org/",
     "license": "MIT",
     "authors": [
         {
