@@ -2,13 +2,14 @@
     "name": "kaloa/renderer",
     "type": "library",
     "description": "A collection of different output renderers",
-    "keywords": ["output", "renderer"],
+    "keywords": ["output", "renderer", "bbcode", "markdown", "xml"],
     "homepage": "http://kaloa.ermshaus.org/",
     "license": "MIT",
     "authors": [
         {
             "name": "Marc Ermshaus",
-            "email": "marc@ermshaus.org"
+            "email": "marc@ermshaus.org",
+            "homepage": "http://www.ermshaus.org/"
         }
     ],
     "require": {
