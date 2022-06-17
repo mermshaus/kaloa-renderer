@@ -14,7 +14,7 @@
     ],
     "require": {
         "php": ">=5.4.8",
-        "league/commonmark": "^0.13",
+        "league/commonmark": "^0.18.3",
         "michelf/php-markdown": "~1.6"
     },
     "require-dev": {
