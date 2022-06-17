@@ -8,7 +8,7 @@
 
     <xsl:template match="youtube">
         <div class="videoWrapper">
-            <iframe src="http://www.youtube.com/embed/{@id}" frameborder="0"></iframe>
+            <iframe src="https://www.youtube.com/embed/{@id}" frameborder="0"></iframe>
         </div>
     </xsl:template>
 
