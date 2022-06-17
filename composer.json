@@ -1,9 +1,8 @@
 {
     "name": "kaloa/renderer",
     "type": "library",
-    "description": "A collection of different output renderers",
-    "keywords": ["output", "renderer", "bbcode", "markdown", "xml"],
-    "homepage": "https://github.com/mermshaus/kaloa-renderer",
+    "description": "A collection of HTML output renderers",
+    "keywords": ["output", "renderer", "html", "bbcode", "markdown", "xml"],
     "license": "MIT",
     "authors": [
         {
