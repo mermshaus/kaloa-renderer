@@ -13,11 +13,7 @@ $ composer require kaloa/renderer
 
 The following PHP versions are supported:
 
-- PHP 5.4
-- PHP 5.5
-- PHP 5.6
-- PHP 7
-- HHVM
+- PHP 7.4
 
 
 ## Documentation
