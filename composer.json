@@ -3,17 +3,17 @@
     "type": "library",
     "description": "A collection of different output renderers",
     "keywords": ["output", "renderer", "bbcode", "markdown", "xml"],
-    "homepage": "http://kaloa.ermshaus.org/",
+    "homepage": "https://github.com/mermshaus/kaloa-renderer",
     "license": "MIT",
     "authors": [
         {
             "name": "Marc Ermshaus",
             "email": "marc@ermshaus.org",
-            "homepage": "http://www.ermshaus.org/"
+            "homepage": "https://www.ermshaus.org/"
         }
     ],
     "require": {
-        "php": ">=5.4.8",
+        "php": ">=7.4",
         "league/commonmark": "^0.18.3",
         "michelf/php-markdown": "~1.6"
     },
