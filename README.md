@@ -1,13 +1,5 @@
 # kaloa/renderer
 
-[![Latest Version](https://img.shields.io/github/release/mermshaus/kaloa-renderer.svg?style=flat-square)](https://github.com/mermshaus/kaloa-renderer/releases)
-[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://github.com/mermshaus/kaloa-renderer/blob/master/LICENSE)
-[![Build Status](https://img.shields.io/travis/mermshaus/kaloa-renderer/master.svg?style=flat-square)](https://travis-ci.org/mermshaus/kaloa-renderer)
-[![Coverage Status](https://img.shields.io/scrutinizer/coverage/g/mermshaus/kaloa-renderer.svg?style=flat-square)](https://scrutinizer-ci.com/g/mermshaus/kaloa-renderer/code-structure)
-[![Quality Score](https://img.shields.io/scrutinizer/g/mermshaus/kaloa-renderer.svg?style=flat-square)](https://scrutinizer-ci.com/g/mermshaus/kaloa-renderer)
-[![Total Downloads](https://img.shields.io/packagist/dt/mermshaus/kaloa-renderer.svg?style=flat-square)](https://packagist.org/packages/kaloa/renderer)
-
-
 ## Install
 
 Via Composer:
