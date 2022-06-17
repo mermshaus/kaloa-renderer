@@ -2,8 +2,6 @@
 
 namespace Kaloa\Renderer;
 
-use Exception;
-use Kaloa\Renderer\Config;
 use Kaloa\Renderer\Xml\Rule\FootnotesRule;
 use Kaloa\Renderer\Xml\Rule\ListingsRule;
 use Kaloa\Renderer\Xml\Rule\PrefixRelativeUrisRule;
@@ -17,11 +15,11 @@ use Kaloa\Renderer\Xml\Rule\YouTubeRule;
 final class Factory
 {
     /**
-     *
      * @param string $type
      * @param Config $config
+     *
      * @return RendererInterface
-     * @throws Exception
+     * @throws \Exception
      */
     public static function createRenderer($type, Config $config = null)
     {
@@ -53,7 +51,7 @@ final class Factory
                 $renderer = new XmlLegacyRenderer($config);
                 break;
             default:
-                throw new Exception('Unknown renderer "' . $type . '"');
+                throw new \Exception('Unknown renderer "' . $type . '"');
                 // no break
         }
 
