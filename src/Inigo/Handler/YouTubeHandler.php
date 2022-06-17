@@ -34,8 +34,8 @@ final class YouTubeHandler extends ProtoHandler
 
             $ret .= '<div class="videoWrapper">' . "\n";
 
-            $ret .= '  <iframe width="560" height="349" src="http://www.youtube.com/embed/' . $this->e($vid) . '" frameborder="0">';
-
+            $ret .= '  <iframe width="560" height="349" src="https://www.youtube.com/embed/'
+                . $this->e($vid) . '" frameborder="0">';
         } else {
             $ret .= '</iframe>' . "\n" . '</div>' . "\n\n";
         }

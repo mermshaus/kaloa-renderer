@@ -12,6 +12,6 @@
     return $x * $x;
 }</code></pre>
 
-<pre><code class="language-php">function f($x) {
-    return $x * $x;
+<pre><code class="language-php">function f($y) {
+    return $y * $y;
 }</code></pre>

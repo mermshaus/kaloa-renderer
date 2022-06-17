@@ -454,7 +454,9 @@ final class Parser
             $last_tag = null;
         }
 
-        $e = function ($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); };
+        $e = function ($s) {
+            return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+        };
 
         return $e($s);
     }

@@ -7,9 +7,9 @@ one single paragraph with a &lt;br /&gt; break.</p>
 
 <p><code>$x</code> and <code>$y</code> are variables.</p>
 
-<p><b>strong text</b></p>
+<p><strong>strong text</strong></p>
 
-<p><i>italic text</i></p>
+<p><em>italic text</em></p>
 
 <p><u>underlined</u></p>
 
@@ -19,7 +19,7 @@ one single paragraph with a &lt;br /&gt; break.</p>
 
 <p><u><s>underline &amp; strike-through</s></u></p>
 
-<p><b>strong <i>italic</i> text</b></p>
+<p><strong>strong <em>italic</em> text</strong></p>
 
 <p><em>emphasized <strong>strong</strong> text</em></p>
 

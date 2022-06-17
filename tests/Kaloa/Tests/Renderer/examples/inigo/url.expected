@@ -1,11 +1,19 @@
-<p><a href="http://www.ermshaus.org/" title="Open &quot;http://www.ermshaus.org/&quot;">Link</a></p>
+<p><a href="https://www.example.org/" title="Open &quot;https://www.example.org/&quot;">Link</a></p>
 
-<p><a href="http://www.ermshaus.org/" title="Open &quot;http://www.ermshaus.org/&quot;">Link</a></p>
+<p><a href="https://www.example.org/" title="Open &quot;https://www.example.org/&quot;">Link</a></p>
 
-<p><a href="http://www.ermshaus.org/" title="Open &quot;http://www.ermshaus.org/&quot;">Link</a></p>
+<p><a href="https://www.example.org/" title="Open &quot;https://www.example.org/&quot;">Link</a></p>
 
-<p><a href="http://www.ermshaus.org/" title="Foo">Link</a></p>
+<p><a href="https://www.example.org/" title="Foo">Link</a></p>
 
-<p><a href="http://www.ermshaus.org/?x&amp;y" title="Foo&gt;bar">Link</a></p>
+<p><a href="https://www.example.org/?x&amp;y" title="Foo&gt;bar">Link</a></p>
 
-<p><a href="https://github.com/GeSHi/geshi-1.0/?x&amp;y" title="Open &quot;https://github.com/GeSHi/geshi-1.0/?x&amp;y&quot;">https://github.com/GeSHi/geshi-1.0/?x&amp;y</a></p>
+<p><a href="https://www.example.org/" title="Open &quot;https://www.example.org/&quot;">Link</a></p>
+
+<p><a href="https://www.example.org/" title="Open &quot;https://www.example.org/&quot;">Link</a></p>
+
+<p><a href="https://www.example.org/" title="Open &quot;https://www.example.org/&quot;">Link</a></p>
+
+<p><a href="https://www.example.org/" title="Foo">Link</a></p>
+
+<p><a href="https://www.example.org/?x&amp;y" title="Foo&gt;bar">Link</a></p>

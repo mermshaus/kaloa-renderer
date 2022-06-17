@@ -39,7 +39,7 @@ class InigoRendererTest extends PHPUnit_Framework_TestCase
         $sets = array();
 
         foreach (glob(__DIR__ . '/examples/inigo/*.txt') as $file) {
-            $sets[] = array(
+            $sets[basename($file)] = array(
                 realpath($file),
                 realpath(substr($file, 0, -4) . '.expected')
             );
@@ -60,7 +60,7 @@ class InigoRendererTest extends PHPUnit_Framework_TestCase
         $renderer = Factory::createRenderer('inigo', $config);
 
         $output   = $renderer->render(file_get_contents($fileInput));
-        $expected = file_get_contents($fileExpected);
+        $expected = rtrim(file_get_contents($fileExpected));
 
         $expected = str_replace('__RESOURCE_BASE_PATH__', $config->getResourceBasePath(), $expected);
 

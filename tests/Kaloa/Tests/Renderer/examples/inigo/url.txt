@@ -1,11 +1,21 @@
-[url=http://www.ermshaus.org/]Link[/url]
+[url=https://www.example.org/]Link[/url]
 
-[url="http://www.ermshaus.org/"]Link[/url]
+[url="https://www.example.org/"]Link[/url]
 
-[url href="http://www.ermshaus.org/"]Link[/url]
+[url href="https://www.example.org/"]Link[/url]
 
-[url href="http://www.ermshaus.org/" title="Foo"]Link[/url]
+[url href="https://www.example.org/" title="Foo"]Link[/url]
 
-[url="http://www.ermshaus.org/?x&y" title="Foo>bar"]Link[/url]
+[url="https://www.example.org/?x&y" title="Foo>bar"]Link[/url]
 
-[URL]https://github.com/GeSHi/geshi-1.0/?x&y[/URL]
+
+
+[link=https://www.example.org/]Link[/link]
+
+[link="https://www.example.org/"]Link[/link]
+
+[link href="https://www.example.org/"]Link[/link]
+
+[link href="https://www.example.org/" title="Foo"]Link[/link]
+
+[link="https://www.example.org/?x&y" title="Foo>bar"]Link[/link]
