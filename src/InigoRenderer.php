@@ -8,7 +8,7 @@ use Kaloa\Renderer\Inigo\Parser;
 
 final class InigoRenderer implements RendererInterface
 {
-    private ?Parser $parser = null;
+    private Parser $parser;
 
     public function __construct(Config $config)
     {
