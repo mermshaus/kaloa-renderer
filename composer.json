@@ -12,14 +12,14 @@
         }
     ],
     "require": {
-        "php": "~8.5",
+        "php": "^8.5",
         "ext-dom": "*",
         "ext-xsl": "*",
-        "league/commonmark": "*"
+        "league/commonmark": "^2.8"
     },
     "require-dev": {
-        "phpunit/phpunit": "~12.0",
-        "phpmd/phpmd": "~2.0",
+        "phpunit/phpunit": "^12.0",
+        "phpmd/phpmd": "^2.0",
         "phpstan/phpstan": "^2.1"
     },
     "autoload": {
