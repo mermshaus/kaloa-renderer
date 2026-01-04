@@ -14,6 +14,13 @@ $ composer require kaloa/renderer
 - PHP >= 8.5
 
 
+## Demo
+
+~~~ bash
+$ php -S localhost:9090 -t demos/renderer
+~~~
+
+
 ## Documentation
 
 ### Usage
@@ -23,10 +30,6 @@ use Kaloa\Renderer\Factory;
 
 $cm = Factory::createRenderer('commonmark');
 echo $cm->render('**Hello *[World](http://example.org)*!**');
-// <p><strong>Hello <em><a href="http://example.org">World</a></em>!</strong></p>
-
-$md = Factory::createRenderer('markdown');
-echo $md->render('**Hello *[World](http://example.org)*!**');
 // <p><strong>Hello <em><a href="http://example.org">World</a></em>!</strong></p>
 
 $bb = Factory::createRenderer('inigo');
@@ -71,9 +74,6 @@ Supported tags:
 
 - `amazon`
 
-#### markdown (third-party)
-
-The [PHP Markdown parser](https://github.com/michelf/php-markdown) (without extras).
 
 #### xml
 
@@ -93,7 +93,6 @@ $ ./vendor/bin/phpunit
 Further quality assurance:
 
 ~~~ bash
-$ ./vendor/bin/phpcs --standard=PSR2 ./src
 $ ./vendor/bin/phpmd ./src text codesize,design,naming
 ~~~
 

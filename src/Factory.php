@@ -12,11 +12,13 @@ use Kaloa\Renderer\Xml\Rule\YouTubeRule;
 
 final class Factory
 {
-    public static function createRenderer(string $type, ?Config $config = null): RendererInterface
-    {
+    public static function createRenderer(
+        string $type,
+        ?Config $config = null
+    ): RendererInterface {
         $renderer = null;
 
-        if (null === $config) {
+        if ($config === null) {
             $config = new Config();
         }
 
@@ -26,9 +28,6 @@ final class Factory
                 break;
             case 'inigo':
                 $renderer = new InigoRenderer($config);
-                break;
-            case 'markdown':
-                $renderer = new MarkdownRenderer();
                 break;
             case 'xml':
                 $renderer = new XmlRenderer();
@@ -43,7 +42,6 @@ final class Factory
                 break;
             default:
                 throw new \Exception('Unknown renderer "' . $type . '"');
-                // no break
         }
 
         return $renderer;
