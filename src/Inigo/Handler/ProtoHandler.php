@@ -1,60 +1,54 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer\Inigo\Handler;
 
+use Kaloa\Renderer\Inigo\Structs;
+
 /**
- *
+ * @phpstan-import-type HandlerDataStruct from Structs
  */
 abstract class ProtoHandler
 {
-    public $name;
-    public $type;
-    public $defaultParam = null;
-
+    public string $name;
     /**
-     *
+     * @var list<int>|int
      */
-    public function initialize()
+    public array|int $type;
+    public ?string $defaultParam = null;
+
+    public function initialize(): void
     {
         // nop
     }
 
     /**
-     *
+     * @param HandlerDataStruct $data
      */
-    abstract public function draw(array $data);
+    abstract public function draw(array $data): string;
 
     /**
-     *
-     * @param array $sourceData
-     * @param string $key
-     * @param mixed $defaultValue
-     * @return mixed
+     * @param HandlerDataStruct $sourceData
      */
-    protected function fillParam(array $sourceData, $key, $defaultValue = null)
-    {
+    protected function fillParam(
+        array $sourceData,
+        string $key,
+        mixed $defaultValue = null
+    ): mixed {
         return (isset($sourceData['params'][$key]))
-                ? $sourceData['params'][$key]
-                : $defaultValue;
+            ? $sourceData['params'][$key] : $defaultValue;
     }
 
-    /**
-     *
-     * @param string $s
-     * @return string
-     */
-    protected function e($s)
+    protected function e(string $s): string
     {
         return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
     }
 
     /**
-     *
-     * @param string $s
-     * @param array $data
-     * @return string
+     * @param array{vars: array<mixed>, tag: string} $data
      */
-    public function postProcess($s, array $data)
+    public function postProcess(string $s, array $data): string
     {
         return $s;
     }

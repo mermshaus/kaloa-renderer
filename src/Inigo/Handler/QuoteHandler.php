@@ -1,18 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer\Inigo\Handler;
 
-use Kaloa\Renderer\Inigo\Handler\ProtoHandler;
 use Kaloa\Renderer\Inigo\Parser;
 
-/**
- *
- */
 final class QuoteHandler extends ProtoHandler
 {
-    /**
-     *
-     */
     public function __construct()
     {
         $this->name = 'quote';
@@ -20,12 +15,7 @@ final class QuoteHandler extends ProtoHandler
         $this->defaultParam = 'author';
     }
 
-    /**
-     *
-     * @param  array  $data
-     * @return string
-     */
-    public function draw(array $data)
+    public function draw(array $data): string
     {
         $ret = '';
 

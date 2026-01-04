@@ -1,34 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer\Inigo\Handler;
 
-use Kaloa\Renderer\Inigo\Handler\ProtoHandler;
-
-/**
- *
- */
 final class SimpleHandler extends ProtoHandler
 {
-    /**
-     *
-     * @var string
-     */
-    private $front;
+    private string $front;
+    private string $back;
 
-    /**
-     *
-     * @var string
-     */
-    private $back;
-
-    /**
-     *
-     * @param string $name
-     * @param int $type
-     * @param string $front
-     * @param string $back
-     */
-    public function __construct($name, $type, $front, $back)
+    public function __construct(string $name, int $type, string $front, string $back)
     {
         $this->name  = $name;
         $this->type  = $type;
@@ -36,13 +17,7 @@ final class SimpleHandler extends ProtoHandler
         $this->back  = $back;
     }
 
-    /**
-     *
-     * @param array $data
-     *
-     * @return string
-     */
-    public function draw(array $data)
+    public function draw(array $data): string
     {
         $ret = '';
 

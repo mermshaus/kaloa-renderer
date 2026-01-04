@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer\Inigo;
 
 use Kaloa\Renderer\Config;
@@ -14,111 +16,176 @@ use Kaloa\Renderer\Inigo\Handler\QuoteHandler;
 use Kaloa\Renderer\Inigo\Handler\SimpleHandler;
 use Kaloa\Renderer\Inigo\Handler\UrlHandler;
 use Kaloa\Renderer\Inigo\Handler\YouTubeHandler;
-use Kaloa\Renderer\Inigo\Tag;
 use SplStack;
 
 /**
- * Inigo
- *
  * Do not use this renderer. The code is very (!) old. It's in here for
  * backwards compatibility reasons
  *
- * @author Marc Ermshaus
+ * @phpstan-import-type HandlerStruct from Structs
  */
 final class Parser
 {
-    const TAG_OUTLINE          = 0x1;
-    const TAG_INLINE           = 0x2;
-    const TAG_PRE              = 0x4;
-    const TAG_SINGLE           = 0x8;
-    const TAG_CLEAR_CONTENT    = 0x10;
-    const TAG_FORCE_PARAGRAPHS = 0x20;
+    const int TAG_OUTLINE = 0x1;
+    const int TAG_INLINE = 0x2;
+    const int TAG_PRE = 0x4;
+    const int TAG_SINGLE = 0x8;
+    const int TAG_CLEAR_CONTENT = 0x10;
+    const int TAG_FORCE_PARAGRAPHS = 0x20;
 
-    const PC_IMG_ALIGN_LEFT   = 0;
-    const PC_IMG_ALIGN_RIGHT  = 1;
-    const PC_IMG_ALIGN_CENTER = 2;
+    const int PC_IMG_ALIGN_LEFT = 0;
+    const int PC_IMG_ALIGN_RIGHT = 1;
+    const int PC_IMG_ALIGN_CENTER = 2;
 
     /* "German" style
     const PC_PARSER_QUOTE_LEFT = '&#8222;';
     const PC_PARSER_QUOTE_RIGHT = '&#8220;');
     /**/
     /* "French" style */
-    const PC_PARSER_QUOTE_LEFT  = '&raquo;';
+    const PC_PARSER_QUOTE_LEFT = '&raquo;';
     const PC_PARSER_QUOTE_RIGHT = '&laquo;';
     /**/
 
-    private $s = '';
-    private $m_stack;
-    private $m_handlers;
-    private $m_vars;
+    private string $s = '';
+    /**
+     * @var SplStack<Tag>
+     */
+    private SplStack $m_stack;
+    /**
+     * @var list<HandlerStruct>
+     */
+    private array $m_handlers;
 
     /**
-     *
-     * @param Config $config
+     * @var array<mixed>
      */
-    public function addDefaultHandlers(Config $config)
+    private array $m_vars;
+
+    public function addDefaultHandlers(Config $config): void
     {
         $this->addSetting('image-dir', $config->getResourceBasePath() . '/');
 
         // Example for multiple tags being displayed in the same way
-        $this
-        ->addHandler(new SimpleHandler('b|strong', Parser::TAG_INLINE, '<strong>', '</strong>'))
-        ->addHandler(new SimpleHandler('i|em', Parser::TAG_INLINE, '<em>', '</em>'))
+        $this->addHandler(
+            new SimpleHandler(
+                'b|strong', Parser::TAG_INLINE, '<strong>', '</strong>'
+            )
+        )->addHandler(
+            new SimpleHandler('i|em', Parser::TAG_INLINE, '<em>', '</em>')
+        )->addHandler(
+            new SimpleHandler(
+                'icode', Parser::TAG_INLINE, '<code>', '</code>'
+            )
+        )->addHandler(
+            new SimpleHandler('u', Parser::TAG_INLINE, '<u>', '</u>')
+        )->addHandler(
+            new SimpleHandler('s|strike', Parser::TAG_INLINE, '<s>', '</s>')
+        )
 
-        ->addHandler(new SimpleHandler('icode', Parser::TAG_INLINE, '<code>', '</code>'))
+            // Used to display other tags. Tags with type Parser::TAG_PRE will not be parsed
+            // This tag belongs also to two types
 
-        ->addHandler(new SimpleHandler('u', Parser::TAG_INLINE, '<u>', '</u>'))
-        ->addHandler(new SimpleHandler('s|strike', Parser::TAG_INLINE, '<s>', '</s>'))
+            ->addHandler(
+                new SimpleHandler(
+                    'off|noparse', Parser::TAG_INLINE | Parser::TAG_PRE, '', ''
+                )
+            )->addHandler(
+                new SimpleHandler(
+                    'var',
+                    Parser::TAG_INLINE | Parser::TAG_PRE,
+                    '<var>',
+                    '</var>'
+                )
+            )
+            //        ->addHandler(new SimpleHandler(
+            //            'quote',
+            //            Parser::TAG_OUTLINE | Parser::TAG_FORCE_PARAGRAPHS,
+            //            '<blockquote>',
+            //            "</blockquote>\n\n"
+            //        ))
 
-        // Used to display other tags. Tags with type Parser::TAG_PRE will not be parsed
-        // This tag belongs also to two types
-
-        ->addHandler(new SimpleHandler('off|noparse', Parser::TAG_INLINE | Parser::TAG_PRE, '', ''))
-        ->addHandler(new SimpleHandler('var', Parser::TAG_INLINE | Parser::TAG_PRE, '<var>', '</var>'))
-//        ->addHandler(new SimpleHandler(
-//            'quote',
-//            Parser::TAG_OUTLINE | Parser::TAG_FORCE_PARAGRAPHS,
-//            '<blockquote>',
-//            "</blockquote>\n\n"
-//        ))
-
-        ->addHandler(new QuoteHandler())
-
-        /* Most replacements are rather simple */
-        ->addHandler(new SimpleHandler('h1', Parser::TAG_OUTLINE, "<h1>", "</h1>\n\n"))
-        ->addHandler(new SimpleHandler('h2', Parser::TAG_OUTLINE, "<h2>", "</h2>\n\n"))
-        ->addHandler(new SimpleHandler('h3', Parser::TAG_OUTLINE, "<h3>", "</h3>\n\n"))
-        ->addHandler(new SimpleHandler('h4', Parser::TAG_OUTLINE, "<h4>", "</h4>\n\n"))
-        ->addHandler(new SimpleHandler('h5', Parser::TAG_OUTLINE, "<h5>", "</h5>\n\n"))
-        ->addHandler(new SimpleHandler('h6', Parser::TAG_OUTLINE, "<h6>", "</h6>\n\n"))
-        ->addHandler(new SimpleHandler('dl', Parser::TAG_OUTLINE, "<dl>", "\n\n</dl>\n\n"))
-        ->addHandler(new SimpleHandler('dt', Parser::TAG_OUTLINE, "\n\n<dt>", "</dt>"))
-        ->addHandler(new SimpleHandler('dd', Parser::TAG_OUTLINE, "\n<dd>", "</dd>"))
-        ->addHandler(new SimpleHandler('ul', Parser::TAG_OUTLINE, "<ul>", "\n</ul>\n\n"))
-        ->addHandler(new SimpleHandler('ol', Parser::TAG_OUTLINE, "<ol>", "\n</ol>\n\n"))
-        ->addHandler(new SimpleHandler('li', Parser::TAG_OUTLINE, "\n<li>", "</li>"))
-        ->addHandler(new SimpleHandler('table', Parser::TAG_OUTLINE, "<table>", "\n</table>\n\n"))
-        ->addHandler(new SimpleHandler('tr', Parser::TAG_OUTLINE, "\n<tr>", "\n</tr>"))
-        ->addHandler(new SimpleHandler('td', Parser::TAG_OUTLINE, "\n<td>", "</td>"))
-        ->addHandler(new SimpleHandler('th', Parser::TAG_OUTLINE, "\n<th>", "</th>"))
-
-        ->addHandler(new SimpleHandler('indent', Parser::TAG_OUTLINE, "<div style=\"margin-left: 30px;\">", "</div>\n\n"))
-        ->addHandler(new SimpleHandler('center', Parser::TAG_OUTLINE, "<div style=\"text-align: center;\">", "</div>\n\n"))
-
-        ->addHandler(new UrlHandler())
-        ->addHandler(new ImgHandler())
-        ->addHandler(new AmazonHandler())
-        ->addHandler(new AbbrHandler())
-        ->addHandler(new HTMLHandler())
-        ->addHandler(new CodeHandler($config->getSyntaxHighlighter()))
-        ->addHandler(new FootnotesHandler())
-        ->addHandler(new YouTubeHandler());
+            ->addHandler(
+                new QuoteHandler()
+            )/* Most replacements are rather simple */ ->addHandler(
+                new SimpleHandler(
+                    'h1', Parser::TAG_OUTLINE, "<h1>", "</h1>\n\n"
+                )
+            )->addHandler(
+                new SimpleHandler(
+                    'h2', Parser::TAG_OUTLINE, "<h2>", "</h2>\n\n"
+                )
+            )->addHandler(
+                new SimpleHandler(
+                    'h3', Parser::TAG_OUTLINE, "<h3>", "</h3>\n\n"
+                )
+            )->addHandler(
+                new SimpleHandler(
+                    'h4', Parser::TAG_OUTLINE, "<h4>", "</h4>\n\n"
+                )
+            )->addHandler(
+                new SimpleHandler(
+                    'h5', Parser::TAG_OUTLINE, "<h5>", "</h5>\n\n"
+                )
+            )->addHandler(
+                new SimpleHandler(
+                    'h6', Parser::TAG_OUTLINE, "<h6>", "</h6>\n\n"
+                )
+            )->addHandler(
+                new SimpleHandler(
+                    'dl', Parser::TAG_OUTLINE, "<dl>", "\n\n</dl>\n\n"
+                )
+            )->addHandler(
+                new SimpleHandler(
+                    'dt', Parser::TAG_OUTLINE, "\n\n<dt>", "</dt>"
+                )
+            )->addHandler(
+                new SimpleHandler('dd', Parser::TAG_OUTLINE, "\n<dd>", "</dd>")
+            )->addHandler(
+                new SimpleHandler(
+                    'ul', Parser::TAG_OUTLINE, "<ul>", "\n</ul>\n\n"
+                )
+            )->addHandler(
+                new SimpleHandler(
+                    'ol', Parser::TAG_OUTLINE, "<ol>", "\n</ol>\n\n"
+                )
+            )->addHandler(
+                new SimpleHandler('li', Parser::TAG_OUTLINE, "\n<li>", "</li>")
+            )->addHandler(
+                new SimpleHandler(
+                    'table', Parser::TAG_OUTLINE, "<table>", "\n</table>\n\n"
+                )
+            )->addHandler(
+                new SimpleHandler(
+                    'tr', Parser::TAG_OUTLINE, "\n<tr>", "\n</tr>"
+                )
+            )->addHandler(
+                new SimpleHandler('td', Parser::TAG_OUTLINE, "\n<td>", "</td>")
+            )->addHandler(
+                new SimpleHandler('th', Parser::TAG_OUTLINE, "\n<th>", "</th>")
+            )->addHandler(
+                new SimpleHandler(
+                    'indent',
+                    Parser::TAG_OUTLINE,
+                    "<div style=\"margin-left: 30px;\">",
+                    "</div>\n\n"
+                )
+            )->addHandler(
+                new SimpleHandler(
+                    'center',
+                    Parser::TAG_OUTLINE,
+                    "<div style=\"text-align: center;\">",
+                    "</div>\n\n"
+                )
+            )->addHandler(new UrlHandler())->addHandler(new ImgHandler())
+            ->addHandler(new AmazonHandler())->addHandler(new AbbrHandler())
+            ->addHandler(new HTMLHandler())->addHandler(
+                new CodeHandler($config->getSyntaxHighlighter())
+            )->addHandler(new FootnotesHandler())->addHandler(
+                new YouTubeHandler()
+            );
     }
 
-    /**
-     *
-     */
-    public function addHandler(ProtoHandler $class)
+    public function addHandler(ProtoHandler $class): self
     {
         $tags = explode('|', $class->name);
 
@@ -126,7 +193,7 @@ final class Parser
 
         foreach ($tags as $tag) {
             if (trim($tag) !== '') {
-                $temp = array();
+                $temp = [];
                 $temp['name'] = $tag;
 
                 if (is_array($class->type)) {
@@ -145,26 +212,22 @@ final class Parser
         return $this;
     }
 
-    /**
-     *
-     * @param string $name
-     */
-    public function addSetting($name, $value = '')
+    public function addSetting(string $name, mixed $value = ''): void
     {
         $this->m_vars[$name] = $value;
     }
 
-    /**
-     *
-     */
-    private function printHandlerMarkup(Tag $tag, $front = true, $tag_content = '')
-    {
-        $data = array();
-
-        $data['tag']    = $tag->getName();
-        $data['params'] = $tag->getAttributes();
-        $data['front']  = $front;
-        $data['vars']   = $this->m_vars;
+    private function printHandlerMarkup(
+        Tag $tag,
+        bool $front = true,
+        string $tag_content = ''
+    ): string {
+        $data = [
+            'tag'    => $tag->getName(),
+            'params' => $tag->getAttributes(),
+            'front'  => $front,
+            'vars'   => $this->m_vars,
+        ];
 
         if ($tag_content !== '') {
             $data['content'] = $tag_content;
@@ -174,7 +237,8 @@ final class Parser
 
         $tagCnt = count($this->m_handlers);
 
-        while (($i < $tagCnt) && ($this->m_handlers[$i]['name'] !== $data['tag'])) {
+        while (($i < $tagCnt)
+            && ($this->m_handlers[$i]['name'] !== $data['tag'])) {
             $i++;
         }
 
@@ -184,13 +248,12 @@ final class Parser
     /**
      * Gets the next tag
      *
-     * @param  string $s        String to parse
-     * @param  int    $i        Offset where search begins
-     * @param  int    $position Will be filled with next tag's offset (FALSE if
-     *                          there are no more tags)
-     * @return Tag
+     * @param string    $s        String to parse
+     * @param int       $i        Offset where search begins
+     * @param int|false $position Will be filled with next tag's offset (FALSE if
+     *                            there are no more tags)
      */
-    private function getNextTag(&$s, $i, &$position)
+    private function getNextTag(string &$s, int $i, int|false &$position): ?Tag
     {
         $j = mb_strpos($s, '[', $i);
         $k = mb_strpos($s, ']', $j + 1);
@@ -215,19 +278,14 @@ final class Parser
     }
 
     /**
-     *
-     * @return
+     * @return list<HandlerStruct>
      */
-    public function getHandlers()
+    public function getHandlers(): array
     {
         return $this->m_handlers;
     }
 
-    /**
-     *
-     * @param string $s
-     */
-    public function parse($s)
+    public function parse(string $s): string
     {
         // Cleaning the data that shall be parsed
 
@@ -250,7 +308,7 @@ final class Parser
 
         // Postprocessing
 
-        $data = array();
+        $data = [];
         $data['vars'] = $this->m_vars;
 
         foreach ($this->m_handlers as $h) {
@@ -261,26 +319,25 @@ final class Parser
         return trim($ret);
     }
 
-    /**
-     *
-     * @param  Tag  $tag
-     * @return bool
-     */
-    private function fitsStack(Tag $tag)
+    private function fitsStack(Tag $tag): bool
     {
+        if ($this->m_stack->isEmpty()) {
+            return false;
+            #throw new \LogicException(sprintf('Trying to read from empty stack: %s', $tag->getName()));
+        }
+
         return ($tag->getName() === $this->m_stack->top()->getName());
     }
 
-    /**
-     *
-     */
-    private function parseEx()
+    private function parseEx(): string
     {
         $ret = '';
 
         $cdata = '';
         $last_pos = 0;
         $f_clear_content = false;
+
+        $tag_pos = 0; // ?
 
         $this->m_stack = new SplStack();
 
@@ -294,7 +351,7 @@ final class Parser
             // registered tags (m_handlers) as CDATA
             $executeTag = $tag->isValid();
 
-            // If we are parsing inside of a TAG_PRE tag, do not execute current
+            // If we are parsing inside a TAG_PRE tag, do not execute current
             // tag (= pretend it is CDATA) unless it is the corresponding
             // closing tag to the active TAG_PRE tag
             if ($executeTag
@@ -305,14 +362,16 @@ final class Parser
             }
 
             if ($executeTag) {
-                // Tag is valid and not inside of a TAG_PRE tag, execute it
+                // Tag is valid and not inside a TAG_PRE tag, execute it
 
                 // Get CDATA
-                $cdata .= $this->formatString(mb_substr(
-                    $this->s,
-                    $last_pos,
-                    $tag_pos - $last_pos
-                ));
+                $cdata .= $this->formatString(
+                    mb_substr(
+                        $this->s,
+                        $last_pos,
+                        $tag_pos - $last_pos
+                    )
+                );
 
                 if (!$tag->isClosingTag()) {
                     // Opening tag
@@ -322,7 +381,10 @@ final class Parser
 
                         if ($f_clear_content) {
                             $tag_content .= $this->printCData($cdata, true);
-                            $tag_content .= $this->printHandlerMarkup($tag, true);
+                            $tag_content .= $this->printHandlerMarkup(
+                                $tag,
+                                true
+                            );
                         } else {
                             $ret .= $this->printCData($cdata, true);
                             $ret .= $this->printHandlerMarkup($tag, true);
@@ -352,14 +414,21 @@ final class Parser
 
                             $f_clear_content = false;
                             $tag_content .= $this->printCData($cdata);
-                            $ret .= $this->printHandlerMarkup($tag, false, $tag_content);
+                            $ret .= $this->printHandlerMarkup(
+                                $tag,
+                                false,
+                                $tag_content
+                            );
                             $tag_content = '';
                         } else {
                             // Closing tag, outline tag, NOT clear content tag
 
                             if ($f_clear_content) {
                                 $tag_content .= $this->printCData($cdata);
-                                $tag_content .= $this->printHandlerMarkup($tag, false);
+                                $tag_content .= $this->printHandlerMarkup(
+                                    $tag,
+                                    false
+                                );
                             } else {
                                 $ret .= $this->printCData($cdata);
                                 $ret .= $this->printHandlerMarkup($tag, false);
@@ -375,17 +444,32 @@ final class Parser
                     if ($this->fitsStack($tag)) {
                         $this->m_stack->pop();
                     } else {
-                        // Markup error
+                        $contextLength = 50;
+
+                        $offset = (int) max($tag_pos - $contextLength, 0);
+
+                        $length = $tag_pos - $contextLength < 0 ? $tag_pos : $contextLength;
+
+                        throw new \RuntimeException(
+                            sprintf(
+                                'Unexpected closing element "%s" at offset %s, after content: "%s"',
+                                $tag->getName(),
+                                $tag_pos,
+                                mb_substr($this->s, $offset, (int) $length)
+                            )
+                        );
                     }
                 }
             } else {
                 // Tag is CDATA
 
-                $cdata .= $this->formatString(mb_substr(
-                    $this->s,
-                    $last_pos,
-                    $tag_pos - $last_pos
-                ) . $tag->getRawData());
+                $cdata .= $this->formatString(
+                    mb_substr(
+                        $this->s,
+                        $last_pos,
+                        $tag_pos - $last_pos
+                    ) . $tag->getRawData()
+                );
             }
 
             $pos = $tag_pos + mb_strlen($tag->getRawData());
@@ -395,18 +479,15 @@ final class Parser
 
         // Add string data after last tag as CDATA
         $cdata .= $this->formatString(mb_substr($this->s, $last_pos));
-        $ret   .= $this->printCData($cdata, true);
+        $ret .= $this->printCData($cdata, true);
 
         return $ret;
     }
 
     /**
      * Formats small pieces of CDATA
-     *
-     * @param  string $s
-     * @return string
      */
-    private function formatString($s)
+    private function formatString(string $s): string
     {
         static $last_tag = null;
 
@@ -432,7 +513,6 @@ final class Parser
         // opening quote
         if ($last_tag !== null && $last_tag->isOfType(self::TAG_INLINE)) {
             $s = preg_replace('/([\s])&quot;/', '\1&raquo;', $s);
-
             #echo 'without';
         } else {
             $s = preg_replace('/([\s]|^)&quot;/', '\1&raquo;', $s);
@@ -463,12 +543,8 @@ final class Parser
 
     /**
      * Formats whole blocks of CDATA
-     *
-     * @param  string $cdata
-     * @param  boolean $outline
-     * @return string
      */
-    private function printCData(&$cdata, $outline = false)
+    private function printCData(string &$cdata, bool $outline = false): string
     {
         $cdata = trim($cdata);
         $ret = '';
@@ -486,8 +562,7 @@ final class Parser
 
         //$e = function ($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); };
 
-        if (
-            // All top-level blocks of CDATA have to be surrounded with <p>
+        if (// All top-level blocks of CDATA have to be surrounded with <p>
             //($this->m_stack->size() == 0)
 
             // An outline tag starts after this CDATA block
@@ -502,7 +577,7 @@ final class Parser
 
             /* TODO Add FORCE_PARAGRAPHS parameter to tags (li?, blockquote, ...) */
             || ($this->m_stack->count() > 0
-                    && $this->m_stack->top()->isOfType(self::TAG_FORCE_PARAGRAPHS))
+                && $this->m_stack->top()->isOfType(self::TAG_FORCE_PARAGRAPHS))
         ) {
             if ($this->m_stack->count() > 0
                 && $this->m_stack->top()->isOfType(self::TAG_PRE)

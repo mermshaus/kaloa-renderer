@@ -1,24 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer\Inigo\Handler;
 
-use Kaloa\Renderer\Inigo\Handler\ProtoHandler;
 use Kaloa\Renderer\Inigo\Parser;
 
-/**
- *
- */
 final class ImgHandler extends ProtoHandler
 {
-    /**
-     *
-     * @var string
-     */
-    private $last_img_align = '';
+    private string $last_img_align = '';
 
-    /**
-     *
-     */
     public function __construct()
     {
         $this->name = 'img';
@@ -27,22 +18,13 @@ final class ImgHandler extends ProtoHandler
         $this->defaultParam = 'src';
     }
 
-    /**
-     *
-     * @param  string $path
-     * @param  string $alt
-     * @param  string $title
-     * @param  int    $align
-     * @param  string $dir
-     * @return string
-     */
     private function drawImage(
-        $path,
-        $alt = '',
-        $title = '',
-        $align = Parser::PC_IMG_ALIGN_LEFT,
-        $dir = ''
-    ) {
+        string $path,
+        string $alt = '',
+        string $title = '',
+        int $align = Parser::PC_IMG_ALIGN_LEFT,
+        string $dir = ''
+    ): string {
         // width of framing div's border (one side)
         $border_width = 1;
         $padding      = 2;
@@ -55,8 +37,9 @@ final class ImgHandler extends ProtoHandler
         $attr = 'width="150" height="150"';
 
         // Image exists?
-        if (@getimagesize($path) !== false) {
-            list($width, $height, $type, $attr) = getimagesize($path);
+        $imageData = @getimagesize($path);
+        if ($imageData !== false) {
+            list($width, $height, $type, $attr) = $imageData;
         }
 
         //$path = $this->m_rel_path . $path;
@@ -98,19 +81,14 @@ final class ImgHandler extends ProtoHandler
         return $ret;
     }
 
-    /**
-     *
-     * @param  array  $data
-     * @return string
-     */
-    public function draw(array $data)
+    public function draw(array $data): string
     {
         $ret = '';
 
         if ($data['front']) {
             $src   = $this->fillParam($data, 'src', '');
             $title = $this->fillParam($data, 'title', '');
-            $align = $this->fillParam($data, 'align', null);
+            $align = $this->fillParam($data, 'align', 'left');
 
             //$src = $this->m_image_path . $src;
             $this->last_img_align = $align;

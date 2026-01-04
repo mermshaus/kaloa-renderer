@@ -1,57 +1,34 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer\Inigo;
 
 /**
- *
+ * @phpstan-import-type HandlerStruct from Structs
  */
 final class Tag
 {
+    private string $name;
     /**
-     *
-     * @var string
+     * @var array<string>
      */
-    private $name;
+    private array $attributes;
+    private bool $isClosingTag;
+    private string $rawData;
+    private bool $isValid;
+    /**
+     * @var HandlerStruct|null
+     */
+    private ?array $myHandler;
 
     /**
-     *
-     * @var array
+     * @param list<HandlerStruct> $handlers
      */
-    private $attributes;
-
-    /**
-     *
-     * @var boolean
-     */
-    private $isClosingTag;
-
-    /**
-     *
-     * @var string
-     */
-    private $rawData;
-
-    /**
-     *
-     * @var boolean
-     */
-    private $isValid;
-
-    /**
-     *
-     * @var array|null
-     */
-    private $myHandler;
-
-    /**
-     *
-     * @param string $tagString
-     * @param array $handlers
-     */
-    public function __construct($tagString, array $handlers)
+    public function __construct(string $tagString, array $handlers)
     {
         $this->rawData = $tagString;
-        $this->name    = $this->extractTagName($tagString);
+        $this->name = $this->extractTagName($tagString);
 
         $this->myHandler = null;
 
@@ -62,16 +39,12 @@ final class Tag
             }
         }
 
-        $this->isValid      = (null !== $this->myHandler);
-        $this->isClosingTag = ('/' === mb_substr($tagString, 1, 1));
-        $this->attributes   = $this->extractTagAttributes($tagString);
+        $this->isValid = !is_null($this->myHandler);
+        $this->isClosingTag = (mb_substr($tagString, 1, 1) === '/');
+        $this->attributes = $this->extractTagAttributes($tagString);
     }
 
-    /**
-     *
-     * @return string
-     */
-    public function getRawData()
+    public function getRawData(): string
     {
         return $this->rawData;
     }
@@ -81,65 +54,54 @@ final class Tag
      *
      * "[tag=http://.../]" => "tag"
      * "[/TAG]"            => "tag"
-     *
-     * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
-     *
-     * @return array
+     * @return array<string>
      */
-    public function getAttributes()
+    public function getAttributes(): array
     {
         return $this->attributes;
     }
 
-    /**
-     *
-     * @return boolean
-     */
-    public function isClosingTag()
+    public function isClosingTag(): bool
     {
         return $this->isClosingTag;
     }
 
-    /**
-     *
-     * @return boolean
-     */
-    public function isOfType($tagType)
+    public function isOfType(int $tagType): bool
     {
         return ($this->isValid && $this->myHandler['type'] & $tagType);
     }
 
-    /**
-     *
-     * @return boolean
-     */
-    public function isValid()
+    public function isValid(): bool
     {
         return $this->isValid;
     }
 
-    /**
-     *
-     *
-     * @param string $tagString
-     * @return string
-     */
-    private function extractTagName($tagString)
+    private function extractTagName(string $tagString): string
     {
-        $name       = '';
+        $name = '';
         $tagPattern = '[A-Za-z][A-Za-z0-9_]*';
-        $matches    = array();
+        $matches = [];
 
-        if (1 === preg_match('/\A\[(' . $tagPattern . ')[\s=\]]/', $tagString, $matches)) {
+        if (1 === preg_match(
+                '/\A\[(' . $tagPattern . ')[\s=\]]/',
+                $tagString,
+                $matches
+            )
+        ) {
             $name = strtolower($matches[1]);
-        } elseif (1 === preg_match('/\A\[\/(' . $tagPattern . ')\s*\]\z/', $tagString, $matches)) {
+        } elseif (1 === preg_match(
+                '/\A\[\/(' . $tagPattern . ')\s*\]\z/',
+                $tagString,
+                $matches
+            )
+        ) {
             $name = strtolower($matches[1]);
         }
 
@@ -147,17 +109,15 @@ final class Tag
     }
 
     /**
-     *
-     * @param  string $tagString
-     * @return array
+     * @return array<string>
      */
-    private function extractTagAttributes($tagString)
+    private function extractTagAttributes(string $tagString): array
     {
-        if (false === $this->isValid) {
-            return array();
+        if ($this->isValid === false) {
+            return [];
         }
 
-        $ret = array();
+        $ret = [];
 
         $tagString = str_replace('&quot;', '"', $tagString);
         $tagString = str_replace("\\\"", '&quot;', $tagString);
@@ -171,7 +131,7 @@ final class Tag
         }
 
         if ($i === false) {
-            return array();
+            return [];
         }
 
         $tagString = trim(mb_substr($tagString, $i));
@@ -182,7 +142,11 @@ final class Tag
             if (mb_substr($t, 0, 1) == '"') {
                 $i = mb_strpos($tagString, '"');
                 $j = mb_strpos($tagString, '"', $i + 1);
-                $ret['__default'] = mb_substr($tagString, $i + 1, $j - ($i + 1));
+                $ret['__default'] = mb_substr(
+                    $tagString,
+                    $i + 1,
+                    $j - ($i + 1)
+                );
                 $tagString = trim(mb_substr($tagString, $j + 1));
             } else {
                 $i = mb_strpos($t, ' ');
@@ -203,12 +167,16 @@ final class Tag
             if (($k > -1) && (mb_substr($tagString, $k - 1, 1) == '\\')) {
                 $k = mb_strpos($tagString, '"', $k + 1);
             }
-            $ret[trim(mb_substr($tagString, 0, $i))] = mb_substr($tagString, $j + 1, $k - ($j + 1));
+            $ret[trim(mb_substr($tagString, 0, $i))] = mb_substr(
+                $tagString,
+                $j + 1,
+                $k - ($j + 1)
+            );
             $tagString = trim(mb_substr($tagString, $k + 1));
             $i = mb_strpos($tagString, '=');
         }
 
-        $retNew = array();
+        $retNew = [];
         foreach ($ret as $key => $value) {
             $retNew[strtolower($key)] = $value;
         }

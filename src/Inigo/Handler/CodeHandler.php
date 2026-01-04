@@ -1,31 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer\Inigo\Handler;
 
-use Kaloa\Renderer\Inigo\Handler\ProtoHandler;
 use Kaloa\Renderer\Inigo\Parser;
 use Kaloa\Renderer\SyntaxHighlighterInterface;
 
-/**
- *
- */
 final class CodeHandler extends ProtoHandler
 {
-    /**
-     *
-     * @var string
-     */
-    private $lang;
+    private string $lang;
 
-    /**
-     *
-     * @var SyntaxHighlighterInterface
-     */
-    private $syntaxHighlighter;
+    private SyntaxHighlighterInterface $syntaxHighlighter;
 
-    /**
-     *
-     */
     public function __construct(SyntaxHighlighterInterface $syntaxHighlighter)
     {
         $this->name = 'code';
@@ -38,18 +25,17 @@ final class CodeHandler extends ProtoHandler
         $this->defaultParam = 'lang';
     }
 
-    /**
-     *
-     * @param  array  $data
-     * @return string
-     */
-    public function draw(array $data)
+    public function draw(array $data): string
     {
         $ret = '';
 
         if ($data['front']) {
             $this->lang = $this->fillParam($data, 'lang', '');
         } else {
+            if (!isset($data['content'])) {
+                throw new \RuntimeException('No content given.');
+            }
+
             $ret = $this->syntaxHighlighter->highlight($data['content'], $this->lang);
             $ret .= "\n\n";
         }

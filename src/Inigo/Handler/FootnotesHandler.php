@@ -1,44 +1,31 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer\Inigo\Handler;
 
-use Kaloa\Renderer\Inigo\Handler\ProtoHandler;
 use Kaloa\Renderer\Inigo\Parser;
 
-/**
- *
- */
 final class FootnotesHandler extends ProtoHandler
 {
-    /**
-     *
-     * @var int
-     */
-    private $cnt;
+    private int $cnt;
 
     /**
-     *
-     * @var array
+     * @var list<string>
      */
-    private $footnotes;
+    private array $footnotes;
 
-    /**
-     *
-     */
     public function __construct()
     {
         $this->name = 'fn|fnt';
 
-        $this->type[0] = (Parser::TAG_INLINE | Parser::TAG_SINGLE);
-        $this->type[1] = (Parser::TAG_OUTLINE | Parser::TAG_CLEAR_CONTENT);
+        $this->type = [
+            (Parser::TAG_INLINE | Parser::TAG_SINGLE),
+            (Parser::TAG_OUTLINE | Parser::TAG_CLEAR_CONTENT)
+        ];
     }
 
-    /**
-     *
-     * @param  array  $data
-     * @return string
-     */
-    public function draw(array $data)
+    public function draw(array $data): string
     {
         $ret = '';
 
@@ -46,28 +33,23 @@ final class FootnotesHandler extends ProtoHandler
             $this->cnt++;
             $ret = '[' . $this->cnt . ']';
         } elseif ($data['tag'] === 'fnt' && !$data['front']) {
+            if (!isset($data['content'])) {
+                throw new \RuntimeException('No content given but content expected for tag fnt.');
+            }
+
             $this->footnotes[] = $data['content'];
         }
 
         return $ret;
     }
 
-    /**
-     *
-     */
-    public function initialize()
+    public function initialize(): void
     {
         $this->cnt = 0;
-        $this->footnotes = array();
+        $this->footnotes = [];
     }
 
-    /**
-     *
-     * @param  string $s
-     * @param  array  $data
-     * @return string
-     */
-    public function postProcess($s, array $data)
+    public function postProcess(string $s, array $data): string
     {
         $ret = '';
 

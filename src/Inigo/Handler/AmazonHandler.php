@@ -1,32 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer\Inigo\Handler;
 
-use Kaloa\Renderer\Inigo\Handler\ProtoHandler;
 use Kaloa\Renderer\Inigo\Parser;
 
-/**
- *
- */
 final class AmazonHandler extends ProtoHandler
 {
-    /**
-     *
-     */
     public function __construct()
     {
         $this->name = 'amazon';
         $this->type = Parser::TAG_OUTLINE;
     }
 
-    /**
-     *
-     * @param  string $asin
-     * @param  string $title
-     * @param  string $author
-     * @return string
-     */
-    private function drawBox($asin, $title, $author)
+    private function drawBox(string $asin, string $title, string $author): string
     {
         $img = 'http://images.amazon.com/images/P/' . $this->e($asin)
                 . '.01._SCMZZZZZZZ_V65020934_.jpg';
@@ -42,12 +30,7 @@ final class AmazonHandler extends ProtoHandler
         return $ret;
     }
 
-    /**
-     *
-     * @param  array  $data
-     * @return string
-     */
-    public function draw(array $data)
+    public function draw(array $data): string
     {
         $ret = '';
 
