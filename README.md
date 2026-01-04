@@ -11,9 +11,7 @@ $ composer require kaloa/renderer
 
 ## Requirements
 
-The following PHP versions are supported:
-
-- PHP 7.4
+- PHP >= 8.5
 
 
 ## Documentation
