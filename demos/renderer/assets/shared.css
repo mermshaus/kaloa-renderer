@@ -53,5 +53,6 @@ table, pre {
 }
 
 .example .output {
+    background: white;
     font-family: Ubuntu, sans-serif;
 }
