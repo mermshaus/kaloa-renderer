@@ -12,5 +12,9 @@ class CommonMarkRendererTest extends TestCase
         $renderer = Factory::createRenderer('commonmark');
 
         $this->assertEquals("<h1>Hello World!</h1>\n", $renderer->render('# Hello World!'));
+
+        $renderer = Factory::createRenderer('markdown');
+
+        $this->assertEquals("<h1>Hello World!</h1>\n", $renderer->render('# Hello World!'));
     }
 }

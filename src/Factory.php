@@ -24,6 +24,7 @@ final class Factory
 
         switch ($type) {
             case 'commonmark':
+            case 'markdown':
                 $renderer = new CommonMarkRenderer();
                 break;
             case 'inigo':
