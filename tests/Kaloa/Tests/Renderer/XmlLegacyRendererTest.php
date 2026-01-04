@@ -1,14 +1,14 @@
 <?php
 
-namespace Kaloa\Tests;
+namespace Kaloa\Tests\Renderer;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Kaloa\Renderer\Config;
 use Kaloa\Renderer\Factory;
 
-class XmlLegacyRendererTest extends PHPUnit_Framework_TestCase
+class XmlLegacyRendererTest extends TestCase
 {
-    public function testIntegrity()
+    public function testIntegrity(): void
     {
         // Environment
         #$contentToRender = file_get_contents(__DIR__ . '/examples/xmllegacy/arrayobject.xml');
@@ -20,6 +20,9 @@ class XmlLegacyRendererTest extends PHPUnit_Framework_TestCase
 
         $renderer = Factory::createRenderer($filter, $config);
 
-        $renderer->render($contentToRender);
+        $output = $renderer->render($contentToRender);
+
+        self::assertIsString($output);
+        self::assertNotEmpty($output);
     }
 }

@@ -1,13 +1,14 @@
 <?php
 
-namespace Kaloa\Tests;
+namespace Kaloa\Tests\Renderer;
 
 use Kaloa\Renderer\Factory;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
 
-class MarkdownRendererTest extends PHPUnit_Framework_TestCase
+class MarkdownRendererTest extends TestCase
 {
-    public function testIntegrity()
+    public function testIntegrity(): void
     {
         $renderer = Factory::createRenderer('markdown');
         $output = $renderer->render('# Hello World!');
@@ -15,7 +16,7 @@ class MarkdownRendererTest extends PHPUnit_Framework_TestCase
         $this->assertEquals("<h1>Hello World!</h1>\n", $output);
     }
 
-    public function basicParserProvider()
+    public static function basicParserProvider(): array
     {
         $sets = array();
 
@@ -29,10 +30,8 @@ class MarkdownRendererTest extends PHPUnit_Framework_TestCase
         return $sets;
     }
 
-    /**
-     * @dataProvider basicParserProvider
-     */
-    public function testBasicParser($fileInput, $fileExpected)
+    #[DataProvider('basicParserProvider')]
+    public function testBasicParser(string $fileInput, string $fileExpected): void
     {
         $renderer = Factory::createRenderer('markdown');
 

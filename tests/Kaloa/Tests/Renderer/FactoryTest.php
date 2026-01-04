@@ -1,18 +1,16 @@
 <?php
 
-namespace Kaloa\Tests;
+namespace Kaloa\Tests\Renderer;
 
 use Exception;
 use Kaloa\Renderer\Factory;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class FactoryTest extends PHPUnit_Framework_TestCase
+class FactoryTest extends TestCase
 {
-    /**
-     * @expectedException Exception
-     */
-    public function testInvalidRenderer()
+    public function testInvalidRenderer(): void
     {
+        $this->expectException(Exception::class);
         Factory::createRenderer('bogus');
     }
 }

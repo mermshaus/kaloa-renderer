@@ -1,23 +1,22 @@
 <?php
 
-namespace Kaloa\Tests;
+declare(strict_types=1);
+
+namespace Kaloa\Tests\Renderer;
 
 use Kaloa\Renderer\Config;
 use Kaloa\Renderer\Factory;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
 
-/**
- *
- */
-class InigoRendererTest extends PHPUnit_Framework_TestCase
+class InigoRendererTest extends TestCase
 {
-    /**
-     *
-     */
-    public function testIntegrity()
+    public function testIntegrity(): void
     {
         // Environment
-        $contentToRender = file_get_contents(__DIR__ . '/examples/inigo/klangbilder.txt');
+        $contentToRender = file_get_contents(
+            __DIR__ . '/examples/inigo/klangbilder.txt'
+        );
         $resourceBasePath = __DIR__ . '/examples/inigo/res';
         $filter = 'inigo';
 
@@ -27,16 +26,22 @@ class InigoRendererTest extends PHPUnit_Framework_TestCase
 
         $output = $renderer->render($contentToRender);
 
-        $expected = file_get_contents(__DIR__ . '/examples/inigo/klangbilder.expected');
+        $expected = rtrim(
+            file_get_contents(__DIR__ . '/examples/inigo/klangbilder.expected')
+        );
 
-        $expected = str_replace('__RESOURCE_BASE_PATH__', $config->getResourceBasePath(), $expected);
+        $expected = str_replace(
+            '__RESOURCE_BASE_PATH__',
+            $config->getResourceBasePath(),
+            $expected
+        );
 
-        $this->assertEquals($expected, $output);
+        self::assertEquals($expected, $output);
     }
 
-    public function runSuiteProvider()
+    public static function runSuiteProvider(): array
     {
-        $sets = array();
+        $sets = [];
 
         foreach (glob(__DIR__ . '/examples/inigo/*.txt') as $file) {
             $sets[basename($file)] = array(
@@ -48,10 +53,8 @@ class InigoRendererTest extends PHPUnit_Framework_TestCase
         return $sets;
     }
 
-    /**
-     * @dataProvider runSuiteProvider
-     */
-    public function testRunSuite($fileInput, $fileExpected)
+    #[DataProvider('runSuiteProvider')]
+    public function testRunSuite(string $fileInput, string $fileExpected): void
     {
         $resourceBasePath = __DIR__ . '/examples/inigo/res';
 
@@ -59,11 +62,23 @@ class InigoRendererTest extends PHPUnit_Framework_TestCase
 
         $renderer = Factory::createRenderer('inigo', $config);
 
-        $output   = $renderer->render(file_get_contents($fileInput));
         $expected = rtrim(file_get_contents($fileExpected));
 
-        $expected = str_replace('__RESOURCE_BASE_PATH__', $config->getResourceBasePath(), $expected);
+        $expected = str_replace(
+            '__RESOURCE_BASE_PATH__',
+            $config->getResourceBasePath(),
+            $expected
+        );
 
-        $this->assertEquals($expected, $output);
+        if (str_starts_with($expected, 'Exception:')) {
+            $this->expectException(\RuntimeException::class);
+            $this->expectExceptionMessage(
+                trim(substr($expected, strlen('Exception:')))
+            );
+        }
+
+        $output = $renderer->render(file_get_contents($fileInput));
+
+        self::assertEquals($expected, $output);
     }
 }

@@ -1,68 +1,57 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer\Xml\Rule;
 
 use DOMElement;
-use Kaloa\Renderer\Xml\Rule\AbstractRule;
 
 /**
- *
+ * @phpstan-type FootnoteArray array{identifier: string, text: string}
+ * @phpstan-type ConfigArray array{footnoteIdFormat: string, footnoteRefIdFormat: string, useRandomIdsNotNumbers: bool}
+ * @phpstan-type ConfigArrayInput array{footnoteIdFormat?: string, footnoteRefIdFormat?: string, useRandomIdsNotNumbers?: bool}
  */
 final class FootnotesRule extends AbstractRule
 {
     /**
-     *
-     * @var array
+     * @var ConfigArray
      */
-    private $config;
+    private array $config;
+    /**
+     * @var array<FootnoteArray>
+     */
+    private array $footnotes;
+    /**
+     * @var array<string>
+     */
+    private array $randomIdStore;
+    /**
+     * @var array<string>
+     */
+    private array $usedIdentifiers;
 
     /**
-     *
-     * @var array
+     * @param ConfigArrayInput $config
      */
-    private $footnotes;
-
-    /**
-     *
-     * @var array
-     */
-    private $randomIdStore;
-
-    /**
-     *
-     * @var array
-     */
-    private $usedIdentifiers;
-
-    /**
-     *
-     * @param array $config
-     */
-    public function __construct(array $config = array())
+    public function __construct(array $config = [])
     {
-        $configDefault = array(
+        $configDefault = [
             'footnoteIdFormat'       => 'fn:%s',
             'footnoteRefIdFormat'    => 'fnref:%s',
             'useRandomIdsNotNumbers' => true
-        );
+        ];
 
         $this->config = array_merge($configDefault, $config);
     }
 
-    /**
-     *
-     */
-    public function init()
+    public function init(): void
     {
-        $this->footnotes       = array();
-        $this->randomIdStore   = array();
-        $this->usedIdentifiers = array();
+        $this->footnotes = [];
+        $this->randomIdStore = [];
+        $this->usedIdentifiers = [];
     }
 
-    /**
-     *
-     */
-    public function preSave()
+    public function preSave(): void
     {
         if ($this->config['useRandomIdsNotNumbers']) {
             // Generate random footnote identifier for all footnotes without name
@@ -76,11 +65,7 @@ final class FootnotesRule extends AbstractRule
         }
     }
 
-    /**
-     *
-     * @return string
-     */
-    private function generateRandomFootnoteIdentifier()
+    private function generateRandomFootnoteIdentifier(): string
     {
         $letters = range('a', 'z');
 
@@ -96,32 +81,29 @@ final class FootnotesRule extends AbstractRule
         return $randomId;
     }
 
-    /**
-     *
-     */
-    public function render()
+    public function render(): void
     {
         foreach ($this->runXpathQuery('//footnote') as $node) {
             $parent = $node->parentNode;
 
-            /* @var $node DOMElement */
+            /* @var DOMElement $node */
 
             $fragment = $this->getDocument()->createDocumentFragment();
 
-            $identifier = (string) $node->getAttribute('name');
+            $identifier = (string)$node->getAttribute('name');
             $text = $this->getInnerXml($node);
 
             if ($identifier === '') {
                 // This should only happen when a footnote has no name
                 // attribute or when a name was already taken
-                $identifier = count($this->footnotes) + 1;
+                $identifier = (string)(count($this->footnotes) + 1);
             }
 
             $i = 0;
             $identifierClean = '';
             while (in_array($identifier, $this->usedIdentifiers)) {
                 if ($i === 0) {
-                    $identifier = count($this->footnotes) + 1;
+                    $identifier = (string)(count($this->footnotes) + 1);
                     $identifierClean = $identifier;
                 } else {
                     $identifier = $identifierClean . '-' . $i;
@@ -151,10 +133,7 @@ EOT;
         }
     }
 
-    /**
-     *
-     */
-    public function postRender()
+    public function postRender(): void
     {
         if (count($this->footnotes) === 0) {
             return;
@@ -168,9 +147,9 @@ EOT;
         $xml .= '<ol class="footnotes">';
         foreach ($this->footnotes as $element) {
             $identifier = $element['identifier'];
-            $text       = $element['text'];
+            $text = $element['text'];
 
-            $id    = sprintf($this->config['footnoteIdFormat'], $identifier);
+            $id = sprintf($this->config['footnoteIdFormat'], $identifier);
             $idRef = sprintf($this->config['footnoteRefIdFormat'], $identifier);
 
             $xml .= '<li id="' . $id . '">';

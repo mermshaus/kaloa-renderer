@@ -1,43 +1,38 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer\Xml\Rule;
 
-use Kaloa\Renderer\Xml\Rule\AbstractRule;
-
 /**
- *
+ * @phpstan-type ConfigArray array{idFormat: string}
+ * @phpstan-type ConfigArrayInput array{idFormat?: string}
  */
 final class TocRule extends AbstractRule
 {
-    private $config;
+    /** @var ConfigArray */
+    private array $config;
 
     /**
-     *
-     * @param array $config
+     * @param ConfigArrayInput $config
      */
-    public function __construct(array $config = array())
+    public function __construct(array $config = [])
     {
-        $configDefault = array(
+        $configDefault = [
             'idFormat' => 'h:%s'
-        );
+        ];
 
         $this->config = array_merge($configDefault, $config);
     }
 
-    /**
-     *
-     */
-    public function preRender()
+    public function preRender(): void
     {
         if (count($this->runXpathQuery('//k:toc')) > 0) {
             $this->createToc();
         }
     }
 
-    /**
-     *
-     */
-    private function createToc()
+    private function createToc(): void
     {
         $curDepth = 2;
         $i = 0;

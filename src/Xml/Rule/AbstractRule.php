@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer\Xml\Rule;
 
 use DOMDocument;
@@ -7,86 +9,72 @@ use DOMElement;
 use DOMNode;
 use DOMXPath;
 
-/**
- *
- */
 abstract class AbstractRule
 {
-    /**
-     *
-     * @var DOMDocument
-     */
-    private $document;
+    private DOMDocument $document;
 
-    public function init()
+    public function init(): void
     {
         // nop
     }
 
-    public function preSave()
+    public function preSave(): void
     {
         // nop
     }
 
-    /**
-     *
-     * @param DOMDocument $document
-     */
-    public function setDocument(DOMDocument $document)
+    public function setDocument(DOMDocument $document): void
     {
         $this->document = $document;
     }
 
-    /**
-     *
-     * @return DOMDocument
-     */
-    protected function getDocument()
+    protected function getDocument(): DOMDocument
     {
         return $this->document;
     }
 
-    public function preRender()
+    public function preRender(): void
     {
         // nop
     }
 
-    public function render()
+    public function render(): void
     {
         // nop
     }
 
-    public function postRender()
+    public function postRender(): void
     {
         // nop
     }
 
-    /**
-     *
-     * @param string $string
-     * @param int $flags
-     * @param string $charset
-     * @return string
-     */
-    protected function escape($string, $flags = ENT_QUOTES, $charset = 'UTF-8')
-    {
+    protected function escape(
+        string $string,
+        int $flags = ENT_QUOTES,
+        string $charset = 'UTF-8'
+    ): string {
         return htmlspecialchars($string, $flags, $charset);
     }
 
     /**
-     *
-     * @param string $xpathExpression
-     * @param DOMNode $contextNode
-     * @param boolean $documentOrdered
-     * @return array
+     * @return array<DOMElement>
      */
-    protected function runXpathQuery($xpathExpression, DOMNode $contextNode = null, $documentOrdered = true)
-    {
+    protected function runXpathQuery(
+        string $xpathExpression,
+        ?DOMNode $contextNode = null,
+        bool $documentOrdered = true
+    ): array {
         $xp = new DOMXPath($this->document);
         $xp->registerNamespace('k', 'lalalala');
         $nodeList = $xp->query($xpathExpression, $contextNode);
 
-        $arrayList = array();
+        if ($nodeList === false) {
+            throw new \RuntimeException(
+                sprintf('Error in xpath query: %s', $xpathExpression)
+            );
+        }
+
+        $arrayList = [];
 
         foreach ($nodeList as $node) {
             $arrayList[] = $node;
@@ -104,11 +92,11 @@ abstract class AbstractRule
          * Unfortunately, this is not the most efficient thing to do.
          */
         if ($documentOrdered) {
-            $newList = array();
+            $newList = [];
 
             // Traverse the tree
             $rec = function ($node) use (&$rec, &$newList, &$arrayList) {
-                /* @var $node DOMElement */
+                /* @var DOMElement $node */
 
                 foreach ($arrayList as $index => $compareNode) {
                     if ($node->isSameNode($compareNode)) {
@@ -134,9 +122,8 @@ abstract class AbstractRule
 
     /**
      * @see http://www.php.net/manual/en/class.domelement.php#86803
-     * @param mixed $elem
      */
-    protected function getInnerXml($elem)
+    protected function getInnerXml(DOMElement $elem): string
     {
         $innerHtml = '';
 
@@ -145,6 +132,11 @@ abstract class AbstractRule
             $tmp_doc->appendChild($tmp_doc->importNode($child, true));
 
             $tmp = $tmp_doc->saveXML();
+
+            if (!is_string($tmp)) {
+                throw new \RuntimeException('Unable to generate XML');
+            }
+
             $tmp = preg_replace('/<\?xml[^>]*>\n/', '', $tmp);
             $tmp = rtrim($tmp, "\n");
 

@@ -1,0 +1,3 @@
+Exception:
+
+Unexpected closing element "html" at offset 36, after content: "[html]foo[html]<div></div>[/html]bar"

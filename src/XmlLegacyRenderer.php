@@ -1,32 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer;
 
 use DOMDocument;
 use XSLTProcessor;
 
-/**
- *
- */
 final class XmlLegacyRenderer implements RendererInterface
 {
-    /**
-     *
-     * @var XmlLegacyRenderer
-     */
-    private static $myself;
+    private static self $myself;
 
-    /**
-     *
-     * @var XSLTProcessor
-     */
-    private $xsltProcessor = null;
+    private XSLTProcessor|null $xsltProcessor = null;
 
-    /**
-     *
-     * @var Config
-     */
-    private $config;
+    private Config $config;
 
     public function __construct(Config $config)
     {
@@ -37,12 +24,17 @@ final class XmlLegacyRenderer implements RendererInterface
         $this->initXsltProcessor();
     }
 
-    /**
-     *
-     */
-    private function initXsltProcessor()
+    private function initXsltProcessor(): void
     {
-        $xsl = file_get_contents(__DIR__ . '/xmllegacy.xsl');
+        $filepath = __DIR__ . '/xmllegacy.xsl';
+
+        $xsl = file_get_contents($filepath);
+
+        if (!is_string($xsl)) {
+            throw new \RuntimeException(
+                sprintf('Unable to read %s', $filepath)
+            );
+        }
 
         $xsl = str_replace('__CLASS__', __CLASS__, $xsl);
 
@@ -51,17 +43,12 @@ final class XmlLegacyRenderer implements RendererInterface
 
         $xsltProcessor = new XSLTProcessor();
         $xsltProcessor->registerPHPFunctions();
-        $xsltProcessor->importStyleSheet($xslDoc);
+        $xsltProcessor->importStylesheet($xslDoc);
 
         $this->xsltProcessor = $xsltProcessor;
     }
 
-    /**
-     *
-     * @param  string $input
-     * @return string
-     */
-    public function render($input)
+    public function render(string $input): string
     {
         $xmlCode = '<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE root [
@@ -75,18 +62,22 @@ final class XmlLegacyRenderer implements RendererInterface
 
         $tmp = $this->xsltProcessor->transformToDoc($xmldoc);
 
-        $html = $tmp->saveHTML($tmp->documentElement);
-        $html = substr($html, 6, -7);
+        if (!$tmp instanceof DOMDocument) {
+            throw new \RuntimeException('Unable to run XSLT');
+        }
+
+        $htmlCandidate = $tmp->saveHTML($tmp->documentElement);
+
+        if (!is_string($htmlCandidate)) {
+            throw new \RuntimeException('Unable to saveHTML');
+        }
+
+        $html = substr($htmlCandidate, 6, -7);
 
         return $html;
     }
 
-    /**
-     *
-     * @param  string $path
-     * @return string
-     */
-    public static function imageUrl($path)
+    public static function imageUrl(string $path): string
     {
         if (preg_match('/^https?:\/\//', $path)) {
             return $path;
@@ -95,12 +86,7 @@ final class XmlLegacyRenderer implements RendererInterface
         return self::$myself->config->getResourceBasePath() . '/' . $path;
     }
 
-    /**
-     *
-     * @param  string $path
-     * @return string
-     */
-    public static function linkUrl($path)
+    public static function linkUrl(string $path): string
     {
         if (preg_match('/^(https?:\/\/|mailto:)/', $path)) {
             return $path;
@@ -110,20 +96,20 @@ final class XmlLegacyRenderer implements RendererInterface
     }
 
     /**
-     *
      * @todo OMG this method can't be efficient
-     *
-     * @param  string $source
-     * @param  string $language
-     * @return DOMElement?
      */
-    public static function highlight($source, $language)
-    {
+    public static function highlight(
+        string $source,
+        string $language
+    ): \DOMElement {
         // Smart trim code
         /*$source = preg_replace('/(?:\s*\n)?(.*)$/s', '$1', $source);
         $source = rtrim($source);*/
 
-        $parsed_code = self::$myself->config->getSyntaxHighlighter()->highlight($source, $language);
+        $parsed_code = self::$myself->config->getSyntaxHighlighter()->highlight(
+            $source,
+            $language
+        );
 
         $parsed_code = '<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE root [

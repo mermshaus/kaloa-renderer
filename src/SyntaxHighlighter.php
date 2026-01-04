@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer;
 
 /**
@@ -8,13 +10,7 @@ namespace Kaloa\Renderer;
  */
 class SyntaxHighlighter implements SyntaxHighlighterInterface
 {
-    /**
-     * @param string $source
-     * @param string $language
-     *
-     * @return string
-     */
-    public function highlight($source, $language = '')
+    public function highlight(string $source, string $language = ''): string
     {
         $e = function ($s) {
             return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
@@ -22,7 +18,8 @@ class SyntaxHighlighter implements SyntaxHighlighterInterface
 
         $source = trim($source, "\r\n");
 
-        $classStr = ($language === '') ? ' class="language-none"' : ' class="language-' . $e($language) . '"';
+        $classStr = ($language === '') ? ' class="language-none"'
+            : ' class="language-' . $e($language) . '"';
 
         return '<pre><code' . $classStr . '>' . $e($source) . '</code></pre>';
     }

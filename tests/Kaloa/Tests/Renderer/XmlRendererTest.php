@@ -1,14 +1,14 @@
 <?php
 
-namespace Kaloa\Tests;
+namespace Kaloa\Tests\Renderer;
 
-use PHPUnit_Framework_TestCase;
 use Kaloa\Renderer\Config;
 use Kaloa\Renderer\Factory;
+use PHPUnit\Framework\TestCase;
 
-class XmlRendererTest extends PHPUnit_Framework_TestCase
+class XmlRendererTest extends TestCase
 {
-    public function testIntegrity()
+    public function testIntegrity(): void
     {
         // Environment
         $contentToRender = file_get_contents(__DIR__ . '/examples/xml/mvc.xml');
@@ -24,7 +24,10 @@ class XmlRendererTest extends PHPUnit_Framework_TestCase
         /* Simulate run of preSave hook */
         $contentToRender = $renderer->firePreSaveEvent($contentToRender);
 
-        $renderer->render($contentToRender);
+        $output = $renderer->render($contentToRender);
+
+        self::assertIsString($output);
+        self::assertNotEmpty($output);
 
         $ctr = '<k:toc/>
             <h2>Test</h2>
@@ -50,6 +53,9 @@ class XmlRendererTest extends PHPUnit_Framework_TestCase
 
         $ctr = $renderer->firePreSaveEvent($ctr);
 
-        $renderer->render($ctr);
+        $output = $renderer->render($ctr);
+
+        self::assertIsString($output);
+        self::assertNotEmpty($output);
     }
 }

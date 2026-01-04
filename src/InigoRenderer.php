@@ -1,35 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer;
 
 use Kaloa\Renderer\Inigo\Parser;
 
-/**
- *
- */
 final class InigoRenderer implements RendererInterface
 {
-    /**
-     * @var Parser
-     */
-    private $parser = null;
+    private ?Parser $parser = null;
 
-    /**
-     *
-     * @param Config $config
-     */
     public function __construct(Config $config)
     {
         $this->parser = new Parser();
         $this->parser->addDefaultHandlers($config);
     }
 
-    /**
-     *
-     * @param  string $input
-     * @return string
-     */
-    public function render($input)
+    public function render(string $input): string
     {
         return $this->parser->parse($input);
     }

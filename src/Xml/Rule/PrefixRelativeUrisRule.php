@@ -1,39 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer\Xml\Rule;
 
 use DOMElement;
 use Kaloa\Renderer\Xml\Rule\AbstractRule;
 
-/**
- *
- */
 final class PrefixRelativeUrisRule extends AbstractRule
 {
-    /**
-     *
-     * @var string
-     */
-    private $prefix;
-
-    /**
-     *
-     * @param string $prefix
-     */
-    public function __construct($prefix = '')
+    public function __construct(private string $prefix = '')
     {
-        $this->prefix = $prefix;
     }
 
-    /**
-     *
-     */
-    public function postRender()
+    public function postRender(): void
     {
         $imageNodes = $this->runXpathQuery('//img[@src]');
 
         foreach ($imageNodes as $node) {
-            /* @var $node DOMElement */
+            /* @var $node \DOMElement */
             $src = (string) $node->getAttribute('src');
 
             if (0 === preg_match('~^https?://|/~', $src)) {

@@ -1,18 +1,15 @@
 <?php
 
-namespace Kaloa\Tests;
+namespace Kaloa\Tests\Renderer;
 
 use Kaloa\Renderer\Config;
 use Kaloa\Renderer\Inigo\Parser;
 use Kaloa\Renderer\Inigo\Tag;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-/**
- *
- */
-class TagTest extends PHPUnit_Framework_TestCase
+class TagTest extends TestCase
 {
-    private function initParser()
+    private function initParser(): Parser
     {
         $config = new Config();
 
@@ -22,10 +19,10 @@ class TagTest extends PHPUnit_Framework_TestCase
         return $inigo;
     }
 
-    public function testFoo()
+    public function testFoo(): void
     {
-        $handlers = $this->initParser();
-        $handlers = $handlers->getHandlers();
+        $parser = $this->initParser();
+        $handlers = $parser->getHandlers();
 
         $tag = new Tag('[url=example.org]', $handlers);
 

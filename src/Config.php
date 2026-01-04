@@ -1,58 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer;
 
-use Kaloa\Renderer\SyntaxHighlighter;
-use Kaloa\Renderer\SyntaxHighlighterInterface;
-
-/**
- *
- * @api
- */
 final class Config
 {
-    /**
-     *
-     * @var string
-     */
-    private $resourceBasePath;
+    private string $resourceBasePath;
+    private SyntaxHighlighterInterface $syntaxHighlighter;
 
-    /**
-     *
-     * @var SyntaxHighlighterInterface
-     */
-    private $syntaxHighlighter;
-
-    /**
-     *
-     * @param string $resourceBasePath
-     * @param SyntaxHighlighterInterface $syntaxHighlighter
-     */
     public function __construct(
-        $resourceBasePath = '.',
-        SyntaxHighlighterInterface $syntaxHighlighter = null
+        string $resourceBasePath = '.',
+        ?SyntaxHighlighterInterface $syntaxHighlighter = null
     ) {
-        $this->resourceBasePath = (string) $resourceBasePath;
+        $this->resourceBasePath = $resourceBasePath;
 
-        $this->syntaxHighlighter = (null === $syntaxHighlighter)
-                ? new SyntaxHighlighter()
-                : $syntaxHighlighter;
+        $this->syntaxHighlighter =
+            (is_null($syntaxHighlighter)) ? new SyntaxHighlighter() : $syntaxHighlighter;
     }
 
-    /**
-     *
-     * @return string
-     */
-    public function getResourceBasePath()
+    public function getResourceBasePath(): string
     {
         return $this->resourceBasePath;
     }
 
-    /**
-     *
-     * @return SyntaxHighlighterInterface
-     */
-    public function getSyntaxHighlighter()
+    public function getSyntaxHighlighter(): SyntaxHighlighterInterface
     {
         return $this->syntaxHighlighter;
     }

@@ -1,1 +1,5 @@
-<p>Nested in wrong way: <em>wrong closing element</strong></p>
+Exception:
+
+Unexpected closing element "b" at offset 280, after content: "um.
+
+Nested in wrong way: [i]wrong closing element"

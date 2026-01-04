@@ -1,79 +1,69 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer\Xml\Rule;
 
 use DOMElement;
-use Kaloa\Renderer\Xml\Rule\AbstractRule;
 
-/**
- *
- */
 final class ListingsRule extends AbstractRule
 {
-    /**
-     *
-     * @var int
-     */
-    private $listingCount;
+    private int $listingCount;
 
     /**
-     *
-     * @var array
+     * @var array<int>
      */
-    private $positionCache;
+    private array $positionCache;
 
-    /**
-     *
-     */
-    public function init()
+    public function init(): void
     {
         $this->listingCount = 0;
-        $this->positionCache = array();
+        $this->positionCache = [];
     }
 
-    /**
-     *
-     */
-    public function render()
+    public function render(): void
     {
         foreach ($this->runXpathQuery('//listing') as $node) {
-            /* @var $node DOMElement */
+            /* @var DOMElement $node */
             $parent = $node->parentNode;
-
 
             $fragment = $this->getDocument()->createDocumentFragment();
 
-            $language = (string) $node->getAttribute('language');
-            $caption  = (string) $node->getAttribute('caption');
+            $language = (string)$node->getAttribute('language');
+            $caption = (string)$node->getAttribute('caption');
 
-            $file = (string) $node->getAttribute('file');
-            $from = $node->getAttribute('from');
-            $length = $node->getAttribute('length');
+            $file = (string)$node->getAttribute('file');
+            $fromTmp = $node->getAttribute('from');
+            $lengthTmp = $node->getAttribute('length');
 
-            if ($from === '') {
-                $from = null;
-            }
+            $from = $fromTmp === '' ? null : (int)$fromTmp;
 
-            if ($length === '') {
-                $length = null;
-            }
+            $length = $lengthTmp === '' ? null : (int)$lengthTmp;
 
             $source = '';
 
             if ('' === $file) {
                 $source = $node->nodeValue;
             } else {
-                $resourceBasePath = $this->renderer
-                        ->getConfig()->getResourceBasePath();
+                $resourceBasePath = '';
+                #$resourceBasePath = $this->renderer->getConfig()->getResourceBasePath();
                 $file = $resourceBasePath . '/' . $file;
 
                 $lines = file($file, FILE_IGNORE_NEW_LINES);
+
+                if ($lines === false) {
+                    throw new \RuntimeException(
+                        sprintf('Could not read resource: %s', $file)
+                    );
+                }
+
                 if ($from === null && $length === null) {
                     $from = 1;
                     $length = count($lines);
                 } elseif ($from !== null && $length === null) {
                     $length = count($lines) - $from + 1;
-                } elseif ($from === null && $length !== null) {
+                } elseif ($from === null) {
+                    // $length !== null is implicit here
                     if (isset($this->positionCache[$file])) {
                         $from = $this->positionCache[$file];
                     } else {
@@ -81,7 +71,10 @@ final class ListingsRule extends AbstractRule
                     }
                 }
 
-                $source = implode("\n", array_splice($lines, $from - 1, $length));
+                $source = implode(
+                    "\n",
+                    array_splice($lines, $from - 1, $length)
+                );
 
                 $this->positionCache[$file] = $from + $length;
             }
@@ -97,14 +90,17 @@ final class ListingsRule extends AbstractRule
             if ($language !== '') {
                 $source = $this->shHighlight($source, $language);
             } else {
-                $source = '<pre><span class="preformatted">' . $this->escape($source) . '</span></pre>';
+                $source = '<pre><span class="preformatted">' . $this->escape(
+                        $source
+                    ) . '</span></pre>';
             }
 
             $s = '<div>';
 
             if ($caption !== '') {
                 $this->listingCount++;
-                $s .= '<p class="caption">Listing ' . $this->listingCount . ': ' . $caption . '</p>';
+                $s .= '<p class="caption">Listing ' . $this->listingCount . ': '
+                    . $caption . '</p>';
             }
 
             $s .= $source;
@@ -117,13 +113,7 @@ final class ListingsRule extends AbstractRule
         }
     }
 
-    /**
-     *
-     * @param string $source
-     * @param string $language
-     * @return string
-     */
-    private function shHighlight($source, $language)
+    private function shHighlight(string $source, string $language): string
     {
         /*$this->geshi->set_language($language);
         $this->geshi->set_source($source);
@@ -132,12 +122,12 @@ final class ListingsRule extends AbstractRule
 
         //$source = $this->sh->highlight($source, $language);
 
-        $source = '<pre>' . htmlspecialchars($source, ENT_QUOTES, 'UTF-8') . '</pre>';
+        $source = '<pre>' . htmlspecialchars($source, ENT_QUOTES, 'UTF-8')
+            . '</pre>';
 
         #$source = $this->geshi->parse_code();
 
-        /** @todo Otherwise, DOMDocument would warn about unknown 'nbsp' entities */
-        //$source = str_replace('&nbsp;', ' ', $source);
+        /** @todo Otherwise, DOMDocument would warn about unknown 'nbsp' entities */ //$source = str_replace('&nbsp;', ' ', $source);
 
         //$source = preg_replace('/^(<pre[^>]*>)(.*)(<\/pre>)$/ms', '$1<code>$2</code>$3', $source);
 
@@ -154,37 +144,34 @@ final class ListingsRule extends AbstractRule
 
         for ($i = 0; $i < $count; $i++) {
             /** @todo mermshaus Downstream hack */
-            if (true) {
-                $c = 0;
-                if ($code[$i] === '&nbsp;') {
-                    // Empty line
-                    $c = 6;
-                } else {
-                    while (substr($code[$i], $c, 1) === ' ') {
-                        $c++;
-                    }
+            #if (true) {
+            $c = 0;
+            if ($code[$i] === '&nbsp;') {
+                // Empty line
+                $c = 6;
+            } else {
+                while (substr($code[$i], $c, 1) === ' ') {
+                    $c++;
                 }
-
-                /*$code[$i] = substr($code[$i], 0, $c)
-                        . '<span style="display: block; background: #eee;" id="' . $geshi->overall_id . '-' . $i . '">'
-                        . substr($code[$i], $c)
-                        . '</span>';*/
-
-                $class = '';
-                if (in_array($i, array(5, 9, 12))) {
-                    $class = 'line hl';
-                } else {
-                    $class = 'line';
-                }
-
-                $code[$i] = '<span class="' . $class . '" id="hic-svnt-dracones">'
-                        . $code[$i]
-                        . '</span>';
-
-                /*$code[$i] = '<span class="'.$class.'" id="' . $geshi->overall_id . '-' . $i . '">'
-                        . $code[$i]
-                        . '</span>';*/
             }
+
+            /*$code[$i] = substr($code[$i], 0, $c)
+                    . '<span style="display: block; background: #eee;" id="' . $geshi->overall_id . '-' . $i . '">'
+                    . substr($code[$i], $c)
+                    . '</span>';*/
+
+            $class = '';
+            if (in_array($i, array(5, 9, 12))) {
+                $class = 'line hl';
+            } else {
+                $class = 'line';
+            }
+
+            $code[$i] = '<span class="' . $class . '" id="hic-svnt-dracones">'
+                . $code[$i] . '</span>';
+            /*$code[$i] = '<span class="'.$class.'" id="' . $geshi->overall_id . '-' . $i . '">'
+                    . $code[$i]
+                    . '</span>';*/ #}
 
             //$code[$i] = preg_replace_callback('/>(.*?)</s', function ($matches) { return '>'
             //. str_replace(' ', '&nbsp;<wbr/>', $matches[1]) . '<'; }, $code[$i]);

@@ -1,16 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer;
 
-/**
- *
- */
 interface RendererInterface
 {
-    /**
-     *
-     * @param string $input
-     * @return string
-     */
-    public function render($input);
+    public function render(string $input): string ;
 }

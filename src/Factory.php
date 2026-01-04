@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kaloa\Renderer;
 
 use Kaloa\Renderer\Xml\Rule\FootnotesRule;
@@ -8,20 +10,9 @@ use Kaloa\Renderer\Xml\Rule\PrefixRelativeUrisRule;
 use Kaloa\Renderer\Xml\Rule\TocRule;
 use Kaloa\Renderer\Xml\Rule\YouTubeRule;
 
-/**
- *
- * @api
- */
 final class Factory
 {
-    /**
-     * @param string $type
-     * @param Config $config
-     *
-     * @return RendererInterface
-     * @throws \Exception
-     */
-    public static function createRenderer($type, Config $config = null)
+    public static function createRenderer(string $type, ?Config $config = null): RendererInterface
     {
         $renderer = null;
 

@@ -1,13 +1,13 @@
 <?php
 
-namespace Kaloa\Tests;
+namespace Kaloa\Tests\Renderer;
 
 use Kaloa\Renderer\Factory;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class CommonMarkRendererTest extends PHPUnit_Framework_TestCase
+class CommonMarkRendererTest extends TestCase
 {
-    public function testIntegrity()
+    public function testIntegrity(): void
     {
         $renderer = Factory::createRenderer('commonmark');
 
