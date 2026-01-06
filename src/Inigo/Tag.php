@@ -136,7 +136,7 @@ final class Tag
 
         $tagString = trim(mb_substr($tagString, $i));
 
-        if (mb_substr($tagString, 0, 1) == '=') {
+        if (mb_substr($tagString, 0, 1) === '=') {
             //if
             $t = ltrim(mb_substr($tagString, 1));
             if (mb_substr($t, 0, 1) == '"') {
